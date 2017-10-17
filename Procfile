@@ -1,1 +1,2 @@
-worker: node --debug=5858 telegram.js
+web: node --debug=5858 index.js
+worker: node telegram.js
