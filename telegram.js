@@ -8,6 +8,7 @@ var helpCmd = require('./commands/help').help;
 var priceCmd = require('./commands/price').price;
 var volumeCmd = require('./commands/volume').volume;
 var feedbackCmd = require('./commands/feedback').feedback;
+var settingsCmd = require('./commands/settings').settings;
 
 // const aws = require('aws-sdk');
 
@@ -24,6 +25,10 @@ const api_host_url = process.env.ITT_API_HOST;
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
+const telegram_message_options = {
+  parse_mode: "Markdown"
+};
+
 
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
@@ -43,27 +48,28 @@ bot.onText(/\/help/, (msg, match) => {
   bot.sendMessage(chatId, helpCmd.text());
 });
 
-bot.onText(/\/price (.+)/, (msg, match) => {
+// match with /price, throw away all the blanks, match with any single char
+bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const coin = match[1]; // the captured "whatever"
+  const coin = match[2]; // the captured "whatever"
 
   priceCmd.getPrice(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString() + " BTC");
+      bot.sendMessage(chatId, result.toString() + " BTC", telegram_message_options);
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, reason);
+      bot.sendMessage(chatId, reason, telegram_message_options);
     });
 });
 
-bot.onText(/\/volume (.+)/, (msg, match) => {
+bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const coin = match[1]; // the captured "whatever"
+  const coin = match[2]; // the captured "whatever"
 
   volumeCmd.getVolume(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString() + " BTC");
+      bot.sendMessage(chatId, result.toString() + " BTC", telegram_message_options);
     })
     .catch((reason) => {
       console.log(reason);
@@ -85,6 +91,12 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
     });
 });
 
+bot.onText(/\/settings/, (msg, match) => {
+  const chatId = msg.chat.id;
+
+  bot.sendMessage(chatId, settingsCmd.text, settingsCmd.options);
+});
+
 // Listen for any kind of message. There are different kinds of
 // messages.
 bot.on('message', (msg) => {
@@ -93,3 +105,4 @@ bot.on('message', (msg) => {
   // send a message to the chat acknowledging receipt of their message
   //bot.sendMessage(chatId, 'Received your message');
 });
+
