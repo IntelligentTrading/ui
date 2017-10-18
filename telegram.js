@@ -40,7 +40,7 @@ bot.onText(/\/price (.+)/, (msg, match) => {
 
   var resp = ""
 
-  request(api_host_url+'/price', function (error, response, body) {
+  request(api_host_url+'/price?coin='+coin, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var info = JSON.parse(body)
         if ('price' in info){
