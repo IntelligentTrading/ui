@@ -7,6 +7,7 @@ var startCmd = require('./commands/start').start;
 var helpCmd = require('./commands/help').help;
 var priceCmd = require('./commands/price').price;
 var volumeCmd = require('./commands/volume').volume;
+var feedbackCmd = require('./commands/feedback').feedback;
 
 // const aws = require('aws-sdk');
 
@@ -61,18 +62,27 @@ bot.onText(/\/volume (.+)/, (msg, match) => {
   const coin = match[1]; // the captured "whatever"
 
   volumeCmd.getVolume(coin)
-  .then((result) => {
-    bot.sendMessage(chatId, result.toString() + " BTC");
-  })
-  .catch((reason) => {
-    console.log(reason);
-    bot.sendMessage(chatId, reason);
-  });
+    .then((result) => {
+      bot.sendMessage(chatId, result.toString() + " BTC");
+    })
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
 });
 
-bot.onText(/\/feedback (.+)/, (msg, match) => {
+bot.onText(/\/feedback(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, resp);
+  const feedback = match[1];
+
+  feedbackCmd.storeFeedback(feedback)
+    .then((result) => {
+      bot.sendMessage(chatId, result);
+    })
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
 });
 
 // Listen for any kind of message. There are different kinds of
