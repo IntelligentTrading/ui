@@ -97,12 +97,58 @@ bot.onText(/\/settings/, (msg, match) => {
   bot.sendMessage(chatId, settingsCmd.text, settingsCmd.options);
 });
 
-// Listen for any kind of message. There are different kinds of
-// messages.
+bot.on('callback_query', (callback_message) => {
+  console.log(callback_message);
+
+  var message_id = callback_message.message.message_id;
+  var chat_id = callback_message.message.chat.id;
+
+  var data_array = callback_message.data.split('.'); // eg.: settings_RSK
+  var cmd = {
+    category : data_array[0],
+    operation : { 
+      action : data_array[1].split(':')[0],
+      param : data_array[1].split(':')[1]
+    }
+  };
+
+  if (cmd.category == 'settings') {
+
+    if (cmd.operation.action == 'NAV') {
+      var cmd_kb = settingsCmd.getKeyboard(cmd.operation.param);
+
+      bot.editMessageText(cmd_kb.kb.message,
+        {
+          chat_id: chat_id,
+          message_id: message_id,
+          parse_mode : 'Markdown', 
+          reply_markup: { inline_keyboard: cmd_kb.kb.buttons }
+        });
+    }
+    if (cmd.operation.action == 'DB') {
+      var cmd_kb = settingsCmd.store(chat_id, cmd.operation.param);
+
+      bot.answerCallbackQuery(callback_message.id,'Saved').then((any) => {
+        
+        var main_kb = settingsCmd.getKeyboard('MAIN').kb;
+
+        bot.editMessageText(main_kb.message,
+          {
+            chat_id: chat_id,
+            message_id: message_id,
+            parse_mode : 'Markdown', 
+            reply_markup: { parse_mode : 'Markdown', inline_keyboard: main_kb.buttons }
+          });
+      });
+    }
+  }
+  else {
+    bot.answerCallbackQuery(callback_message.id, '');
+  }
+});
+
+
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
-
-  // send a message to the chat acknowledging receipt of their message
-  //bot.sendMessage(chatId, 'Received your message');
 });
 
