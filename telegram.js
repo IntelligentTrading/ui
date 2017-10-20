@@ -2,6 +2,7 @@ const request = require('request');
 const express = require('express');
 const app = express();
 const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
 
 var startCmd = require('./commands/start').start;
 var helpCmd = require('./commands/help').help;
@@ -9,6 +10,7 @@ var priceCmd = require('./commands/price').price;
 var volumeCmd = require('./commands/volume').volume;
 var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
+var qrbuilder = require('./util/qr-builder').builder;
 
 // const aws = require('aws-sdk');
 
@@ -17,18 +19,11 @@ var settingsCmd = require('./commands/settings').settings;
 //   secretAccessKey: process.env.S3_SECRET
 // });
 
-
-// START TelegramBot
-// replace the value below with the Telegram token you receive from @BotFather
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const api_host_url = process.env.ITT_API_HOST;
-
-// Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 const telegram_message_options = {
   parse_mode: "Markdown"
 };
-
 
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
@@ -40,6 +35,15 @@ bot.onText(/\/start/, (msg, match) => {
     };
 
   bot.sendMessage(chatId, startCmd.text, opts);
+
+  startCmd.subscribe(chatId)
+    .then((result) => {
+      bot.sendMessage(chatId, 'You are now subscribed!', opts);
+    })
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, 'Something went wrong with the subscription, contact us!', opts);
+    })
 });
 
 bot.onText(/\/help/, (msg, match) => {
@@ -55,7 +59,7 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
 
   priceCmd.getPrice(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString() + " BTC", telegram_message_options);
+      bot.sendMessage(chatId, result.toString(), telegram_message_options);
     })
     .catch((reason) => {
       console.log(reason);
@@ -69,7 +73,7 @@ bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
 
   volumeCmd.getVolume(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString() + " BTC", telegram_message_options);
+      bot.sendMessage(chatId, result.toString(), telegram_message_options);
     })
     .catch((reason) => {
       console.log(reason);
@@ -105,10 +109,10 @@ bot.on('callback_query', (callback_message) => {
 
   var data_array = callback_message.data.split('.'); // eg.: settings_RSK
   var cmd = {
-    category : data_array[0],
-    operation : { 
-      action : data_array[1].split(':')[0],
-      param : data_array[1].split(':')[1]
+    category: data_array[0],
+    operation: {
+      action: data_array[1].split(':')[0],
+      param: data_array[1].split(':')[1]
     }
   };
 
@@ -121,23 +125,23 @@ bot.on('callback_query', (callback_message) => {
         {
           chat_id: chat_id,
           message_id: message_id,
-          parse_mode : 'Markdown', 
+          parse_mode: 'Markdown',
           reply_markup: { inline_keyboard: cmd_kb.kb.buttons }
         });
     }
     if (cmd.operation.action == 'DB') {
       var cmd_kb = settingsCmd.store(chat_id, cmd.operation.param);
 
-      bot.answerCallbackQuery(callback_message.id,'Saved').then((any) => {
-        
+      bot.answerCallbackQuery(callback_message.id, 'Saved').then((any) => {
+
         var main_kb = settingsCmd.getKeyboard('MAIN').kb;
 
         bot.editMessageText(main_kb.message,
           {
             chat_id: chat_id,
             message_id: message_id,
-            parse_mode : 'Markdown', 
-            reply_markup: { parse_mode : 'Markdown', inline_keyboard: main_kb.buttons }
+            parse_mode: 'Markdown',
+            reply_markup: { parse_mode: 'Markdown', inline_keyboard: main_kb.buttons }
           });
       });
     }
@@ -145,6 +149,17 @@ bot.on('callback_query', (callback_message) => {
   else {
     bot.answerCallbackQuery(callback_message.id, '');
   }
+});
+
+bot.onText(/\/qr (.+)/,(msg, match) => {
+  const chatId = msg.chat.id;
+  const qr_input = match[1];
+
+  var code = qrbuilder.build(qr_input,function(image_name){
+      bot.sendPhoto(chatId, image_name,{ caption: qr_input}).then(function(){
+        fs.unlinkSync(image_name);
+      });
+  });
 });
 
 

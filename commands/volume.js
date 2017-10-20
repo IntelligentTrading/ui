@@ -13,7 +13,8 @@ var volume = {
                 if (!error && response.statusCode == 200) {
                     var info = JSON.parse(body)
                     if ('volume' in info) {
-                        resolve(parseFloat(info['volume'] / 100000000));
+                        var retrievedVolume = parseFloat(info['volume']).toFixed(3);
+                        resolve(`${coin}\n24h Volume: ${retrievedVolume} BTC\nLast update: ${info.timestamp.split('.')[0]}`);
                     } else {
                         reject('Coin not found');
                     }

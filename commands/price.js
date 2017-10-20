@@ -13,7 +13,8 @@ var price = {
                 if (!error && response.statusCode == 200) {
                     var info = JSON.parse(body)
                     if ('price' in info) {
-                        resolve(parseFloat(info['price'] / 100000000));
+                        var retrievedPrice = parseFloat(info['price'] / 100000000);
+                        resolve(`${coin}\nPrice: ${retrievedPrice} BTC\nLast update: ${info.timestamp.split('.')[0]}`);
                     } else {
                         reject('Coin not found');
                     }
