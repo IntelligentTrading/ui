@@ -16,6 +16,7 @@ var volume = {
                         var retrievedVolume = parseFloat(info['volume']).toFixed(3);
                         resolve(`${coin}\n24h Volume: ${retrievedVolume} BTC\nLast update: ${info.timestamp.split('.')[0]}`);
                     } else {
+                        console.log(response);
                         reject('Coin not found');
                     }
                 }

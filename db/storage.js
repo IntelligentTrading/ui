@@ -3,18 +3,17 @@ var request = require('request');
 var api_url = `https://${process.env.ITT_API_HOST}`;
 
 var storage = {
-    saveSettings: (chat_id, is_subscribed = true, is_muted = false, risk = RISK.LOW, horizon = HORIZON.SHORT) =>
+        storeSettings: (chat_id, optionals) =>
         new Promise((resolve, reject) => {
+
+            if(chat_id == null || chat_id == undefined)
+                throw new Error('Chat id cannot be null or undefined');
+
+            var postParameters = Object.assign({},{chat_id : chat_id},optionals);
 
             request.post({
                 url: `${api_url}/user`,
-                form: {
-                    chat_id: chat_id,
-                    is_subscribed: is_subscribed,
-                    is_muted: is_muted,
-                    risk: risk,
-                    horizon: horizon
-                }
+                form: postParameters
             }, function (error, response, body) {
                 if (response != null && response.statusCode == 200) {
                     resolve('Ok');
@@ -24,19 +23,6 @@ var storage = {
                 }
             });
         })
-}
-
-
-var RISK = {
-    LOW: 'LOW',
-    MEDIUM: 'MEDIUM',
-    HIGH: 'HIGH'
-}
-
-var HORIZON = {
-    SHORT: 'SHORT',
-    MEDIUM: 'MEDIUM',
-    LONG: 'LONG'
 }
 
 exports.storage = storage;
