@@ -97,11 +97,18 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
 bot.onText(/\/settings/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, settingsCmd.text, settingsCmd.options);
+  settingsCmd.getCurrent(chatId)
+    .then(() => {
+      var settingsMessage = settingsCmd.profileMessage();
+      bot.sendMessage(chatId, settingsMessage, settingsCmd.options);
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
 });
 
 bot.on('callback_query', (callback_message) => {
-  console.log(callback_message);
+  //console.log(callback_message);
 
   var message_id = callback_message.message.message_id;
   var chat_id = callback_message.message.chat.id;
@@ -130,43 +137,44 @@ bot.on('callback_query', (callback_message) => {
     }
     if (cmd.operation.action == 'DB') {
       var cmd_kb = settingsCmd.store(chat_id, cmd.operation.param)
-      .then(() => {
-        bot.answerCallbackQuery(callback_message.id, 'Settings saved')
-        .then((any) => {
-          
-                  var main_kb = settingsCmd.getKeyboard('MAIN').kb;
-          
-                  bot.editMessageText(main_kb.message,
-                    {
-                      chat_id: chat_id,
-                      message_id: message_id,
-                      parse_mode: 'Markdown',
-                      reply_markup: { parse_mode: 'Markdown', inline_keyboard: main_kb.buttons }
-                    });
-                });
-      })
-      .catch((reason) => {
-        console.log(reason);
+        .then(() => {
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
+            .then((any) => {
 
-        bot.answerCallbackQuery(callback_message.id, 'Settings not saved').then(()=>{
-          bot.sendMessage(chat_id,'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+              var main_kb = settingsCmd.getKeyboard('MAIN').kb;
+
+              bot.editMessageText(settingsCmd.profileMessage(),
+                {
+                  chat_id: chat_id,
+                  message_id: message_id,
+                  parse_mode: 'Markdown',
+                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: main_kb.buttons }
+                });
+            });
+        })
+        .catch((reason) => {
+          console.log(reason);
+
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
+            .then(() => {
+              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+            });
         });
-      });
     }
   }
   else {
-    bot.answerCallbackQuery(callback_message.id, '');
+    bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: '' });
   }
 });
 
-bot.onText(/\/qr (.+)/,(msg, match) => {
+bot.onText(/\/qr (.+)/, (msg, match) => {
   const chatId = msg.chat.id;
   const qr_input = match[1];
 
-  var code = qrbuilder.build(qr_input,function(image_name){
-      bot.sendPhoto(chatId, image_name,{ caption: qr_input}).then(function(){
-        fs.unlinkSync(image_name);
-      });
+  var code = qrbuilder.build(qr_input, function (image_name) {
+    bot.sendPhoto(chatId, image_name, { caption: qr_input }).then(function () {
+      fs.unlinkSync(image_name);
+    });
   });
 });
 
