@@ -1,0 +1,11 @@
+{
+  "lambda": {
+    "role": "node-js-getting-started-executor",
+    "name": "node-js-getting-started",
+    "region": "us-east-1"
+  },
+  "api": {
+    "id": "66jx1bu5a4",
+    "module": "app"
+  }
+}
