@@ -99,8 +99,19 @@ bot.onText(/\/settings/, (msg, match) => {
 
   settingsCmd.getCurrent(chatId)
     .then(() => {
-      var settingsMessage = settingsCmd.profileMessage();
-      bot.sendMessage(chatId, settingsMessage, settingsCmd.options);
+
+      var keyboard = settingsCmd.getKeyboard().kb;
+
+      var settingsMessage = keyboard.message;
+      var options = {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: keyboard.buttons
+        }
+      };
+
+
+      bot.sendMessage(chatId, settingsMessage, options);
     })
     .catch((reason) => {
       console.log(reason);
@@ -143,7 +154,7 @@ bot.on('callback_query', (callback_message) => {
 
               var main_kb = settingsCmd.getKeyboard('MAIN').kb;
 
-              bot.editMessageText(settingsCmd.profileMessage(),
+              bot.editMessageText(main_kb.message,
                 {
                   chat_id: chat_id,
                   message_id: message_id,
