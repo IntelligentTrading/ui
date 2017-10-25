@@ -189,6 +189,11 @@ bot.onText(/\/qr (.+)/, (msg, match) => {
   });
 });
 
+bot.onText(/\/getMe/, (msg, match) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId,`Your ID is ${chatId}`);
+});
+
 
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
