@@ -4,6 +4,7 @@
 //! perform operations. Example: settings.DB:<T_V> stores the value V in the table T
 
 var storage = require('../db/storage').storage;
+var errorManager = require('../util/error').error;
 
 var main_keyboard = {
     message: "Manage your settings.",
@@ -11,7 +12,7 @@ var main_keyboard = {
     [
         [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
         [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
-        [{ text: "Notifications", callback_data: "settings.NAV:MUTE"}]
+        [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
     ]
 }
 
@@ -37,7 +38,15 @@ var trader_keyboard = {
 
 var post = function (chat_id, optionals) {
     return storage.settingsQuery(chat_id, optionals)
-        .then(userProfile => settings.profile = JSON.parse(userProfile));
+        .then(userProfile => settings.profile = JSON.parse(userProfile))
+        .then(() => {
+            var isMuted = settings.profile.is_muted;
+
+            main_keyboard.buttons[2][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
+            main_keyboard.buttons[2][0].callback_data = isMuted
+                ? main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
+                : main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
+        });
 }
 
 
@@ -81,6 +90,10 @@ var settings = {
                 return post(chat_id, { horizon: kv[1] });
             if (kv[0] == 'RSK')
                 return post(chat_id, { risk: kv[1] });
+            if (kv[0] == 'ISMUTED')
+                return post(chat_id, { is_muted: kv[1] });
+            else
+                return errorManager.reject('Something well wrong, please retry or contact us!','Invalid callback_data key');
         }
     },
     profile: {},
@@ -92,7 +105,6 @@ ${keyboard_text}`;
     getCurrent: (chat_id) => post(chat_id),
     subscribe: (chat_id) => post(chat_id, { is_subscribed: 'True', is_muted: 'False' }),
     unsubscribe: (chat_id) => post(chat_id, { is_subscribed: 'False', is_muted: 'True' }),
-    mute: (chat_id) => post(chat_id, { is_muted: 'True' })
 }
 
 exports.settings = settings;
