@@ -191,7 +191,10 @@ bot.onText(/\/qr (.+)/, (msg, match) => {
 
 bot.onText(/\/getMe/, (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId,`Your ID is ${chatId}`);
+  const userId = msg.from.id;
+  const username = msg.from.username;
+
+  bot.sendMessage(chatId,`Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
 
 
