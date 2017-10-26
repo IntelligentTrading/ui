@@ -4,14 +4,16 @@
 //! perform operations. Example: settings.DB:<T_V> stores the value V in the table T
 
 var storage = require('../db/storage').storage;
+var errorManager = require('../util/error').error;
 
 var main_keyboard = {
-    message: "Manage your settings.",
+    message: '',
     buttons:
     [
         [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
         [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
-        [{ text: "Notifications", callback_data: "settings.NAV:MUTE"}]
+        [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
+        [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
     ]
 }
 
@@ -37,7 +39,30 @@ var trader_keyboard = {
 
 var post = function (chat_id, optionals) {
     return storage.settingsQuery(chat_id, optionals)
-        .then(userProfile => settings.profile = JSON.parse(userProfile));
+        .then(userProfile => settings.profile = JSON.parse(userProfile))
+        .then(() => {
+
+            var isMuted = settings.profile.is_muted;
+            var isSubscribed = settings.profile.is_subscribed;
+
+            var msg = `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
+You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
+Tap below to edit your settings:`;
+
+            main_keyboard.message = msg;
+
+            // Dynamic Subscribe button
+            main_keyboard.buttons[2][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
+            main_keyboard.buttons[2][0].callback_data = isSubscribed
+                ? main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
+                : main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
+
+            // Dynamic Alert button
+            main_keyboard.buttons[3][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
+            main_keyboard.buttons[3][0].callback_data = isMuted
+                ? main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_False'
+                : main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_True';
+        });
 }
 
 
@@ -57,13 +82,7 @@ var keyboards = [
 
 var settings = {
     text: main_keyboard.message,
-    options: {
-        "parse_mode": "Markdown",
-        "reply_markup": {
-            "inline_keyboard": main_keyboard.buttons
-        }
-    },
-    getKeyboard: function (label) {
+    getKeyboard: function (label = 'MAIN') {
         var kb = keyboards.filter(function (keyboard) {
             return keyboard.label == label;
         });
@@ -81,18 +100,17 @@ var settings = {
                 return post(chat_id, { horizon: kv[1] });
             if (kv[0] == 'RSK')
                 return post(chat_id, { risk: kv[1] });
+            if (kv[0] == 'ISMUTED')
+                return post(chat_id, { is_muted: kv[1] });
+            if (kv[0] == 'ISSUB')
+                return post(chat_id, { is_subscribed: kv[1] });
+            else
+                return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
     },
     profile: {},
-    profileMessage: (keyboard_text = main_keyboard.message) => {
-        return `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
-You are ${settings.profile.is_subscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${settings.profile.is_muted ? '*muted*' : '*active*'}.
-${keyboard_text}`;
-    },
     getCurrent: (chat_id) => post(chat_id),
     subscribe: (chat_id) => post(chat_id, { is_subscribed: 'True', is_muted: 'False' }),
-    unsubscribe: (chat_id) => post(chat_id, { is_subscribed: 'False', is_muted: 'True' }),
-    mute: (chat_id) => post(chat_id, { is_muted: 'True' })
 }
 
 exports.settings = settings;
