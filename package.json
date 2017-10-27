@@ -8,14 +8,15 @@
   "main": "telegram.js",
   "scripts": {
     "start": "node index.js",
-    "chart": "node chart-worker.js",
+    "chart": "node chart_dispatcher.js",
     "test": "node test.js"
   },
   "dependencies": {
     "ejs": "2.5.6",
     "express": "4.15.2",
     "node-telegram-bot-api": "^0.29.0",
-    "qr-image": "^3.2.0"
+    "qr-image": "^3.2.0",
+    "plotly": "^1.0.6"
   },
   "devDependencies": {
     "request": "^2.81.0",
