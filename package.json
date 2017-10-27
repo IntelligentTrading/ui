@@ -8,6 +8,7 @@
   "main": "telegram.js",
   "scripts": {
     "start": "node index.js",
+    "chart": "node chart-worker.js",
     "test": "node test.js"
   },
   "dependencies": {
