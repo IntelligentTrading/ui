@@ -1,9 +1,9 @@
+const TelegramBot = require('node-telegram-bot-api');
 var express = require('express');
 var path = require('path');
 var crypto = require('crypto');
 var app = express();
 var fs = require('fs');
-const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: false });
