@@ -46,54 +46,73 @@ var createChart = function (chat_id) {
         //TODO Call to the endpoint
         try {
 
-
             // SAMPLE DATA
-            var day1 = {
+            var trace1 = {
                 y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-23'
             };
             var trace2 = {
                 y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-24'
             };
             var trace3 = {
-                y: [0.1, 0.3, 0.1, 0.9, 0.6, 0.6, 0.9, 1.0, 0.3, 0.6, 0.8, 0.5],
+                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-25'
             };
             var trace4 = {
-                y: [0.2, 0.2, 0.6, 0.25, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
+                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-26'
             };
             var trace5 = {
-                y: [0.2, 0.2, 0.6, 1, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
+                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-27'
             };
             var trace6 = {
-                y: [0, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
+                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
                 type: "box",
-                marker: {color: '#FF851B'},
+                marker: { color: '#FF851B' },
+                name: '2017-10-28'
+            };
+            var trace7 = {
+                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
+                type: "box",
+                marker: { color: '#FF851B' },
+                name: '2017-10-29'
+            };
+            var trace8 = {
+                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
+                type: "box",
+                marker: { color: '#FF851B' },
+                name: '2017-10-30'
             };
 
-            var figure = { 'data': [day1, trace2, trace3, trace4, trace5, trace6] };
+            var figure = { 'data': [trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8] };
 
             var layout = {
                 yaxis: {
-                  title: "normalized moisture",
-                  zeroline: false
+                    title: "normalized moisture",
+                    zeroline: false
+                },
+                xaxis: {
+                    title: "Period"
                 },
                 boxmode: "group"
-              };
+            };
 
             var imgOpts = {
                 format: 'png',
                 width: 1000,
                 height: 500,
-                layout: layout
             };
 
 
@@ -125,7 +144,8 @@ var createChart = function (chat_id) {
             });
         }
         catch (err) {
-            reject({ code: 500, message: error });
+            console.log(err);
+            reject({ code: 500, message: err });
         }
     });
 }

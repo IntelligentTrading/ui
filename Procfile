@@ -1,4 +1,4 @@
 web: node --debug=5858 index.js
-worker: node telegram.js
-worker: node telegram_dispatch.js
-worker: node chart_dispatch.js
+telegram: node telegram.js
+telegram_signals: node telegram_dispatch.js
+chart: node chart_dispatch.js
