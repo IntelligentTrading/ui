@@ -1,28 +1,44 @@
 const { spawn } = require('child_process');
 const request = require('request');
-const test = require('tape');
+const signal_suite = require('./test/t_push_signal').signal_tester;
+var express = require('express');
+var path = require('path');
+var app = express();
+var bodyParser = require('body-parser');
 
-// Start the app
-const env = Object.assign({}, process.env, {PORT: 5000});
-const child = spawn('node', ['index.js'], {env});
+app.use(bodyParser.json());
 
-test('responds to requests', (t) => {
-  t.plan(4);
+app.set('port', (process.env.PORT || 5001));
 
-  // Wait until the server is ready
-  child.stdout.on('data', _ => {
-    // Make a request to our app
-    request('http://127.0.0.1:5000', (error, response, body) => {
-      // stop the server
-      child.kill();
+app.get('/', function (request, response) {
+  // response.render('pages/index');
+  response.sendStatus(200)
+});
 
-      // No error
-      t.false(error);
-      // Successful response
-      t.equal(response.statusCode, 200);
-      // Assert content checks
-      // t.notEqual(body.indexOf("<title>Node.js Getting Started on Heroku</title>"), -1);
-      // t.notEqual(body.indexOf("Getting Started with Node on Heroku"), -1);
-    });
-  });
+app.post('/signal', function (req, res) {
+
+  try {
+    var payload = req.body;
+    var type = payload.type;
+    var risk = payload.risk;
+    var signal = payload.signal;
+    var coin = payload.coin;
+    var trend = payload.trend;
+    var strength = payload.strength;
+    var strength_max = payload.strength_max;
+    var horizon = payload.horizon;
+    var price = payload.price;
+    var price_change = payload.price_change;
+
+    signal_suite.push_trade_signal(type,risk,signal,coin, trend, strength, strength_max, horizon, price, price_change);
+    res.sendStatus(200);
+  }
+  catch (err) {
+    console.log(err);
+    res.sendStatus(500).send(err);
+  }
+});
+
+app.listen(app.get('port'), function() {
+  console.log('Test Suite is running on port', app.get('port'));
 });
