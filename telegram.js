@@ -12,12 +12,7 @@ var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
 var qrbuilder = require('./util/qr-builder').builder;
 
-// const aws = require('aws-sdk');
-
-// let s3 = new aws.S3({
-//   accessKeyId: process.env.S3_KEY,
-//   secretAccessKey: process.env.S3_SECRET
-// });
+var errorManager = require('./util/error').errorManager;
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -58,11 +53,15 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
 
   priceCmd.getPrice(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options);
+      bot.sendMessage(chatId, result.toString(), telegram_message_options)
+        .catch((reason) => {
+          console.log(reason);
+          bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
+        });
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, reason, telegram_message_options);
+      bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
     });
 });
 
@@ -194,9 +193,8 @@ bot.onText(/\/getMe/, (msg, match) => {
   const userId = msg.from.id;
   const username = msg.from.username;
 
-  bot.sendMessage(chatId,`Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
+  bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
-
 
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;

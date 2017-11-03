@@ -4,7 +4,7 @@
 //! perform operations. Example: settings.DB:<T_V> stores the value V in the table T
 
 var storage = require('../db/storage').storage;
-var errorManager = require('../util/error').error;
+var errorManager = require('../util/error').errorManager;
 
 var main_keyboard = {
     message: '',
