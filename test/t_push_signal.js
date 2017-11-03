@@ -5,7 +5,7 @@ const queue = sqs({
     secret: process.env.AWS_SECRET,
     region: 'us-east-1' // defaults to us-east-1
 });
-const production_queue_name = "intelligenttrading-sqs-production"
+const production_queue_name = process.env.SQS_PROD;
 
 function Signal(type, risk, signal, coin, trend, strength, strength_max, horizon, price, price_change) {
     this.type = type;
