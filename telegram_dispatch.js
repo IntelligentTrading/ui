@@ -1,22 +1,15 @@
+require('./util/extensions');
 const request = require('request');
 const express = require('express');
 const app = express();
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
-
-// const aws = require('aws-sdk');
-
-// let s3 = new aws.S3({
-//   accessKeyId: process.env.AWS_KEY,
-//   secretAccessKey: process.env.AWS_SECRET
-// });
-
 const sqs = require('sqs');
 
 const queue = sqs({
-   access: process.env.AWS_KEY,
-   secret: process.env.AWS_SECRET,
-   region: 'us-east-1' // defaults to us-east-1
+  access: process.env.AWS_KEY,
+  secret: process.env.AWS_SECRET,
+  region: 'us-east-1' // defaults to us-east-1
 });
 const production_queue_name = "intelligenttrading-sqs-production"
 
@@ -26,48 +19,52 @@ const telegram_message_options = {
   parse_mode: "Markdown"
 };
 
-
 function onSQSMessage(message_data, callback) {
-  if (message_data.type == "trade signal"){
-    var risk = message_data.risk
+  if (message_data.type == "trade signal") {
+    var risk = message_data.risk;
 
-    request(`https://${process.env.ITT_API_HOST}/users?risk=${risk}`, function (error, response, body) {
+
+    console.log('Getting data from the SQS');
+    var telegram_signal_message = parse_signal(message_data);
+
+    if (telegram_signal_message != undefined) {
+      request(`https://${process.env.ITT_API_HOST}/users?risk=${risk}`, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            var data = JSON.parse(body)
-            data['chat_ids'].foreach(function(chat_id){
-              bot.sendMessage(chat_id, ("this is a trade signal"));
-            });
+          var data = JSON.parse(body)
+          data.chat_ids.forEach((chat_id) => {
+            if (chat_id != undefined) {
+              //TODO bot.sendMessage(chat_id, telegram_signal_message);
+            }
+          });
+          //! TEST
+          bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message);
         }
-    });
+      });
+    }
   }
   callback(); // we are done with this message - pull a new one
-              // calling the callback will also delete the message from the queue
+  // calling the callback will also delete the message from the queue
 }
 
+function parse_signal(message_data) {
+  try {
 
-queue.pull(production_queue_name, [workers=1], onTestMessage)
+    var telegram_signal_message = undefined;
 
+    if (message_data.signal == 'SMA') {
 
+      var trend_sentiment = `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`;
+      var trend_strength = `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength)}${'⚪️'.repeat(message_data.strength_max - message_data.strength)}`;
 
+      telegram_signal_message = `${message_data.coin}/USD\n${trend_sentiment} ${trend_strength}\n${message_data.horizon.toSentenceCase()} horizon (Poloniex)\nPrice: $${message_data.price} (${message_data.price_change > 0 ? '+' : '-'}${message_data.price_change * 100}%)`;
+    }
+    //TODO END
+  }
+  catch (err) {
+    console.log(err);
+  }
 
-
-// ======== For Testing Purposes ========
-// ======== push and pull from SQS, then send yourself a message ========
-// ======== set your personal chat id and uncomment 3 lines  ========
-
-// const telegram_test_chat_id = process.env.TELEGRAM_TOM_CHAT_ID
-const stage_queue_name = "intelligenttrading-sqs-stage"
-
-// pull messages from the test queue
-function onTestMessage(message, callback) {
-    console.log('someone pushed', message);
-    // bot.sendMessage(telegram_test_chat_id, message);
-    callback();
+  return telegram_signal_message;
 }
 
-queue.push(stage_queue_name, "this is a test message")
-queue.pull(stage_queue_name, [workers=1], onTestMessage)
-
-// bot.sendMessage(telegram_test_chat_id, ("online and polling from queue: " + production_queue_name));
-
-// ======== END Testing Stuff ========
+queue.pull(production_queue_name, [workers = 1], onSQSMessage)
