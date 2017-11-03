@@ -41,62 +41,51 @@ app.listen(app.get('port'), function () {
 });
 
 
+function populate_trace(data) {
+    return {
+        y: data.y,
+        type: "box",
+        marker: { color: data.color },
+        name: data.label
+    };
+}
+
+function get_traces() {
+    var traces = [];
+
+    for (i = 0; i < 100; i++) {
+
+        var values = [];
+        values.push(Math.random() * 100);
+
+
+        for (y = 1; y < 5; y++) {
+            values.push(values[y - 1] + Math.random() * 10 + 5);
+        }
+
+        var trace_color = Math.random() > 0.5 ? '#FF0000' : '#00FF00';
+
+        var data = {
+            y: values,
+            color: trace_color,
+            label: 'trace ' + i
+        };
+
+        var new_trace = populate_trace(data);
+        traces.push(new_trace);
+    }
+
+    return traces;
+}
+
 var createChart = function (chat_id) {
     return new Promise((resolve, reject) => {
         //TODO Call to the endpoint
         try {
 
-            // SAMPLE DATA
-            var trace1 = {
-                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-23'
-            };
-            var trace2 = {
-                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-24'
-            };
-            var trace3 = {
-                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-25'
-            };
-            var trace4 = {
-                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-26'
-            };
-            var trace5 = {
-                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-27'
-            };
-            var trace6 = {
-                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-28'
-            };
-            var trace7 = {
-                y: [0.2, 0.2, 0.6, 1.0, 0.5, 0.4, 0.2, 0.7, 0.9, 0.1, 0.5, 0.3],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-29'
-            };
-            var trace8 = {
-                y: [0.6, 0.7, 0.3, 0.6, 0.0, 0.5, 0.7, 0.9, 0.5, 0.8, 0.7, 0.2],
-                type: "box",
-                marker: { color: '#FF851B' },
-                name: '2017-10-30'
-            };
+            var traces_data = get_traces();
 
-            var figure = { 'data': [trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8] };
+            var figure = { 'data': traces_data };
 
             var layout = {
                 yaxis: {
@@ -106,7 +95,6 @@ var createChart = function (chat_id) {
                 xaxis: {
                     title: "Period"
                 },
-                boxmode: "group"
             };
 
             var imgOpts = {
@@ -114,8 +102,6 @@ var createChart = function (chat_id) {
                 width: 1000,
                 height: 500,
             };
-
-
 
             plotly.getImage(figure, imgOpts, function (error, imageStream) {
                 if (error) {
