@@ -18,8 +18,9 @@
     "node-telegram-bot-api": "^0.29.0",
     "plotly": "^1.0.6",
     "qr-image": "^3.2.0",
-    "sqs": "^2.0.2",
-    "body-parser": "^1.18.2"
+    "sqs-consumer": "^3.8.0",
+    "body-parser": "^1.18.2",
+    "aws-sdk": "^2.145.0"
   },
   "devDependencies": {
     "claudia": "^2.14.2",
