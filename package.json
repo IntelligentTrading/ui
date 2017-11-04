@@ -8,6 +8,7 @@
   "main": "telegram.js",
   "scripts": {
     "start": "node index.js",
+    "chart": "node chart_dispatch.js",
     "test": "node test.js"
   },
   "dependencies": {
@@ -15,7 +16,10 @@
     "ejs": "2.5.6",
     "express": "4.15.2",
     "node-telegram-bot-api": "^0.29.0",
-    "qr-image": "^3.2.0"
+    "plotly": "^1.0.6",
+    "qr-image": "^3.2.0",
+    "sqs": "^2.0.2",
+    "body-parser": "^1.18.2"
   },
   "devDependencies": {
     "claudia": "^2.14.2",
