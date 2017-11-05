@@ -63,7 +63,9 @@ function notify(message) {
           var data = JSON.parse(body)
           data.chat_ids.forEach((chat_id) => {
             if (chat_id != undefined) {
-              bot.sendMessage(chat_id, telegram_signal_message);
+              bot.sendMessage(chat_id, telegram_signal_message).catch((err)=>{
+                console.log(err);
+              });
             }
           });
         }
