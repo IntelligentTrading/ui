@@ -12,7 +12,6 @@
     "test": "node test.js"
   },
   "dependencies": {
-    "claudia-api-builder": "^2.5.1",
     "ejs": "2.5.6",
     "express": "4.15.2",
     "node-telegram-bot-api": "^0.29.0",
@@ -23,7 +22,6 @@
     "aws-sdk": "^2.145.0"
   },
   "devDependencies": {
-    "claudia": "^2.14.2",
     "request": "^2.81.0",
     "tape": "^4.7.0"
   },
@@ -34,8 +32,7 @@
   "keywords": [
     "node",
     "heroku",
-    "express",
-    "claudia"
+    "express"
   ],
   "license": "MIT"
 }
