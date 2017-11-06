@@ -41,7 +41,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
     "parse_mode": "Markdown",
   };
 
-  if (token == undefined || token.length != 7) {
+  if (token == undefined || token.length > 7) {
     bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
       console.log('Communication error:\n' + reason);
     });
