@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 const request = require('request');
-const signal_suite = require('./test/t_push_signal').signal_tester;
+const signal_pusher = require('./test/signal_pusher').pusher;
 var express = require('express');
 var path = require('path');
 var app = express();
@@ -18,19 +18,7 @@ app.get('/', function (request, response) {
 app.post('/signal', function (req, res) {
 
   try {
-    var payload = req.body;
-    var type = payload.type;
-    var risk = payload.risk;
-    var signal = payload.signal;
-    var coin = payload.coin;
-    var trend = payload.trend;
-    var strength = payload.strength;
-    var strength_max = payload.strength_max;
-    var horizon = payload.horizon;
-    var price = payload.price;
-    var price_change = payload.price_change;
-
-    signal_suite.push_trade_signal(type,risk,signal,coin, trend, strength, strength_max, horizon, price, price_change);
+    signal_pusher.push(req.body);
     res.sendStatus(200);
   }
   catch (err) {
