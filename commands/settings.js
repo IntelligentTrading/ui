@@ -5,6 +5,7 @@
 
 var storage = require('../db/storage').storage;
 var errorManager = require('../util/error').errorManager;
+var help = require('./help').help;
 
 var main_keyboard = {
     message: '',
@@ -110,7 +111,11 @@ var settings = {
     },
     profile: {},
     getCurrent: (chat_id) => post(chat_id),
-    subscribe: (chat_id) => post(chat_id, { is_subscribed: 'True', is_muted: 'False' }),
+    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token }),
+    subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
+    "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
+    subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
+    tokenError: "Your token is invalid or already activated. Please contact us or get a valid token (here)."
 }
 
 exports.settings = settings;
