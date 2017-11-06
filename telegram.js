@@ -37,9 +37,9 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const token = match[2];
 
   var opts =
-  {
-    "parse_mode": "Markdown",
-  };
+    {
+      "parse_mode": "Markdown",
+    };
 
   if (token == undefined || token.length > 7) {
     bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
@@ -61,7 +61,11 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
 bot.onText(/\/help/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, helpCmd.text());
+  bot.sendMessage(chatId, helpCmd.text())
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
 });
 
 // match with /price, throw away all the blanks, match with any single char
@@ -126,7 +130,6 @@ bot.onText(/\/settings/, (msg, match) => {
           inline_keyboard: keyboard.buttons
         }
       };
-
 
       bot.sendMessage(chatId, settingsMessage, options);
     })
