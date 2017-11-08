@@ -29,21 +29,43 @@ bot.onText(/\/start/, (msg, match) => {
       "disable_web_page_preview": "true"
     };
 
-  bot.sendMessage(chatId, startCmd.text, opts);
-  settingsCmd.subscribe(chatId)
-    .then((result) => {
-      bot.sendMessage(chatId, 'You are now subscribed!', opts);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, 'Something went wrong with the subscription, contact us!', opts);
-    })
+  bot.sendMessage(chatId, startCmd.text, opts).catch(reason => console.log(reason));
+});
+
+bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const token = match[2];
+
+  var opts =
+    {
+      "parse_mode": "Markdown",
+    };
+
+  if (token == undefined || token.length > 7) {
+    bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
+      console.log('Communication error:\n' + reason);
+    });
+  }
+  else {
+    settingsCmd.subscribe(chatId, token)
+      .then((result) => {
+        bot.sendMessage(chatId, settingsCmd.subscribedMessage, opts);
+      })
+      .catch((reason) => {
+        console.log(reason);
+        bot.sendMessage(chatId, reason, opts);
+      })
+  }
 });
 
 bot.onText(/\/help/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, helpCmd.text());
+  bot.sendMessage(chatId, helpCmd.text())
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
 });
 
 // match with /price, throw away all the blanks, match with any single char
@@ -108,7 +130,6 @@ bot.onText(/\/settings/, (msg, match) => {
           inline_keyboard: keyboard.buttons
         }
       };
-
 
       bot.sendMessage(chatId, settingsMessage, options);
     })
