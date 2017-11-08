@@ -1,4 +1,5 @@
 require('./util/extensions');
+var _ = require('lodash');
 const request = require('request');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
@@ -17,23 +18,27 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_SECRET
 });
 
-var messages_cache = [];
+var sorted_messages_cache = [];
 
-// 30 as visibility timeout for duplicate
-var duplicate_time_frame = 30;
+function sortedSignalInsertion(newSignal) {
+  sorted_messages_cache.splice(_.sortedIndexBy(sorted_messages_cache, newSignal, function (signal) { signal.timestamp }), 0, newSignal);
+}
+
+function cleanSortedCache() {
+  while (sorted_messages_cache.length > 50)
+    sorted_messages_cache.pop();
+}
 
 function isDuplicateMessage(message) {
 
-  if (messages_cache.map(msg => msg.id).indexOf(message.MessageId) < 0) {
-    messages_cache.push({ id: message.MessageId, timestamp: Date.now() });
+  cleanSortedCache();
+
+  if (sorted_messages_cache.map(msg => msg.id).indexOf(message.MessageId) < 0) {
+    sortedSignalInsertion({ id: message.MessageId, timestamp: Date.now() });
     return false;
   }
 
   return true;
-}
-
-function cleanMemcache() {
-  messages_cache = messages_cache.filter(msg => Date.now() - msg.timestamp > duplicate_time_frame);
 }
 
 function parse_signal(message_data) {
@@ -114,7 +119,7 @@ const app = Consumer.create({
       notify(message);
     }
     else {
-      console.log('Duplicate ')
+      console.log('Duplicate ' + message.MessageId)
     }
     done();
   },
@@ -130,7 +135,7 @@ app.on('message_received', (msg) => {
 });
 
 app.on('message_processed', (msg) => {
-  console.log(msg);
+  console.log(`Processed ${msg.MessageId}`);
 });
 
 app.on('processing_error', (err, signal) => {
@@ -142,5 +147,3 @@ app.on('error', (err) => {
 });
 
 app.start();
-
-setInterval(() => cleanMemcache(), 30000);
