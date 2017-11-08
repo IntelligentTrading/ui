@@ -12,7 +12,7 @@ var errorManager = {
     handleException: (err, reason = errorManager.generic_error_message) => {
         console.log(err);
         return reason;
-    }
+    },    
 }
 
 
