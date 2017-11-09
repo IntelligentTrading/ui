@@ -6,37 +6,8 @@
 var storage = require('../db/storage').storage;
 var errorManager = require('../util/error').errorManager;
 var help = require('./help').help;
+var kbs = require('./keyboards').keyboards;
 
-var main_keyboard = {
-    message: '',
-    buttons:
-    [
-        [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
-        [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
-        [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-        [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
-    ]
-}
-
-var risk_keyboard = {
-    message: "Please select which _risk profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your trader profile.",
-    buttons: [
-        [{ text: "Only the safest trade signals (Beginners)", callback_data: "settings.DB:RSK_low" }],
-        [{ text: "Any signal, reputable coins only (Standard)", callback_data: "settings.DB:RSK_medium" }],
-        [{ text: "Any signal, including low value coins (High risk high reward)", callback_data: "settings.DB:RSK_high" }],
-        [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }]
-    ]
-};
-
-var trader_keyboard = {
-    message: "Please select which _trader profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your risk profile.",
-    buttons: [
-        [{ text: "Investor: Long term trade signals. Exit and entry points for HODL. (Low risk)", callback_data: "settings.DB:HRZ_long" }],
-        [{ text: "Swingtrader: Short/near term trade signals. Profit from volatility. (Medium risk)", callback_data: "settings.DB:HRZ_medium" }],
-        [{ text: "Daytrader: Very short term trade signals. Getting in and out trades. (High risk)", callback_data: "settings.DB:HRZ_short" }],
-        [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }]
-    ]
-};
 
 var post = function (chat_id, optionals) {
     return storage.settingsQuery(chat_id, optionals)
@@ -50,19 +21,19 @@ var post = function (chat_id, optionals) {
 You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
 Tap below to edit your settings:`;
 
-            main_keyboard.message = msg;
+            kbs.main_keyboard.message = msg;
 
             // Dynamic Subscribe button
-            main_keyboard.buttons[2][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-            main_keyboard.buttons[2][0].callback_data = isSubscribed
-                ? main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
-                : main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
+            kbs.main_keyboard.buttons[2][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
+            kbs.main_keyboard.buttons[2][0].callback_data = isSubscribed
+                ? kbs.main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
+                : kbs.main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
 
             // Dynamic Alert button
-            main_keyboard.buttons[3][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-            main_keyboard.buttons[3][0].callback_data = isMuted
-                ? main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_False'
-                : main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_True';
+            kbs.main_keyboard.buttons[3][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
+            kbs.main_keyboard.buttons[3][0].callback_data = isMuted
+                ? kbs.main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_False'
+                : kbs.main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_True';
         });
 }
 
@@ -70,19 +41,23 @@ Tap below to edit your settings:`;
 var keyboards = [
     {
         label: 'MAIN',
-        kb: main_keyboard
+        kb: kbs.main_keyboard
     },
     {
         label: 'RSK',
-        kb: risk_keyboard
+        kb: kbs.risk_keyboard
     },
     {
         label: 'HRZ',
-        kb: trader_keyboard
+        kb: kbs.trader_keyboard
+    },
+    {
+        label: 'CUR',
+        kb: kbs.base_currency_keyboard
     }];
 
 var settings = {
-    text: main_keyboard.message,
+    text: kbs.main_keyboard.message,
     getKeyboard: function (label = 'MAIN') {
         var kb = keyboards.filter(function (keyboard) {
             return keyboard.label == label;
@@ -105,6 +80,8 @@ var settings = {
                 return post(chat_id, { is_muted: kv[1] });
             if (kv[0] == 'ISSUB')
                 return post(chat_id, { is_subscribed: kv[1] });
+            if (kv[0] == 'CUR')
+                return post(chat_id, { base_currency: kv[1] });
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
@@ -115,7 +92,7 @@ var settings = {
     subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
     "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already activated. Please contact us or get a valid token (here)."
+    tokenError: "Your token is invalid or already activated. Please try again with /token _<your token>_, contact us or get a valid token (here)."
 }
 
 exports.settings = settings;
