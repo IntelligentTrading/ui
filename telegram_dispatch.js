@@ -29,6 +29,13 @@ function cleanSortedCache() {
     sorted_messages_cache.pop();
 }
 
+function hasValidTimestamp(signal) {
+
+  return signal != undefined &&
+    signal.timestamp != undefined &&
+    Date.now() - Date.parse('Thursday, 9 November 2017, 11:46:49 UTC') < 15 * 6000; // 15 minutes 
+}
+
 function isDuplicateMessage(message) {
 
   cleanSortedCache();
@@ -115,7 +122,7 @@ const app = Consumer.create({
   queueUrl: aws_queue_url,
   handleMessage: (message, done) => {
 
-    if (!isDuplicateMessage(message)) {
+    if (hasValidTimestamp(message) && !isDuplicateMessage(message)) {
       notify(message);
     }
     else {
