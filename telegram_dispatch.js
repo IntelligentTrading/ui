@@ -21,6 +21,12 @@ AWS.config.update({
 
 function notify(message_data) {
 
+  var opts =
+  {
+    "parse_mode": "Markdown",
+    "disable_web_page_preview": "true"
+  };
+
   if (message_data != undefined) {
     var risk = message_data.risk;
 
@@ -36,14 +42,14 @@ function notify(message_data) {
           if (process.env.LOCAL_ENV == undefined) {
             data.chat_ids.forEach((chat_id) => {
               if (chat_id != undefined) {
-                bot.sendMessage(chat_id, telegram_signal_message).catch((err) => {
+                bot.sendMessage(chat_id, telegram_signal_message,opts).catch((err) => {
                   console.log(err);
                 });
               }
             });
           }
           else {
-            bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message).catch((err) => {
+            bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts).catch((err) => {
               console.log(err);
             });
           }

@@ -9,24 +9,29 @@ function parseSignal(message_data) {
     if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
 
       var trend_sentiment = `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`;
+      var trend_traversal_sign = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
       var trend_strength = `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`;
 
-      var price_text;
       var price;
       var currency_symbol;
       if (message_data.coin == 'BTC') {
-        currency_symbol = 'USD';
+        currency_symbol = '$';
         price = message_data.price_usdt;
         price_change = message_data.price_usdt_change;
       }
       else {
         currency_symbol = 'BTC';
-        price = message_data.price_satoshis;
+        price = message_data.price_satoshis / 100000000;
         price_change = message_data.price_satoshis_change;
       }
 
-      price_text = price == undefined ? "" : `Price: ${price} (${price_change * 100}%)`;
-      telegram_signal_message = `${message_data.coin}/${currency_symbol}}\n${trend_sentiment} ${trend_strength}\n${message_data.horizon.toSentenceCase()} horizon (Poloniex)\n` + price_text;
+      var time = `*${message_data.timestamp}*`;
+      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : "";
+      var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3)` : `Confirmed`;
+      var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress}`;
+
+      var price_text = price == undefined ? "" : `${currency_symbol}${price.toFixed(2)} (${(price_change * 100).toFixed(3)}%)`;
+      telegram_signal_message = `${time}\n\n${message_data.coin}/${currency_symbol}\n${price_text}\n${trend_sentiment} ${trend_strength}\n${horizon_text}\n${trend_traversal}`;
     }
   }
   catch (err) {
@@ -65,7 +70,7 @@ function hasValidTimestamp(messageBody) {
 
   return messageBody != undefined &&
     messageBody.sent_at != undefined &&
-    Date.now() - Date.parse(messageBody.sent_at) < 15 * 6000; // 15 minutes 
+    Date.now() - Date.parse(messageBody.sent_at) < 15 * 60000; // 15 minutes 
 }
 
 function isDuplicateMessage(message) {
