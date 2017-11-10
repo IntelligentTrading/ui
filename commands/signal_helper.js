@@ -26,7 +26,7 @@ function parseSignal(message_data) {
       }
 
       var time = `*${message_data.timestamp}*`;
-      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : "";
+      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
       var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3)` : `Confirmed`;
       var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress}`;
 
