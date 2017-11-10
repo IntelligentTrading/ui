@@ -44,19 +44,19 @@ function parse_info(info_data) {
         var price_change_sign;
 
         if (info_data.coin == 'BTC') {
-            retrieved_price = `${parseFloat(info_data['price_usdt'])} USD`;
+            retrieved_price = `${parseFloat(info_data['price_usdt']).toFixed(2)} USD`;
         }
         else
-            retrieved_price = `${parseFloat(info_data['price_satoshis'] / 100000000)} BTC`;
+            retrieved_price = `${parseFloat(info_data['price_satoshis'] / 100000000).toFixed(4)} BTC`;
 
-        if (info_data.price_change > 0)
+        if (info_data.price_satoshis_change > 0)
             price_change_sign = '↗️';
-        else if (info_data.price_change < 0)
+        else if (info_data.price_satoshis_change < 0)
             price_change_sign = '↘️';
         else
             price_change_sign = '➡️';
 
-        return `${info_data.coin}\nPrice: ${retrieved_price} (${(info_data.price_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${info_data.timestamp.split('.')[0]}\nSource: ${info_data.source.toSentenceCase()}`;
+        return `${info_data.coin}\nPrice: ${retrieved_price} (${(info_data.price_satoshis_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${info_data.timestamp.split('.')[0]}\nSource: ${info_data.source.toSentenceCase()}`;
     }
     catch (err) {
         return errorManager.handleException(err);
