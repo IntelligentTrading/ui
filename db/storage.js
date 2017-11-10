@@ -6,9 +6,6 @@ var storage = {
         settingsQuery: (chat_id, optionals) =>
         new Promise((resolve, reject) => {
 
-
-            reject('Invalid Token');
-
             if(chat_id == null || chat_id == undefined)
             {
                 throw new Error('Chat id cannot be null or undefined');
