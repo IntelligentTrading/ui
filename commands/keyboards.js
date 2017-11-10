@@ -7,7 +7,8 @@ var keyboards = {
             [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
             [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
             [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-            [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
+            [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }],
+            [{ text: "Change base currency", callback_data: "settings.NAV:CUR" }]
         ]
     },
     risk_keyboard: {
@@ -29,7 +30,7 @@ var keyboards = {
         ]
     },
     base_currency_keyboard: {
-        message: "Please select a  _currency_ as base of your rate informations.",
+        message: "Please select a _currency_ as base of your rate informations.",
         buttons: [
             [{ text: "Bitcoin", callback_data: "settings.DB:CUR_BTC" },
             { text: "US Dollar", callback_data: "settings.DB:CUR_USD" }]
