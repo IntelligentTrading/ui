@@ -25,10 +25,25 @@ function parseSignal(message_data) {
         price_change = message_data.price_satoshis_change;
       }
 
+      var horizon_text;
+      switch (message_data.horizon) {
+        case 0:
+          horizon_text = `Short horizon (Poloniex)`
+          break;
+        case 1:
+          horizon_text = `Medium horizon (Poloniex)`
+          break;
+        case 2:
+          horizon_text = `Long horizon (Poloniex)`
+          break;
+        default:
+          horizon_text = `--- ${message_data.horizon} ---`
+      }
+
       var time = `*${message_data.timestamp}*`;
-      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
-      var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3)` : `Confirmed`;
-      var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress}`;
+      //var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
+      var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`;
+      var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress})`;
 
       var price_text = price == undefined ? "" : `${currency_symbol}${price.toFixed(2)} (${(price_change * 100).toFixed(3)}%)`;
       telegram_signal_message = `${time}\n\n${message_data.coin}/${currency_symbol}\n${price_text}\n${trend_sentiment} ${trend_strength}\n${horizon_text}\n${trend_traversal}`;
