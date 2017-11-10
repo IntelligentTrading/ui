@@ -20,14 +20,14 @@ const telegram_message_options = {
   parse_mode: "Markdown"
 };
 
+const opts =
+  {
+    "parse_mode": "Markdown",
+    "disable_web_page_preview": "true"
+  };
+
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
-
-  var opts =
-    {
-      "parse_mode": "Markdown",
-      "disable_web_page_preview": "true"
-    };
 
   bot.sendMessage(chatId, startCmd.text, opts).catch(reason => console.log(reason));
 });
@@ -36,14 +36,9 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const token = match[2];
 
-  var opts =
-    {
-      "parse_mode": "Markdown",
-    };
-
-  if (token == undefined || token.length > 7) {
+  if (token == undefined || token == "" || token.length > 7) {
     bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
-      console.log('Communication error:\n' + reason);
+      errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
   }
   else {
