@@ -5,6 +5,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const Consumer = require('sqs-consumer');
 const AWS = require('aws-sdk');
+var signalHelper = require('./commands/signal_helper').signalHelper;
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: false });
@@ -18,74 +19,13 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_SECRET
 });
 
-var sorted_messages_cache = [];
-
-function sortedSignalInsertion(newSignal) {
-  sorted_messages_cache.splice(_.sortedIndexBy(sorted_messages_cache, newSignal, function (signal) { signal.timestamp }), 0, newSignal);
-}
-
-function cleanSortedCache() {
-  while (sorted_messages_cache.length > 50)
-    sorted_messages_cache.pop();
-}
-
-function hasValidTimestamp(signal) {
-
-  return signal != undefined &&
-    signal.timestamp != undefined &&
-    Date.now() - Date.parse('Thursday, 9 November 2017, 11:46:49 UTC') < 15 * 6000; // 15 minutes 
-}
-
-function isDuplicateMessage(message) {
-
-  cleanSortedCache();
-
-  if (sorted_messages_cache.map(msg => msg.id).indexOf(message.MessageId) < 0) {
-    sortedSignalInsertion({ id: message.MessageId, timestamp: Date.now() });
-    return false;
-  }
-
-  return true;
-}
-
-function parse_signal(message_data) {
-  try {
-
-    var telegram_signal_message = undefined;
-
-    if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
-
-      var trend_sentiment = `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`;
-      var trend_strength = `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`;
-
-      var price_text = message_data.price == undefined ? "" : `Price: ${message_data.price} (${message_data.price_change > 0 ? '+' : '-'}${message_data.price_change * 100}%)`
-      telegram_signal_message = `${message_data.coin}/USD\n${trend_sentiment} ${trend_strength}\n${message_data.horizon.toSentenceCase()} horizon (Poloniex)\n` + price_text;
-    }
-  }
-  catch (err) {
-    console.log(err);
-  }
-
-  return telegram_signal_message;
-}
-
-function notify(message) {
-  var message_data_64 = message.Body;
-  var message_data;
-  try {
-    var message_data_string = Buffer.from(message_data_64, 'base64').toString();
-    message_data = JSON.parse(message_data_string);
-  }
-  catch (err) {
-    console.log(err);
-    return;
-  }
+function notify(message_data) {
 
   if (message_data != undefined) {
     var risk = message_data.risk;
 
     console.log('Getting SQS signals');
-    var telegram_signal_message = parse_signal(message_data);
+    var telegram_signal_message = signalHelper.parse(message_data);
 
     if (telegram_signal_message != undefined) {
       //! Re-add ?risk=${risk}
@@ -122,11 +62,12 @@ const app = Consumer.create({
   queueUrl: aws_queue_url,
   handleMessage: (message, done) => {
 
-    if (hasValidTimestamp(message) && !isDuplicateMessage(message)) {
-      notify(message);
+    var decoded_message_body = signalHelper.decodeMessage(message.Body);
+    if (signalHelper.hasValidTimestamp(decoded_message_body) && !signalHelper.isDuplicateMessage(message)) {
+      notify(decoded_message_body);
     }
     else {
-      console.log('Duplicate ' + message.MessageId)
+      console.log('Invalid message ' + message.MessageId)
     }
     done();
   },
