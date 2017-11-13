@@ -46,7 +46,7 @@ function notify(message_data) {
               if (chat_id != undefined) {
                 bot.sendMessage(chat_id, telegram_signal_message,opts)
                 .catch((err) => {
-                  console.log(err.message);
+                  console.log(`${err.message} :: chat ${chat_id}`);
                 });
               }
             });
@@ -71,11 +71,15 @@ const app = Consumer.create({
   handleMessage: (message, done) => {
 
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
-    if (signalHelper.hasValidTimestamp(decoded_message_body) && !signalHelper.isDuplicateMessage(message)) {
+    var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
+    var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
+
+    if (hasValidTimestamp && !isDuplicateMessage) {
       notify(decoded_message_body);
     }
     else {
-      console.log('Invalid message ' + message.MessageId)
+      var invalidReason = !hasValidTimestamp ? 'is too old' : 'is a duplicate';
+      console.log(`[Invalid message] ${message.MessageId} ${invalidReason}`);
     }
     done();
   },
