@@ -46,14 +46,14 @@ function notify(message_data) {
               if (chat_id != undefined) {
                 bot.sendMessage(chat_id, telegram_signal_message,opts)
                 .catch((err) => {
-                  console.log(err);
+                  console.log(err.message);
                 });
               }
             });
           }
           else {
             bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts).catch((err) => {
-              console.log(err);
+              console.log(err.message);
             });
           }
         }
@@ -62,7 +62,6 @@ function notify(message_data) {
   }
 }
 
-//
 var aws_queue_url = process.env.LOCAL_ENV == undefined
   ? `${process.env.AWS_SQS_QUEUE_URL}`
   : `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`;
