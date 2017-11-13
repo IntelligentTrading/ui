@@ -20,6 +20,8 @@ const telegram_message_options = {
   parse_mode: "Markdown"
 };
 
+console.log('Starting telegram bot service');
+
 const opts =
   {
     "parse_mode": "Markdown",

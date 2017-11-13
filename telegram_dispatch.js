@@ -19,6 +19,8 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_SECRET
 });
 
+console.log('Starting telegram dispatching service');
+
 function notify(message_data) {
 
   var opts =
@@ -42,7 +44,8 @@ function notify(message_data) {
           if (process.env.LOCAL_ENV == undefined) {
             data.chat_ids.forEach((chat_id) => {
               if (chat_id != undefined) {
-                bot.sendMessage(chat_id, telegram_signal_message,opts).catch((err) => {
+                bot.sendMessage(chat_id, telegram_signal_message,opts)
+                .catch((err) => {
                   console.log(err);
                 });
               }
@@ -82,9 +85,10 @@ const app = Consumer.create({
 
 app.on('message_received', (msg) => {
 
+  console.log(`Received message ${msg.MessageId}`);
+
   app.handleMessage(msg, function (err) {
     if (err) console.log(err);
-    else console.log(`Sent ${msg.MessageId}`)
   })
 });
 
