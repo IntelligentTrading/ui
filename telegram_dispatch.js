@@ -24,30 +24,38 @@ console.log('Starting telegram dispatching service');
 function notify(message_data) {
 
   var opts =
-  {
-    "parse_mode": "Markdown",
-    "disable_web_page_preview": "true"
-  };
+    {
+      "parse_mode": "Markdown",
+      "disable_web_page_preview": "true"
+    };
 
   if (message_data != undefined) {
     var risk = message_data.risk;
+    var horizon = message_data.horizon;
 
     console.log('Getting SQS signals');
     var telegram_signal_message = signalHelper.parse(message_data);
 
     if (telegram_signal_message != undefined) {
-      
-      request(`https://${process.env.ITT_API_HOST}/users?risk=${risk}&horizon=${horizon}`, function (error, response, body) {
+
+      var risk_filter = risk ? `risk=${risk}` : '';
+      var horizon_filter = horizon ? `horizon=${horizon}` : '';
+      var filters = [risk_filter, horizon_filter].join('&');
+
+      if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
+        filters.replace('&', '');
+
+      request(`https://${process.env.ITT_API_HOST}/users?${filters}`, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var data = JSON.parse(body)
 
           if (process.env.LOCAL_ENV == undefined) {
             data.chat_ids.forEach((chat_id) => {
               if (chat_id != undefined) {
-                bot.sendMessage(chat_id, telegram_signal_message,opts)
-                .catch((err) => {
-                  console.log(`${err.message} :: chat ${chat_id}`);
-                });
+                bot.sendMessage(chat_id, telegram_signal_message, opts)
+                  .catch((err) => {
+                    console.log(`${err.message} :: chat ${chat_id}`);
+                  });
               }
             });
           }
@@ -62,9 +70,9 @@ function notify(message_data) {
   }
 }
 
-var aws_queue_url = process.env.LOCAL_ENV == undefined
-  ? `${process.env.AWS_SQS_QUEUE_URL}`
-  : `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`;
+var aws_queue_url = process.env.LOCAL_ENV
+  ? `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`
+  : `${process.env.AWS_SQS_QUEUE_URL}`;
 
 const app = Consumer.create({
   queueUrl: aws_queue_url,

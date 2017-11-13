@@ -25,20 +25,7 @@ function parseSignal(message_data) {
         price_change = message_data.price_satoshis_change;
       }
 
-      var horizon_text;
-      switch (message_data.horizon) {
-        case 0:
-          horizon_text = `Short horizon (Poloniex)`
-          break;
-        case 1:
-          horizon_text = `Medium horizon (Poloniex)`
-          break;
-        case 2:
-          horizon_text = `Long horizon (Poloniex)`
-          break;
-        default:
-          horizon_text = `--- ${message_data.horizon} ---`
-      }
+      var horizon_text = `${horizons[message_data.horizon].toSentenceCase()} horizon (Poloniex)`;
 
       var time = `*${message_data.timestamp}*`;
       //var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
@@ -105,8 +92,10 @@ var helper = {
   hasValidTimestamp: (message) => hasValidTimestamp(message),
   isDuplicateMessage: (message) => isDuplicateMessage(message),
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
-  decodeMessage: (message) => decodeMessage(message)
+  decodeMessage: (message) => decodeMessage(message),
 }
+
+var horizons = ['short','medium','long']; //! Maybe with a different scope (telegram_dispatch uses it)
 
 exports.signalHelper = helper;
 
