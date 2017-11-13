@@ -19,6 +19,8 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_SECRET
 });
 
+console.log('Starting telegram dispatching service');
+
 function notify(message_data) {
 
   var opts =
@@ -42,15 +44,16 @@ function notify(message_data) {
           if (process.env.LOCAL_ENV == undefined) {
             data.chat_ids.forEach((chat_id) => {
               if (chat_id != undefined) {
-                bot.sendMessage(chat_id, telegram_signal_message,opts).catch((err) => {
-                  console.log(err);
+                bot.sendMessage(chat_id, telegram_signal_message,opts)
+                .catch((err) => {
+                  console.log(`${err.message} :: chat ${chat_id}`);
                 });
               }
             });
           }
           else {
             bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts).catch((err) => {
-              console.log(err);
+              console.log(err.message);
             });
           }
         }
@@ -59,7 +62,6 @@ function notify(message_data) {
   }
 }
 
-//
 var aws_queue_url = process.env.LOCAL_ENV == undefined
   ? `${process.env.AWS_SQS_QUEUE_URL}`
   : `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`;
@@ -69,11 +71,15 @@ const app = Consumer.create({
   handleMessage: (message, done) => {
 
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
-    if (signalHelper.hasValidTimestamp(decoded_message_body) && !signalHelper.isDuplicateMessage(message)) {
+    var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
+    var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
+
+    if (hasValidTimestamp && !isDuplicateMessage) {
       notify(decoded_message_body);
     }
     else {
-      console.log('Invalid message ' + message.MessageId)
+      var invalidReason = !hasValidTimestamp ? 'is too old' : 'is a duplicate';
+      console.log(`[Invalid message] ${message.MessageId} ${invalidReason}`);
     }
     done();
   },
@@ -82,9 +88,10 @@ const app = Consumer.create({
 
 app.on('message_received', (msg) => {
 
+  console.log(`Received message ${msg.MessageId}`);
+
   app.handleMessage(msg, function (err) {
     if (err) console.log(err);
-    else console.log(`Sent ${msg.MessageId}`)
   })
 });
 
