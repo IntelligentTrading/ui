@@ -36,8 +36,8 @@ function notify(message_data) {
     var telegram_signal_message = signalHelper.parse(message_data);
 
     if (telegram_signal_message != undefined) {
-      //! Re-add ?risk=${risk}
-      request(`https://${process.env.ITT_API_HOST}/users`, function (error, response, body) {
+      
+      request(`https://${process.env.ITT_API_HOST}/users?risk=${risk}&horizon=${horizon}`, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var data = JSON.parse(body)
 
