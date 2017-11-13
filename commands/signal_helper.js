@@ -83,9 +83,6 @@ function cleanSortedCache() {
 
 function hasValidTimestamp(messageBody) {
 
-  //! horrible: remove immediately after checking if it's the problem
-  return true;
-
   return messageBody != undefined &&
     messageBody.sent_at != undefined &&
     Date.now() - Date.parse(messageBody.sent_at) < 15 * 60000; // 15 minutes 
