@@ -25,23 +25,8 @@ function parseSignal(message_data) {
         price_change = message_data.price_satoshis_change;
       }
 
-      var horizon_text;
-      switch (message_data.horizon) {
-        case 0:
-          horizon_text = `Short horizon (Poloniex)`
-          break;
-        case 1:
-          horizon_text = `Medium horizon (Poloniex)`
-          break;
-        case 2:
-          horizon_text = `Long horizon (Poloniex)`
-          break;
-        default:
-          horizon_text = `--- ${message_data.horizon} ---`
-      }
-
       var time = `*${message_data.timestamp}*`;
-      //var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
+      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source})` : message_data.horizon;
       var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`;
       var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress})`;
 
@@ -84,8 +69,8 @@ function cleanSortedCache() {
 function hasValidTimestamp(messageBody) {
 
   return messageBody != undefined &&
-    messageBody.sent_at != undefined &&
-    Date.now() - Date.parse(messageBody.sent_at) < 15 * 60000; // 15 minutes 
+    messageBody.timestamp != undefined &&
+    Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
 }
 
 function isDuplicateMessage(message) {
@@ -105,7 +90,7 @@ var helper = {
   hasValidTimestamp: (message) => hasValidTimestamp(message),
   isDuplicateMessage: (message) => isDuplicateMessage(message),
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
-  decodeMessage: (message) => decodeMessage(message)
+  decodeMessage: (message) => decodeMessage(message),
 }
 
 exports.signalHelper = helper;
