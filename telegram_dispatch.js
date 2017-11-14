@@ -38,8 +38,8 @@ function notify(message_data) {
 
     if (telegram_signal_message != undefined) {
 
-      var risk_filter = risk ? `risk=${risk}` : '';
-      var horizon_filter = horizon ? `horizon=${horizon}` : '';
+      var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
+      var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
       var filters = [risk_filter, horizon_filter].join('&');
 
       if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
@@ -64,6 +64,9 @@ function notify(message_data) {
               console.log(err.message);
             });
           }
+        }
+        else{
+          console.log(error);
         }
       });
     }
