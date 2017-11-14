@@ -25,10 +25,8 @@ function parseSignal(message_data) {
         price_change = message_data.price_satoshis_change;
       }
 
-      var horizon_text = `${horizons[message_data.horizon].toSentenceCase()} horizon (Poloniex)`;
-
       var time = `*${message_data.timestamp}*`;
-      //var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (Poloniex)` : message_data.horizon;
+      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source})` : message_data.horizon;
       var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`;
       var trend_traversal = `(${trend_traversal_sign} trend reversal  - ${trend_traversal_progress})`;
 
@@ -71,8 +69,8 @@ function cleanSortedCache() {
 function hasValidTimestamp(messageBody) {
 
   return messageBody != undefined &&
-    messageBody.sent_at != undefined &&
-    Date.now() - Date.parse(messageBody.sent_at) < 15 * 60000; // 15 minutes 
+    messageBody.timestamp != undefined &&
+    Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
 }
 
 function isDuplicateMessage(message) {
@@ -94,8 +92,6 @@ var helper = {
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
   decodeMessage: (message) => decodeMessage(message),
 }
-
-var horizons = ['short','medium','long']; //! Maybe with a different scope (telegram_dispatch uses it)
 
 exports.signalHelper = helper;
 
