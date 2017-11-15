@@ -33,7 +33,6 @@ function notify(message_data) {
     var risk = message_data.risk;
     var horizon = message_data.horizon;
 
-    console.log('Getting SQS signals');
     var telegram_signal_message = signalHelper.parse(message_data);
 
     if (telegram_signal_message != undefined) {
@@ -53,19 +52,24 @@ function notify(message_data) {
             data.chat_ids.forEach((chat_id) => {
               if (chat_id != undefined) {
                 bot.sendMessage(chat_id, telegram_signal_message, opts)
+                  .then(() => { return true })
                   .catch((err) => {
                     console.log(`${err.message} :: chat ${chat_id}`);
+                    return false;
                   });
               }
             });
           }
           else {
-            bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts).catch((err) => {
-              console.log(err.message);
-            });
+            bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
+              .then(() => { return true })
+              .catch((err) => {
+                console.log(err.message);
+                return false;
+              });
           }
         }
-        else{
+        else {
           console.log(error);
         }
       });
@@ -86,11 +90,14 @@ const app = Consumer.create({
     var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
 
     if (hasValidTimestamp && !isDuplicateMessage) {
-      notify(decoded_message_body);
+      if (notify(decoded_message_body))
+        console.log(`[Notified] Message ${message.MessageId}`);
+      else
+        console.log(`[Unotified] Message ${message.MessageId}`);
     }
     else {
       var invalidReason = !hasValidTimestamp ? 'is too old' : 'is a duplicate';
-      console.log(`[Invalid message] ${message.MessageId} ${invalidReason}`);
+      console.log(`[Invalid] Message ${message.MessageId} ${invalidReason}`);
     }
     done();
   },
@@ -99,7 +106,7 @@ const app = Consumer.create({
 
 app.on('message_received', (msg) => {
 
-  console.log(`Received message ${msg.MessageId}`);
+  console.log(`[Received] Message ${msg.MessageId}`);
 
   app.handleMessage(msg, function (err) {
     if (err) console.log(err);
@@ -107,7 +114,7 @@ app.on('message_received', (msg) => {
 });
 
 app.on('message_processed', (msg) => {
-  console.log(`Processed ${msg.MessageId}`);
+  console.log(`[Processed] Message ${msg.MessageId}`);
 });
 
 app.on('processing_error', (err, signal) => {
