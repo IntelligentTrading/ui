@@ -36,7 +36,7 @@ function parseSignal(message_data) {
       var header = `🔔  [#${message_data.coin}](https://coinmarketcap.com/coins/) on ${time}`;
       var price_chage_text = `*${price_change >= 0 ? '+':''}${(price_change * 100).toFixed(1)}%*`;
       var price_text = price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`;
-      telegram_signal_message = `${header}\n\n${price_chage_text}, ${price_text}\n\n${trend_sentiment} ${trend_strength}\n${horizon_text}\n${trend_traversal}\n`;
+      telegram_signal_message = `${header}\n${price_chage_text}, ${price_text}\n${trend_sentiment} ${trend_strength}\n${horizon_text}\n${trend_traversal}\n`;
     }
   }
   catch (err) {
