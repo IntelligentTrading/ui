@@ -1,6 +1,7 @@
 require('./util/extensions');
 var _ = require('lodash');
 const request = require('request');
+const rpromise = require('request-promise');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const Consumer = require('sqs-consumer');
@@ -44,35 +45,38 @@ function notify(message_data) {
       if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
         filters.replace('&', '');
 
-      request(`https://${process.env.ITT_API_HOST}/users?${filters}`, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          var data = JSON.parse(body)
+        var request_opts = {
+          uri: `https://${process.env.ITT_API_HOST}/users?${filters}`,
+          resolveWithFullResponse: true    //  <---  <---  <---  <---
+      };
 
-          if (process.env.LOCAL_ENV == undefined) {
-            data.chat_ids.forEach((chat_id) => {
-              if (chat_id != undefined) {
-                bot.sendMessage(chat_id, telegram_signal_message, opts)
-                  .then(() => { return true })
-                  .catch((err) => {
-                    console.log(`${err.message} :: chat ${chat_id}`);
-                    return false;
-                  });
-              }
-            });
+      return rpromise(request_opts)
+        .then(function (response) {
+          if (response.statusCode == 200) {
+            var data = JSON.parse(response.body)
+
+            if (process.env.LOCAL_ENV == undefined) {
+              data.chat_ids.forEach((chat_id) => {
+                if (chat_id != undefined) {
+                  bot.sendMessage(chat_id, telegram_signal_message, opts)
+                    .catch((err) => {
+                      var errMessage = `${err.message} :: chat ${chat_id}`;
+                      throw new Error(errMessage)
+                    });
+                }
+              });
+            }
+            else {
+              bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
+                .catch((err) => {
+                  throw new Error(err.message)
+                });
+            }
           }
           else {
-            bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-              .then(() => { return true })
-              .catch((err) => {
-                console.log(err.message);
-                return false;
-              });
+            throw new Error(error);
           }
-        }
-        else {
-          console.log(error);
-        }
-      });
+        });
     }
   }
 }
@@ -90,10 +94,13 @@ const app = Consumer.create({
     var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
 
     if (hasValidTimestamp && !isDuplicateMessage) {
-      if (notify(decoded_message_body))
-        console.log(`[Notified] Message ${message.MessageId}`);
-      else
-        console.log(`[Unotified] Message ${message.MessageId}`);
+      notify(decoded_message_body)
+        .then((msg) => {
+          console.log(`[Notified] Message ${message.MessageId}`);
+        })
+        .catch((reason) => {
+          console.log(`[Not notified] Message ${message.MessageId}`);
+        })
     }
     else {
       var invalidReason = !hasValidTimestamp ? 'is too old' : 'is a duplicate';
