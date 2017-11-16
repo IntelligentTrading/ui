@@ -1,13 +1,12 @@
 require('./util/extensions');
 var _ = require('lodash');
 const request = require('request');
-const rpromise = require('request-promise');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const Consumer = require('sqs-consumer');
 const AWS = require('aws-sdk');
 var signalHelper = require('./commands/signal_helper').signalHelper;
-
+var api = require('./core/api').api;
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: false });
 const telegram_message_options = {
@@ -40,17 +39,14 @@ function notify(message_data) {
 
       var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
       var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
-      var filters = [risk_filter, horizon_filter].join('&');
+      var beta_users_filter = 'beta_token_valid=True';
+
+      var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
 
       if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
         filters.replace('&', '');
 
-        var request_opts = {
-          uri: `https://${process.env.ITT_API_HOST}/users?${filters}`,
-          resolveWithFullResponse: true    //  <---  <---  <---  <---
-      };
-
-      return rpromise(request_opts)
+      return api.users(filters)
         .then(function (response) {
           if (response.statusCode == 200) {
             var data = JSON.parse(response.body)
