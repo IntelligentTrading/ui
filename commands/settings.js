@@ -75,6 +75,7 @@ Tap below to edit your settings:`;
 
     //! let's keep some features private
     console.log(settings.profile);
+    console.log(main_keyboard.buttons.length);
 
     if (settings.profile.is_ITT_team == true && main_keyboard.buttons.length < 4) {
         console.log('Adding advanced button config');
