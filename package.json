@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.2.6",
-  "description": "A sample Node.js app using Express 4",
+  "name": "itt-bot",
+  "version": "0.0.1",
+  "description": "Intelligent Trading Tech Bot",
   "engines": {
     "node": "6.11.1"
   },
