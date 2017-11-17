@@ -46,7 +46,7 @@ function notify(message_data) {
 
       var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
       var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
-      var beta_users_filter = 'beta_token_valid';
+      var beta_users_filter = 'beta_token_valid=true';
 
       //! BETA - no filters on risk and horizon, just skip the short horizon signals and
       //! deliver everything to the beta users

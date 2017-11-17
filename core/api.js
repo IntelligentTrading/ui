@@ -16,7 +16,7 @@ var api = {
     },
     itt_members: () => {
         var request_opts = {
-            uri: `${api_url}/users?is_ITT_team`,
+            uri: `${api_url}/users?is_ITT_team=true`,
         };
 
         //! returns the list already
@@ -24,7 +24,7 @@ var api = {
     },
     beta_users: () =>{
         var request_opts = {
-            uri: `${api_url}/users?beta_token_valid`,
+            uri: `${api_url}/users?beta_token_valid=true`,
         };
         
         //! returns the list already
