@@ -11,6 +11,23 @@ var api = {
             resolveWithFullResponse: true
         };
 
+        //! returns the full response, with status code and body
+        return rpromise(request_opts);
+    },
+    itt_members: () => {
+        var request_opts = {
+            uri: `${api_url}/users?is_ITT_team`,
+        };
+
+        //! returns the list already
+        return rpromise(request_opts);
+    },
+    beta_users: () =>{
+        var request_opts = {
+            uri: `${api_url}/users?beta_token_valid`,
+        };
+        
+        //! returns the list already
         return rpromise(request_opts);
     },
     user: (chat_id,optionals) => {

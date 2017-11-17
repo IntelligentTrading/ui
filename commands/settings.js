@@ -123,8 +123,9 @@ var settings = {
     subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token }),
     subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
         "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
+    teamMemberSubscription: "You are now subscribed as ITT Team Member!",    
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already in use. Please contact us or get a valid token (here)."
+    tokenError: "Your token is invalid or already in use. Please contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
 }
 
 exports.settings = settings;

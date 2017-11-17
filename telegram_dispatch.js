@@ -39,7 +39,7 @@ function notify(message_data) {
 
       var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
       var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
-      var beta_users_filter = 'beta_token_valid=True';
+      var beta_users_filter = 'beta_token_valid';
 
       var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
 

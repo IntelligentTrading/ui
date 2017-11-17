@@ -49,8 +49,12 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
     settingsCmd.subscribe(chatId, token)
       .then((userSettings) => {
         console.log(userSettings);
-        if (userSettings.beta_token_valid == true || userSettings.is_ITT_team == true) {
-          bot.sendMessage(chatId, settingsCmd.subscribedMessage, opts);
+        if (userSettings.beta_token_valid == true) {
+          var subscriptionMessage = userSettings.is_ITT_team 
+          ? settingsCmd.teamMemberSubscription
+          : settingsCmd.subscribedMessage;
+
+          bot.sendMessage(chatId, subscriptionMessage, opts);
         }
         else{
           bot.sendMessage(chatId, settingsCmd.tokenError, opts);
