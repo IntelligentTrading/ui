@@ -11,8 +11,6 @@ var main_keyboard = {
     message: '',
     buttons:
         [
-            [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
-            [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
             [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
             [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
         ]
@@ -64,16 +62,22 @@ Tap below to edit your settings:`;
     main_keyboard.message = msg;
 
     // Dynamic Subscribe button
-    main_keyboard.buttons[2][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-    main_keyboard.buttons[2][0].callback_data = isSubscribed
-        ? main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
-        : main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
+    main_keyboard.buttons[0][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
+    main_keyboard.buttons[0][0].callback_data = isSubscribed
+        ? main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_False'
+        : main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_True';
 
     // Dynamic Alert button
-    main_keyboard.buttons[3][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-    main_keyboard.buttons[3][0].callback_data = isMuted
-        ? main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_False'
-        : main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_True';
+    main_keyboard.buttons[1][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
+    main_keyboard.buttons[1][0].callback_data = isMuted
+        ? main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_False'
+        : main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_True';
+
+    //! let's keep some features private
+    if (settings.profile.is_ITT_team && main_keyboard.buttons.length < 4) {
+        main_keyboard.buttons.push([{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }]);
+        main_keyboard.buttons.push([{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]);
+    }
 }
 
 var keyboards = [
@@ -120,10 +124,10 @@ var settings = {
     },
     profile: {},
     getCurrent: (chat_id) => post(chat_id),
-    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk:'medium' }),
+    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
     subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
         "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
-    teamMemberSubscription: "You are now subscribed as ITT Team Member!",    
+    teamMemberSubscription: "You are now subscribed as ITT Team Member!",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
 }

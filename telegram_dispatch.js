@@ -48,7 +48,7 @@ function notify(message_data) {
       var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
       var beta_users_filter = 'beta_token_valid';
 
-      //! BETA - no filter on risk and horizon, just skip the short horizon signals and
+      //! BETA - no filters on risk and horizon, just skip the short horizon signals and
       //! deliver everything to the beta users
       //TODO var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
 
