@@ -10,6 +10,8 @@ var priceCmd = require('./commands/price').price;
 var volumeCmd = require('./commands/volume').volume;
 var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
+const about = require('./commands/about').about;
+
 var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
@@ -115,6 +117,19 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   const feedback = match[1];
 
   feedbackCmd.storeFeedback(feedback)
+    .then((result) => {
+      bot.sendMessage(chatId, result);
+    })
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
+});
+
+bot.onText(/\/about(.*)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  
+  about.get()
     .then((result) => {
       bot.sendMessage(chatId, result);
     })
