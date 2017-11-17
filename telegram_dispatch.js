@@ -1,3 +1,4 @@
+var errorManager = require('./util/error.js').errorManager;
 require('./util/extensions');
 var _ = require('lodash');
 const request = require('request');
@@ -33,6 +34,12 @@ function notify(message_data) {
     var risk = message_data.risk;
     var horizon = message_data.horizon;
 
+    if (horizon == 'short') { //! For the BETA we just skip the short horizon signals
+      return new Promise((resolve, reject) => {
+        reject('Short horizon signals are skipped in BETA');
+      });
+    }
+
     var telegram_signal_message = signalHelper.parse(message_data);
 
     if (telegram_signal_message != undefined) {
@@ -41,7 +48,11 @@ function notify(message_data) {
       var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
       var beta_users_filter = 'beta_token_valid';
 
-      var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
+      //! BETA - no filter on risk and horizon, just skip the short horizon signals and
+      //! deliver everything to the beta users
+      //TODO var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
+
+      var filters = [beta_users_filter];
 
       if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
         filters.replace('&', '');
@@ -96,6 +107,7 @@ const app = Consumer.create({
         })
         .catch((reason) => {
           console.log(`[Not notified] Message ${message.MessageId}`);
+          console.log(reason);
         })
     }
     else {

@@ -120,7 +120,7 @@ var settings = {
     },
     profile: {},
     getCurrent: (chat_id) => post(chat_id),
-    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token }),
+    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk:'medium' }),
     subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
         "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
     teamMemberSubscription: "You are now subscribed as ITT Team Member!",    
