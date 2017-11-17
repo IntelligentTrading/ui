@@ -74,13 +74,15 @@ Tap below to edit your settings:`;
         : main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_True';
 
     //! let's keep some features private
-    console.log(settings.profile);
-    console.log(main_keyboard.buttons.length);
 
     if (settings.profile.is_ITT_team == true && main_keyboard.buttons.length < 4) {
-        console.log('Adding advanced button config');
         main_keyboard.buttons.push([{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }]);
         main_keyboard.buttons.push([{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]);
+    }
+
+    // Remove the ITT buttons for users not enabled
+    if (settings.profile.is_ITT_team == false) {
+        main_keyboard.buttons.splice(2);
     }
 }
 
