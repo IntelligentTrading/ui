@@ -3,19 +3,17 @@
 //! I decided to use a <command>.<operation>:<param> to navigate through the menu and
 //! perform operations. Example: settings.DB:<T_V> stores the value V in the table T
 
-var storage = require('../db/storage').storage;
+var api = require('../core/api').api;
 var errorManager = require('../util/error').errorManager;
 var help = require('./help').help;
 
 var main_keyboard = {
     message: '',
     buttons:
-    [
-        [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
-        [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
-        [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-        [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
-    ]
+        [
+            [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
+            [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
+        ]
 }
 
 var risk_keyboard = {
@@ -39,33 +37,48 @@ var trader_keyboard = {
 };
 
 var post = function (chat_id, optionals) {
-    return storage.settingsQuery(chat_id, optionals)
-        .then(userProfile => settings.profile = JSON.parse(userProfile))
-        .then(() => {
+    return api.user(chat_id, optionals)
+        .then(response => {
+            if (response.statusCode == 200) {
+                settings.profile = JSON.parse(response.body);
+                updateKbMessages();
+                return settings.profile;
+            }
+            else {
+                throw new Error(response.statusMessage);
+            }
+        })
+}
 
-            var isMuted = settings.profile.is_muted;
-            var isSubscribed = settings.profile.is_subscribed;
 
-            var msg = `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
+function updateKbMessages() {
+    var isMuted = settings.profile.is_muted;
+    var isSubscribed = settings.profile.is_subscribed;
+
+    var msg = `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
 You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
 Tap below to edit your settings:`;
 
-            main_keyboard.message = msg;
+    main_keyboard.message = msg;
 
-            // Dynamic Subscribe button
-            main_keyboard.buttons[2][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-            main_keyboard.buttons[2][0].callback_data = isSubscribed
-                ? main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_False'
-                : main_keyboard.buttons[2][0].callback_data.split('_')[0] + '_True';
+    // Dynamic Subscribe button
+    main_keyboard.buttons[0][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
+    main_keyboard.buttons[0][0].callback_data = isSubscribed
+        ? main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_False'
+        : main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_True';
 
-            // Dynamic Alert button
-            main_keyboard.buttons[3][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-            main_keyboard.buttons[3][0].callback_data = isMuted
-                ? main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_False'
-                : main_keyboard.buttons[3][0].callback_data.split('_')[0] + '_True';
-        });
+    // Dynamic Alert button
+    main_keyboard.buttons[1][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
+    main_keyboard.buttons[1][0].callback_data = isMuted
+        ? main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_False'
+        : main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_True';
+
+    //! let's keep some features private
+    if (settings.profile.is_ITT_team && main_keyboard.buttons.length < 4) {
+        main_keyboard.buttons.push([{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }]);
+        main_keyboard.buttons.push([{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]);
+    }
 }
-
 
 var keyboards = [
     {
@@ -111,11 +124,12 @@ var settings = {
     },
     profile: {},
     getCurrent: (chat_id) => post(chat_id),
-    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token }),
+    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
     subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
-    "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
+        "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
+    teamMemberSubscription: "You are now subscribed as ITT Team Member!",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already activated. Please contact us or get a valid token (here)."
+    tokenError: "Your token is invalid or already in use. Please contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
 }
 
 exports.settings = settings;

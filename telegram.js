@@ -28,6 +28,8 @@ const opts =
     "disable_web_page_preview": "true"
   };
 
+const MAX_TOKEN_LENGTH = 8;  
+
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
@@ -38,19 +40,29 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const token = match[2];
 
-  if (token == undefined || token == "" || token.length > 7) {
+  if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
     bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
       errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
   }
   else {
     settingsCmd.subscribe(chatId, token)
-      .then((result) => {
-        bot.sendMessage(chatId, settingsCmd.subscribedMessage, opts);
+      .then((userSettings) => {
+        console.log(userSettings);
+        if (userSettings.beta_token_valid == true) {
+          var subscriptionMessage = userSettings.is_ITT_team 
+          ? settingsCmd.teamMemberSubscription
+          : settingsCmd.subscribedMessage;
+
+          bot.sendMessage(chatId, subscriptionMessage, opts);
+        }
+        else{
+          bot.sendMessage(chatId, settingsCmd.tokenError, opts);
+        }
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, reason, opts);
+        bot.sendMessage(chatId, settingsCmd.subscriptionError, opts);
       })
   }
 });
