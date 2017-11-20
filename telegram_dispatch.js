@@ -76,12 +76,12 @@ function notify(message_data) {
             else {
               bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
                 .catch((err) => {
-                  throw new Error(err.message)
+                  console.log(err.message)
                 });
             }
           }
           else {
-            throw new Error(error);
+            console.log(error);
           }
         });
     }
