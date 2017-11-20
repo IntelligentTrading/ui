@@ -30,7 +30,13 @@ const opts =
     "disable_web_page_preview": "true"
   };
 
-const MAX_TOKEN_LENGTH = 8;  
+const opts_html =
+  {
+    "parse_mode": "HTML",
+    "disable_web_page_preview": "true"
+  };
+
+const MAX_TOKEN_LENGTH = 8;
 
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
@@ -52,13 +58,13 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
       .then((userSettings) => {
         console.log(userSettings);
         if (userSettings.beta_token_valid == true) {
-          var subscriptionMessage = userSettings.is_ITT_team 
-          ? settingsCmd.teamMemberSubscription
-          : settingsCmd.subscribedMessage;
+          var subscriptionMessage = userSettings.is_ITT_team
+            ? settingsCmd.teamMemberSubscription
+            : settingsCmd.subscribedMessage;
 
           bot.sendMessage(chatId, subscriptionMessage, opts);
         }
-        else{
+        else {
           bot.sendMessage(chatId, settingsCmd.tokenError, opts);
         }
       })
@@ -128,10 +134,10 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
 
 bot.onText(/\/about(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  
+
   about.get()
     .then((result) => {
-      bot.sendMessage(chatId, result);
+      bot.sendMessage(chatId, result, opts_html);
     })
     .catch((reason) => {
       console.log(reason);

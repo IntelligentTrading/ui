@@ -2,6 +2,7 @@
   "name": "itt-bot",
   "version": "0.0.1",
   "description": "Intelligent Trading Tech Bot",
+  "homepage": "http://intelligenttrading.org/",
   "engines": {
     "node": "6.11.1"
   },
@@ -34,7 +35,9 @@
   "keywords": [
     "node",
     "heroku",
-    "express"
+    "express",
+    "bot",
+    "telegram"
   ],
   "license": "MIT"
 }
