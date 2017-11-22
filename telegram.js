@@ -10,6 +10,8 @@ var priceCmd = require('./commands/price').price;
 var volumeCmd = require('./commands/volume').volume;
 var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
+const about = require('./commands/about').about;
+
 var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
@@ -20,11 +22,15 @@ const telegram_message_options = {
   parse_mode: "Markdown"
 };
 
+console.log('Starting telegram bot service');
+
 const opts =
   {
     "parse_mode": "Markdown",
     "disable_web_page_preview": "true"
   };
+
+const MAX_TOKEN_LENGTH = 8;  
 
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
@@ -36,19 +42,29 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const token = match[2];
 
-  if (token == undefined || token == "" || token.length > 7) {
+  if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
     bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
       errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
   }
   else {
     settingsCmd.subscribe(chatId, token)
-      .then((result) => {
-        bot.sendMessage(chatId, settingsCmd.subscribedMessage, opts);
+      .then((userSettings) => {
+        console.log(userSettings);
+        if (userSettings.beta_token_valid == true) {
+          var subscriptionMessage = userSettings.is_ITT_team 
+          ? settingsCmd.teamMemberSubscription
+          : settingsCmd.subscribedMessage;
+
+          bot.sendMessage(chatId, subscriptionMessage, opts);
+        }
+        else{
+          bot.sendMessage(chatId, settingsCmd.tokenError, opts);
+        }
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, reason, opts);
+        bot.sendMessage(chatId, settingsCmd.subscriptionError, opts);
       })
   }
 });
@@ -101,6 +117,19 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   const feedback = match[1];
 
   feedbackCmd.storeFeedback(feedback)
+    .then((result) => {
+      bot.sendMessage(chatId, result);
+    })
+    .catch((reason) => {
+      console.log(reason);
+      bot.sendMessage(chatId, reason);
+    });
+});
+
+bot.onText(/\/about(.*)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  
+  about.get()
     .then((result) => {
       bot.sendMessage(chatId, result);
     })
