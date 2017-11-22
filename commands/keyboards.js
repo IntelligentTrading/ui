@@ -1,15 +1,29 @@
+var _ = require('lodash');
+
 var keyboards = {
 
     main_keyboard: {
         message: '',
         buttons:
-        [
-            [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
-            [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }],
-            [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-            [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }],
-            [{ text: "Change base currency", callback_data: "settings.NAV:CUR" }]
-        ]
+            [
+                [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
+                [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
+            ],
+        extraButtons:
+            [
+                [{ text: "Exchange currencies", callback_data: "settings.NAV:CUR" }],
+                [{ text: "Coins list", callback_data: "settings.NAV:COI" }],
+                [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
+                [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
+            ],
+        showExtraButtons(show) {
+            if (show) {
+                this.buttons.length == 2 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};
+            }
+            else {
+                this.buttons.splice(2);
+            }
+        }
     },
     risk_keyboard: {
         message: "Please select which _risk profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your trader profile.",
@@ -30,10 +44,11 @@ var keyboards = {
         ]
     },
     base_currency_keyboard: {
-        message: "Please select a _currency_ as base of your rate informations.",
+        message: "Please select the exchange _currencies_ in order to receive related signals.",
         buttons: [
             [{ text: "Bitcoin", callback_data: "settings.DB:CUR_BTC" },
-            { text: "US Dollar", callback_data: "settings.DB:CUR_USD" }]
+            { text: "US Dollar", callback_data: "settings.DB:CUR_USD" },
+            { text: "Ethereum", callback_data: "settings.DB:CUR_USD" }]
         ]
     }
 }

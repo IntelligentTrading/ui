@@ -23,7 +23,6 @@ var post = function (chat_id, optionals) {
         })
 }
 
-
 function updateKbMessages() {
     var isMuted = settings.profile.is_muted;
     var isSubscribed = settings.profile.is_subscribed;
@@ -48,15 +47,7 @@ kbs.main_keyboard.message = msg;
 
     //! let's keep some features private
 
-    if (settings.profile.is_ITT_team == true && kbs.main_keyboard.buttons.length < 4) {
-        kbs.main_keyboard.buttons.push([{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }]);
-        kbs.main_keyboard.buttons.push([{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]);
-    }
-
-    // Remove the ITT buttons for users not enabled
-    if (settings.profile.is_ITT_team == false) {
-        kbs.main_keyboard.buttons.splice(2);
-    }
+    kbs.main_keyboard.showExtraButtons(settings.profile.is_ITT_team);
 }
 
 var keyboards = [
