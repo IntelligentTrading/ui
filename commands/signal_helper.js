@@ -10,12 +10,12 @@ function parseSignal(message_data) {
   if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
 
     var sma = getSMATemplate(message_data);
-    telegram_signal_message = `${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${sma.trend_sentiment} ${sma.trend_strength}\n${bst.horizon_text}\n${sma.trend_traversal}\n`;
+    telegram_signal_message = `${sma.sma_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${sma.trend_sentiment} ${sma.trend_strength}\n${bst.horizon_text}\n${sma.trend_traversal}\n`;
   }
 
   if (message_data.signal == 'RSI') {
     var rsi = getRSITemplate(message_data);
-    telegram_signal_message = `${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
+    telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
   }
 
   return telegram_signal_message;
@@ -23,12 +23,14 @@ function parseSignal(message_data) {
 
 function getSMATemplate(message_data) {
 
+  var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`;
+  var trend_traversal_sign = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
+
   var sma_template = {
+    sma_header_emoji: '🔔',
     trend_sentiment: `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`,
-    trend_traversal_sign: `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`,
     trend_strength: `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`,
-    trend_traversal_progress: message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`,
-    trend_traversal: `(${this.trend_traversal_sign} trend reversal - ${this.trend_traversal_progress})`
+    trend_traversal: `(${trend_traversal_sign} trend reversal - ${trend_traversal_progress})`
   }
 
   return sma_template;
@@ -40,12 +42,13 @@ function getRSITemplate(message_data) {
     throw new Error('Invalid RSI value');
 
   var rsi_emoji = `${(message_data.trend == -1 ? '✅' : '⛔')}`;
-  var rsi_trend = ['Oversold','Neutral','Overbought'];
+  var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
   var rsi_strength_values = ['', 'Very', 'Extremely'];
   var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
 
   var rsi = {
-    rsi_text: `${rsi_emoji} RSI ${message_data.rsi_value.toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${ message_data.strength_value == 3 ?'⚠️':''}`,
+    rsi_header_emoji: '📣',
+    rsi_text: `${rsi_emoji} RSI ${message_data.rsi_value.toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
   }
 
   return rsi;
@@ -69,7 +72,7 @@ function getBaseSignalTemplate(message_data) {
 
   var base_template = {
     horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
-    header: `🔔  [#${message_data.coin}](https://coinmarketcap.com/coins/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
+    header: `[#${message_data.coin}](https://coinmarketcap.com/coins/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
     price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(1)}%*`,
     price_text: price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`
   }
