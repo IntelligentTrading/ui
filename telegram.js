@@ -30,7 +30,7 @@ const opts =
     "disable_web_page_preview": "true"
   };
 
-const MAX_TOKEN_LENGTH = 8;  
+const MAX_TOKEN_LENGTH = 8;
 
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
@@ -52,13 +52,13 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
       .then((userSettings) => {
         console.log(userSettings);
         if (userSettings.beta_token_valid == true) {
-          var subscriptionMessage = userSettings.is_ITT_team 
-          ? settingsCmd.teamMemberSubscription
-          : settingsCmd.subscribedMessage;
+          var subscriptionMessage = userSettings.is_ITT_team
+            ? settingsCmd.teamMemberSubscription
+            : settingsCmd.subscribedMessage;
 
           bot.sendMessage(chatId, subscriptionMessage, opts);
         }
-        else{
+        else {
           bot.sendMessage(chatId, settingsCmd.tokenError, opts);
         }
       })
@@ -128,7 +128,7 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
 
 bot.onText(/\/about(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  
+
   about.get()
     .then((result) => {
       bot.sendMessage(chatId, result);
@@ -145,17 +145,19 @@ bot.onText(/\/settings/, (msg, match) => {
   settingsCmd.getCurrent(chatId)
     .then(() => {
 
-      var keyboard = settingsCmd.getKeyboard().kb;
+      var keyboard = settingsCmd.getKeyboard();
 
-      var settingsMessage = keyboard.message;
-      var options = {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: keyboard.buttons
-        }
-      };
+      keyboard.getButtons().then((btns) => {
+        var settingsMessage = keyboard.message;
+        var options = {
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: btns
+          }
+        };
 
-      bot.sendMessage(chatId, settingsMessage, options);
+        bot.sendMessage(chatId, settingsMessage, options);
+      });
     })
     .catch((reason) => {
       console.log(reason);
@@ -163,40 +165,45 @@ bot.onText(/\/settings/, (msg, match) => {
 });
 
 bot.on('callback_query', (callback_message) => {
-  //console.log(callback_message);
 
   var message_id = callback_message.message.message_id;
   var chat_id = callback_message.message.chat.id;
 
   var data_array = callback_message.data.split('.'); // eg.: settings_RSK
+  var kb_data = data_array[1].split(':')[1];
+
   var cmd = {
     category: data_array[0],
     operation: {
       action: data_array[1].split(':')[0],
-      param: data_array[1].split(':')[1]
+      kb_label: kb_data.split('_')[0],
+      kb_page: kb_data.split('_')[1]
     }
   };
 
   if (cmd.category == 'settings') {
 
     if (cmd.operation.action == 'NAV') {
-      var cmd_kb = settingsCmd.getKeyboard(cmd.operation.param);
+      var cmd_kb = settingsCmd.getKeyboard(cmd.operation.kb_label);
 
-      bot.editMessageText(cmd_kb.kb.message,
-        {
-          chat_id: chat_id,
-          message_id: message_id,
-          parse_mode: 'Markdown',
-          reply_markup: { inline_keyboard: cmd_kb.kb.buttons }
-        });
+      cmd_kb.getButtons(cmd.operation.kb_page).then((btns) => {
+
+        bot.editMessageText(cmd_kb.message,
+          {
+            chat_id: chat_id,
+            message_id: message_id,
+            parse_mode: 'Markdown',
+            reply_markup: { inline_keyboard: btns }
+          });
+      });
     }
     if (cmd.operation.action == 'DB') {
-      var cmd_kb = settingsCmd.store(chat_id, cmd.operation.param)
+      var cmd_kb = settingsCmd.store(chat_id, cmd.operation.kb_label)
         .then(() => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
 
-              var main_kb = settingsCmd.getKeyboard('MAIN').kb;
+              var main_kb = settingsCmd.getKeyboard('MAIN');
 
               bot.editMessageText(main_kb.message,
                 {

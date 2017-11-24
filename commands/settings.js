@@ -6,48 +6,26 @@
 var api = require('../core/api').api;
 var errorManager = require('../util/error').errorManager;
 var help = require('./help').help;
-var kbs = require('./keyboards').keyboards;
+var kbs = require('./keyboards/keyboards').keyboards;
 
+var current_kb = kbs.main_keyboard;
 
 var post = function (chat_id, optionals) {
     return api.user(chat_id, optionals)
         .then(response => {
             if (response.statusCode == 200) {
                 settings.profile = JSON.parse(response.body);
-                updateKbMessages();
+                current_kb.setSettings(settings.profile);
                 return settings.profile;
             }
             else {
                 throw new Error(response.statusMessage);
             }
         })
-}
-
-function updateKbMessages() {
-    var isMuted = settings.profile.is_muted;
-    var isSubscribed = settings.profile.is_subscribed;
-
-    var msg = `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
-You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
-Tap below to edit your settings:`;
-
-kbs.main_keyboard.message = msg;
-
-    // Dynamic Subscribe button
-    kbs.main_keyboard.buttons[0][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-    kbs.main_keyboard.buttons[0][0].callback_data = isSubscribed
-        ? kbs.main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_False'
-        : kbs.main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_True';
-
-    // Dynamic Alert button
-    kbs.main_keyboard.buttons[1][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-    kbs.main_keyboard.buttons[1][0].callback_data = isMuted
-        ? kbs.main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_False'
-        : kbs.main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_True';
-
-    //! let's keep some features private
-
-    kbs.main_keyboard.showExtraButtons(settings.profile.is_ITT_team);
+        .catch((reason)=>{
+            console.log(reason);
+            throw new Error(errorManager.genericErrorMessage);
+        })
 }
 
 var keyboards = [
@@ -66,6 +44,10 @@ var keyboards = [
     {
         label: 'CUR',
         kb: kbs.base_currency_keyboard
+    },
+    {
+        label: 'COI',
+        kb: kbs.coins_keyboard
     }];
 
 var settings = {
@@ -75,8 +57,12 @@ var settings = {
             return keyboard.label == label;
         });
 
-        if (kb.length > 0)
-            return kb[0];
+        if (kb.length > 0) {
+            current_kb = kb[0].kb;
+        }
+
+        current_kb.setSettings(this.profile);
+        return current_kb;
 
         throw new Error('Keyboard not found');
     },
@@ -94,6 +80,12 @@ var settings = {
                 return post(chat_id, { is_subscribed: kv[1] });
             if (kv[0] == 'CUR')
                 return post(chat_id, { base_currency: kv[1] });
+            if (kv[0] == 'COI') {
+                var coin = { name: kv[1], follow: kv[2] };
+                var coin_array = [];
+                coin_array.push(coin);
+                return post(chat_id, { coins: coin_array });
+            }
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
