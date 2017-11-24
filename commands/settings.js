@@ -6,111 +6,68 @@
 var api = require('../core/api').api;
 var errorManager = require('../util/error').errorManager;
 var help = require('./help').help;
+var kbs = require('./keyboards/keyboards').keyboards;
 
-var main_keyboard = {
-    message: '',
-    buttons:
-        [
-            [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-            [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
-        ]
-}
-
-var risk_keyboard = {
-    message: "Please select which _risk profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your trader profile.",
-    buttons: [
-        [{ text: "Only the safest trade signals (Beginners)", callback_data: "settings.DB:RSK_low" }],
-        [{ text: "Any signal, reputable coins only (Standard)", callback_data: "settings.DB:RSK_medium" }],
-        [{ text: "Any signal, including low value coins (High risk high reward)", callback_data: "settings.DB:RSK_high" }],
-        [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }]
-    ]
-};
-
-var trader_keyboard = {
-    message: "Please select which _trader profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your risk profile.",
-    buttons: [
-        [{ text: "Investor: Long term trade signals. Exit and entry points for HODL. (Low risk)", callback_data: "settings.DB:HRZ_long" }],
-        [{ text: "Swingtrader: Short/near term trade signals. Profit from volatility. (Medium risk)", callback_data: "settings.DB:HRZ_medium" }],
-        [{ text: "Daytrader: Very short term trade signals. Getting in and out trades. (High risk)", callback_data: "settings.DB:HRZ_short" }],
-        [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }]
-    ]
-};
+var current_kb = kbs.main_keyboard;
 
 var post = function (chat_id, optionals) {
     return api.user(chat_id, optionals)
         .then(response => {
             if (response.statusCode == 200) {
                 settings.profile = JSON.parse(response.body);
-                updateKbMessages();
+                
+                //update all the kbs at once
+                kbs.updateKeyboardsSettings(settings.profile);
                 return settings.profile;
             }
             else {
                 throw new Error(response.statusMessage);
             }
         })
-}
-
-
-function updateKbMessages() {
-    var isMuted = settings.profile.is_muted;
-    var isSubscribed = settings.profile.is_subscribed;
-
-    var msg = `Your profile is set on *${settings.profile.horizon}* horizon, *${settings.profile.risk}* risk.
-You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
-Tap below to edit your settings:`;
-
-    main_keyboard.message = msg;
-
-    // Dynamic Subscribe button
-    main_keyboard.buttons[0][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-    main_keyboard.buttons[0][0].callback_data = isSubscribed
-        ? main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_False'
-        : main_keyboard.buttons[0][0].callback_data.split('_')[0] + '_True';
-
-    // Dynamic Alert button
-    main_keyboard.buttons[1][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-    main_keyboard.buttons[1][0].callback_data = isMuted
-        ? main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_False'
-        : main_keyboard.buttons[1][0].callback_data.split('_')[0] + '_True';
-
-    //! let's keep some features private
-
-    if (settings.profile.is_ITT_team == true && main_keyboard.buttons.length < 4) {
-        main_keyboard.buttons.push([{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }]);
-        main_keyboard.buttons.push([{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]);
-    }
-
-    // Remove the ITT buttons for users not enabled
-    if (settings.profile.is_ITT_team == false) {
-        main_keyboard.buttons.splice(2);
-    }
+        .catch((reason) => {
+            console.log(reason);
+            throw new Error(errorManager.genericErrorMessage);
+        })
 }
 
 var keyboards = [
     {
         label: 'MAIN',
-        kb: main_keyboard
+        kb: kbs.main_keyboard
     },
     {
         label: 'RSK',
-        kb: risk_keyboard
+        kb: kbs.risk_keyboard
     },
     {
         label: 'HRZ',
-        kb: trader_keyboard
+        kb: kbs.trader_keyboard
+    },
+    {
+        label: 'CUR',
+        kb: kbs.base_currency_keyboard
+    },
+    {
+        label: 'COI',
+        kb: kbs.coins_keyboard
     }];
 
 var settings = {
-    text: main_keyboard.message,
+    text: kbs.main_keyboard.message,
     getKeyboard: function (label = 'MAIN') {
         var kb = keyboards.filter(function (keyboard) {
             return keyboard.label == label;
         });
 
-        if (kb.length > 0)
-            return kb[0];
+        if (kb.length > 0) {
+            current_kb = kb[0].kb;
+        }
+        return current_kb;
 
         throw new Error('Keyboard not found');
+    },
+    getCurrentKeyboard: () => {
+        return current_kb;
     },
     store: (chat_id, param) => {
         if (param != undefined) {
@@ -124,6 +81,14 @@ var settings = {
                 return post(chat_id, { is_muted: kv[1] });
             if (kv[0] == 'ISSUB')
                 return post(chat_id, { is_subscribed: kv[1] });
+            if (kv[0] == 'CUR')
+                return post(chat_id, { base_currency: kv[1] });
+            if (kv[0] == 'COI') {
+                var coin = { name: kv[1], follow: kv[2] };
+                var coin_array = [];
+                coin_array.push(coin);
+                return post(chat_id, { coins: coin_array });
+            }
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
@@ -135,7 +100,7 @@ var settings = {
         "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
     teamMemberSubscription: "You are now subscribed as ITT Team Member!",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already in use. Please contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
+    tokenError: "Your token is invalid or already in use. Please /token _your token_, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
 }
 
 exports.settings = settings;
