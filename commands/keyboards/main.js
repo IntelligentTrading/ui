@@ -13,7 +13,7 @@ var extraButtons = [
     [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
 
-var kb = new Keyboard('', buttons, extraButtons);
+var kb = new Keyboard('', buttons, extraButtons, false);
 kb.showExtraButtons = function (show) {
     if (show) {
         this.buttons.length == 2 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};

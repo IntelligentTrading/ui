@@ -10,4 +10,5 @@ var buttons = [
 
 var msg = "Please select the *exchange currencies* in order to receive related signals.";
 var kb = new Keyboard(msg, buttons);
+kb.showCancelButton = true;
 exports.kb = kb;

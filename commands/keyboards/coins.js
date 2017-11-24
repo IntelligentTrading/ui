@@ -19,15 +19,22 @@ var getCurrentButtons = (page_num = 0) => {
     var total_number_of_pages = symbols.length / PAGE_SIZE;
 
     // 0 < 4
-    var next_page = page_num < total_number_of_pages ? page_num + 1 : 0;
-    var prev_page = page_num > 0 ? page_num - 1 : total_number_of_pages;
+    var next_page = page_num < total_number_of_pages - 1 ? page_num + 1 : 0;
+    var prev_page = page_num > 0 ? page_num - 1 : total_number_of_pages - 1;
 
     var arrows = [{ text: "<<", callback_data: `settings.NAV:COI_${prev_page}` }, { text: ">>", callback_data: `settings.NAV:COI_${next_page}` }];
+    var cancel = [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }];
 
-    buttons_line.slice()// get groups of 5 
+    //get PAGE_SIZE elements for each page (25)
+    var page_buttons = buttons_line.slice(page_num * PAGE_SIZE, page_num * PAGE_SIZE + PAGE_SIZE);
 
-    buttons.push(buttons_line);
+    for (i = 0; i <= total_number_of_pages; i++) {
+        var page_buttons_row = page_buttons.slice(i * PAGE_COLS, i * PAGE_COLS + PAGE_COLS);
+        buttons.push(page_buttons_row);
+    }
     buttons.push(arrows);
+    //I redefined the getButtons method, therefore I have to add CANCEL manually
+    buttons.push(kb.cancelButton);
     return buttons;
 }
 
@@ -56,12 +63,11 @@ var loadCoins = (page_num) => {
                     symbols.push(symbol);
                 });
 
-                for (i = 0; i < symbols.length; i++) {
-                    symbols.slice(i * PAGE_COLS, i * PAGE_COLS + PAGE_COLS).forEach(s => {
-                        var followed = followed_coins.indexOf(s) < 0
-                        buttons_line.push({ text: `${followed ? '' : '• '}${s}`, callback_data: `settings.DB:COI_${s}_${followed ? 'False' : 'True'}` });
-                    });
-                }
+                symbols.forEach(s => {
+                    var followed = followed_coins.indexOf(s) < 0
+                    buttons_line.push({ text: `${followed ? '' : '• '}${s}`, callback_data: `settings.DB:COI_${s}_${followed ? 'False' : 'True'}` });
+                });
+
             })
             .then(() => {
                 return getCurrentButtons();

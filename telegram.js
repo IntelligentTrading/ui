@@ -181,15 +181,17 @@ bot.on('callback_query', (callback_message) => {
   var cmd = {
     category: data_array[0],
     operation: {
-      action: data_array[1].split(':')[0],
-      kb_label: kb_data.split('_')[0],
-      kb_page: kb_data.split('_')[1]
+      action: data_array[1].split(':')[0]
     }
   };
 
   if (cmd.category == 'settings') {
 
     if (cmd.operation.action == 'NAV') {
+
+      cmd.operation.kb_label= kb_data.split('_')[0];
+      cmd.operation.kb_page= kb_data.split('_')[1]
+
       var cmd_kb = settingsCmd.getKeyboard(cmd.operation.kb_label);
 
       cmd_kb.getButtons(cmd.operation.kb_page).then((btns) => {
@@ -204,7 +206,7 @@ bot.on('callback_query', (callback_message) => {
       });
     }
     if (cmd.operation.action == 'DB') {
-      var cmd_kb = settingsCmd.store(chat_id, cmd.operation.kb_label)
+      var cmd_kb = settingsCmd.store(chat_id, kb_data)
         .then(() => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
