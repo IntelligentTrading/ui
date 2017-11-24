@@ -30,6 +30,12 @@ const opts =
     "disable_web_page_preview": "true"
   };
 
+const opts_html =
+  {
+    "parse_mode": "HTML",
+    "disable_web_page_preview": "true"
+  };
+
 const MAX_TOKEN_LENGTH = 8;
 
 bot.onText(/\/start/, (msg, match) => {
@@ -131,7 +137,7 @@ bot.onText(/\/about(.*)/, (msg, match) => {
 
   about.get()
     .then((result) => {
-      bot.sendMessage(chatId, result);
+      bot.sendMessage(chatId, result, opts_html);
     })
     .catch((reason) => {
       console.log(reason);
