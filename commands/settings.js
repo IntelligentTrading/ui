@@ -15,14 +15,16 @@ var post = function (chat_id, optionals) {
         .then(response => {
             if (response.statusCode == 200) {
                 settings.profile = JSON.parse(response.body);
-                current_kb.setSettings(settings.profile);
+                
+                //update all the kbs at once
+                kbs.updateKeyboardsSettings(settings.profile);
                 return settings.profile;
             }
             else {
                 throw new Error(response.statusMessage);
             }
         })
-        .catch((reason)=>{
+        .catch((reason) => {
             console.log(reason);
             throw new Error(errorManager.genericErrorMessage);
         })
@@ -60,8 +62,6 @@ var settings = {
         if (kb.length > 0) {
             current_kb = kb[0].kb;
         }
-
-        current_kb.setSettings(this.profile);
         return current_kb;
 
         throw new Error('Keyboard not found');

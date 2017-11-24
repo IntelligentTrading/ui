@@ -6,7 +6,7 @@ var buttons = [];
 var followed_coins = [];
 var buttons_line = [];
 var userSettings;
-var symbols;
+var coins;
 
 var PAGE_COLS = 5;
 var PAGE_ROWS = 5;
@@ -14,11 +14,11 @@ var PAGE_SIZE = PAGE_COLS * PAGE_ROWS;
 
 var current_page = 0;
 
-var getCurrentButtons = (page_num = 0) => {
+var getCurrentPage = (page_num = 0) => {
     buttons = [];
 
     current_page = parseInt(page_num);
-    var total_number_of_pages = symbols.length / PAGE_SIZE;
+    var total_number_of_pages = coins.length / PAGE_SIZE;
 
     // 0 < 4
     var next_page = current_page < total_number_of_pages - 1 ? current_page + 1 : 0;
@@ -40,6 +40,14 @@ var getCurrentButtons = (page_num = 0) => {
     return buttons;
 }
 
+var updateFollowedButtons = () => {
+    buttons_line = [];
+    coins.forEach(coin => {
+        coin.followed = followed_coins.indexOf(coin.symbol) >= 0;
+        buttons_line.push({ text: `${coin.followed ? '• ':''}${coin.symbol}`, callback_data: `settings.DB:COI_${coin.symbol}_${coin.followed ? 'False' : 'True'}` });
+    });
+}
+
 var loadCoins = (page_num) => {
     var node_services_endpoint = process.env.ITT_NODE_SERVICES;
 
@@ -49,30 +57,27 @@ var loadCoins = (page_num) => {
         followed_coins.push('ETH', 'NEO', 'OMG');
     }
 
-    if (symbols) {
+    if (coins) {
         return new Promise((resolve, reject) => {
-            resolve(getCurrentButtons(page_num));
+            updateFollowedButtons();
+            resolve(getCurrentPage(page_num));
         });
     }
     else {
         return rp(`${node_services_endpoint}/tickers`)
             .then((json_tickers) => {
                 var tickers = JSON.parse(json_tickers);
-                symbols = [];
+                coins = [];
 
                 Object.keys(tickers).forEach((key) => {
-                    var symbol = tickers[key].info.symbol;
-                    symbols.push(symbol);
+                    var ticker = { symbol: tickers[key].info.symbol, followed: false};
+                    coins.push(ticker);
                 });
 
-                symbols.forEach(s => {
-                    var followed = followed_coins.indexOf(s) < 0
-                    buttons_line.push({ text: `${followed ? '' : '• '}${s}`, callback_data: `settings.DB:COI_${s}_${followed ? 'False' : 'True'}` });
-                });
-
+                updateFollowedButtons();
             })
             .then(() => {
-                return getCurrentButtons();
+                return getCurrentPage();
             })
             .catch((reason) => {
                 console.log(reason)
@@ -84,7 +89,7 @@ var loadCoins = (page_num) => {
 var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";
 var kb = new Keyboard(msg, buttons);
 
-kb.setSettings = (settings) => {
+kb.updateSettings = (settings) => {
     userSettings = settings;
 };
 kb.getButtons = (page) => loadCoins(page);

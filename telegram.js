@@ -151,6 +151,8 @@ bot.onText(/\/settings/, (msg, match) => {
   settingsCmd.getCurrent(chatId)
     .then(() => {
 
+      // getCurrent sets the user settings and the keyboard message and buttons callback_data values,
+      // but it's an hidden dependency, maybe I should redesign the flow
       var keyboard = settingsCmd.getKeyboard();
 
       keyboard.getButtons().then((btns) => {
@@ -189,8 +191,8 @@ bot.on('callback_query', (callback_message) => {
 
     if (cmd.operation.action == 'NAV') {
 
-      cmd.operation.kb_label= kb_data.split('_')[0];
-      cmd.operation.kb_page= kb_data.split('_')[1]
+      cmd.operation.kb_label = kb_data.split('_')[0];
+      cmd.operation.kb_page = kb_data.split('_')[1]
 
       var cmd_kb = settingsCmd.getKeyboard(cmd.operation.kb_label);
 
@@ -214,14 +216,16 @@ bot.on('callback_query', (callback_message) => {
               //var main_kb = settingsCmd.getKeyboard('MAIN');
 
               var current_kb = settingsCmd.getCurrentKeyboard();
-
-              bot.editMessageText(current_kb.message,
-                {
+              current_kb.getButtons().then(btns => {
+                bot.editMessageText(current_kb.message, {
                   chat_id: chat_id,
                   message_id: message_id,
                   parse_mode: 'Markdown',
-                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: current_kb.buttons }
+                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: btns }
+                }).catch(reason => {
+                  console.log(reason);
                 });
+              })
             });
         })
         .catch((reason) => {

@@ -17,7 +17,7 @@ Keyboard.prototype.getButtons = function (keyboard_page) {
     });
 }
 
-Keyboard.prototype.setSettings = (userSettings) => {
+Keyboard.prototype.updateSettings = (userSettings) => {
     // do something
 }
 

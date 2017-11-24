@@ -12,5 +12,11 @@ var keyboards = {
     coins_keyboard: coins_kb
 }
 
+keyboards.updateKeyboardsSettings = (settings) => {
+    Object.keys(keyboards).forEach(kb => {
+        if (kb != 'updateKeyboardsSettings')
+            keyboards[kb].updateSettings(settings);
+    });
+}
 
 exports.keyboards = keyboards;

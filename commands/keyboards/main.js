@@ -39,7 +39,7 @@ kb.updateButtons = (message, isSubscribed, isMuted) => {
         : buttons[1][0].callback_data.split('_')[0] + '_True';
 }
 
-kb.setSettings = (userSettings) => {
+kb.updateSettings = (userSettings) => {
     var isMuted = userSettings.is_muted;
     var isSubscribed = userSettings.is_subscribed;
 
