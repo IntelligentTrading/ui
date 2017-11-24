@@ -2,48 +2,79 @@ require('../util/extensions');
 var _ = require('lodash');
 
 function parseSignal(message_data) {
-  try {
 
-    var telegram_signal_message;;
+  var telegram_signal_message;
 
-    if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
+  var bst = getBaseSignalTemplate(message_data);
 
-      var trend_sentiment = `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`;
-      var trend_traversal_sign = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
-      var trend_strength = `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`;
+  if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
 
-      var price;
-      var currency_symbol;
-      if (message_data.coin == 'BTC') {
-        currency_symbol = '$';
-        price = message_data.price_usdt;
-        price_change = message_data.price_usdt_change;
-      }
-      else {
-        currency_symbol = 'BTC';
-        price = message_data.price_satoshis / 100000000;
-        price_change = message_data.price_satoshis_change;
-      }
-
-
-
-
-      var time = `*${message_data.timestamp.toString().split('.')[0]} UTC*`;
-      var horizon_text = message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon;
-      var trend_traversal_progress = message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`;
-      var trend_traversal = `(${trend_traversal_sign} trend reversal - ${trend_traversal_progress})`;
-
-      var header = `🔔  [#${message_data.coin}](https://coinmarketcap.com/coins/) on ${time}`;
-      var price_chage_text = `*${price_change >= 0 ? '+':''}${(price_change * 100).toFixed(1)}%*`;
-      var price_text = price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`;
-      telegram_signal_message = `${header}\n${price_chage_text}, ${price_text}\n${trend_sentiment} ${trend_strength}\n${horizon_text}\n${trend_traversal}\n`;
-    }
+    var sma = getSMATemplate(message_data);
+    telegram_signal_message = `${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${sma.trend_sentiment} ${sma.trend_strength}\n${bst.horizon_text}\n${sma.trend_traversal}\n`;
   }
-  catch (err) {
-    console.log(err);
+
+  if (message_data.signal == 'RSI') {
+    var rsi = getRSITemplate(message_data);
+    telegram_signal_message = `${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
   }
 
   return telegram_signal_message;
+}
+
+function getSMATemplate(message_data) {
+
+  var sma_template = {
+    trend_sentiment: `${(message_data.trend == -1 ? 'Bearish' : 'Bullish')}`,
+    trend_traversal_sign: `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`,
+    trend_strength: `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`,
+    trend_traversal_progress: message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`,
+    trend_traversal: `(${trend_traversal_sign} trend reversal - ${trend_traversal_progress})`
+  }
+
+  return sma_template;
+}
+
+function getRSITemplate(message_data) {
+
+  if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
+    throw new Error('Invalid RSI value');
+
+  var rsi_emoji = `${(message_data.trend == -1 ? '✅' : '⛔')}`;
+  var rsi_trend = ['Oversold','Neutral','Overbought'];
+  var rsi_strength_values = ['', 'Very', 'Extremely'];
+  var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
+
+  var rsi = {
+    rsi_text: `${rsi_emoji} RSI ${message_data.rsi_value.toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${ message_data.strength_value == 3 ?'⚠️':''}`,
+  }
+
+  return rsi;
+}
+
+function getBaseSignalTemplate(message_data) {
+
+  var price;
+  var currency_symbol;
+
+  if (message_data.coin == 'BTC') {
+    currency_symbol = '$';
+    price = message_data.price_usdt;
+    price_change = message_data.price_usdt_change;
+  }
+  else {
+    currency_symbol = 'BTC';
+    price = message_data.price_satoshis / 100000000;
+    price_change = message_data.price_satoshis_change;
+  }
+
+  var base_template = {
+    horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
+    header: `🔔  [#${message_data.coin}](https://coinmarketcap.com/coins/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
+    price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(1)}%*`,
+    price_text: price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`
+  }
+
+  return base_template;
 }
 
 function decodeMessage(message_body) {
