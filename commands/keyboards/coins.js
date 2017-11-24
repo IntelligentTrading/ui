@@ -12,21 +12,23 @@ var PAGE_COLS = 5;
 var PAGE_ROWS = 5;
 var PAGE_SIZE = PAGE_COLS * PAGE_ROWS;
 
+var current_page = 0;
+
 var getCurrentButtons = (page_num = 0) => {
     buttons = [];
 
-    page_num = parseInt(page_num);
+    current_page = parseInt(page_num);
     var total_number_of_pages = symbols.length / PAGE_SIZE;
 
     // 0 < 4
-    var next_page = page_num < total_number_of_pages - 1 ? page_num + 1 : 0;
-    var prev_page = page_num > 0 ? page_num - 1 : total_number_of_pages - 1;
+    var next_page = current_page < total_number_of_pages - 1 ? current_page + 1 : 0;
+    var prev_page = current_page > 0 ? current_page - 1 : total_number_of_pages - 1;
 
     var arrows = [{ text: "<<", callback_data: `settings.NAV:COI_${prev_page}` }, { text: ">>", callback_data: `settings.NAV:COI_${next_page}` }];
     var cancel = [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }];
 
     //get PAGE_SIZE elements for each page (25)
-    var page_buttons = buttons_line.slice(page_num * PAGE_SIZE, page_num * PAGE_SIZE + PAGE_SIZE);
+    var page_buttons = buttons_line.slice(current_page * PAGE_SIZE, current_page * PAGE_SIZE + PAGE_SIZE);
 
     for (i = 0; i <= total_number_of_pages; i++) {
         var page_buttons_row = page_buttons.slice(i * PAGE_COLS, i * PAGE_COLS + PAGE_COLS);
@@ -82,7 +84,9 @@ var loadCoins = (page_num) => {
 var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";
 var kb = new Keyboard(msg, buttons);
 
-kb.setSettings = (settings) => { userSettings = settings };
+kb.setSettings = (settings) => {
+    userSettings = settings;
+};
 kb.getButtons = (page) => loadCoins(page);
 
 exports.kb = kb;

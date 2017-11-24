@@ -66,6 +66,9 @@ var settings = {
 
         throw new Error('Keyboard not found');
     },
+    getCurrentKeyboard: () => {
+        return current_kb;
+    },
     store: (chat_id, param) => {
         if (param != undefined) {
             let kv = param.split('_');

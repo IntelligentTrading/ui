@@ -211,14 +211,16 @@ bot.on('callback_query', (callback_message) => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
 
-              var main_kb = settingsCmd.getKeyboard('MAIN');
+              //var main_kb = settingsCmd.getKeyboard('MAIN');
 
-              bot.editMessageText(main_kb.message,
+              var current_kb = settingsCmd.getCurrentKeyboard();
+
+              bot.editMessageText(current_kb.message,
                 {
                   chat_id: chat_id,
                   message_id: message_id,
                   parse_mode: 'Markdown',
-                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: main_kb.buttons }
+                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: current_kb.buttons }
                 });
             });
         })
