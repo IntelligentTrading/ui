@@ -28,7 +28,7 @@ function getSMATemplate(message_data) {
     trend_traversal_sign: `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`,
     trend_strength: `${(message_data.trend == -1 ? '🔴' : '🔵').repeat(message_data.strength_value)}${'⚪️'.repeat(message_data.strength_max - message_data.strength_value)}`,
     trend_traversal_progress: message_data.strength_value < 3 ? `Confirmation ${message_data.strength_value} out of 3` : `Confirmed`,
-    trend_traversal: `(${trend_traversal_sign} trend reversal - ${trend_traversal_progress})`
+    trend_traversal: `(${this.trend_traversal_sign} trend reversal - ${this.trend_traversal_progress})`
   }
 
   return sma_template;
