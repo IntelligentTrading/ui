@@ -68,7 +68,7 @@ function notify(message_data) {
                   bot.sendMessage(chat_id, telegram_signal_message, opts)
                     .catch((err) => {
                       var errMessage = `${err.message} :: chat ${chat_id}`;
-                      throw new Error(errMessage)
+                      console.log(errMessage);
                     });
                 }
               });
@@ -83,6 +83,9 @@ function notify(message_data) {
           else {
             console.log(error);
           }
+        })
+        .catch((reason) => {
+          console.log(reason);
         });
     }
   }
