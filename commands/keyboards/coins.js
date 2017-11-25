@@ -47,12 +47,17 @@ var updateFollowedButtons = () => {
 
     buttons_line = [];
 
-    if (userSettings.altcoins) {
-        altcoins.forEach(coin => {
-            coin.followed = userSettings.altcoins.indexOf(coin.symbol) >= 0;
-            buttons_line.push({ text: `${coin.followed ? '• ' : ''}${coin.symbol}`, callback_data: `settings.DB:COI_${coin.symbol}_${coin.followed ? 'False' : 'True'}` });
-        });
+    if (userSettings.altcoins == undefined) {
+        if (userSettings == undefined)
+            userSettings = {};
+
+        userSettings.altcoins = []
     }
+
+    altcoins.forEach(coin => {
+        coin.followed = userSettings.altcoins.indexOf(coin.symbol) >= 0;
+        buttons_line.push({ text: `${coin.followed ? '• ' : ''}${coin.symbol}`, callback_data: `settings.DB:COI_${coin.symbol}_${coin.followed ? 'False' : 'True'}` });
+    });
 }
 
 var loadCoins = () => {
