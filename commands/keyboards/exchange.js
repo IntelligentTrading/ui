@@ -21,11 +21,21 @@ kb.getButtons = () => {
     return new Promise((resolve, reject) => {
         var quota_buttons = [];
         var buttons = [];
-        
-        var followed_quota_currencies = ['USD']; //!userSettings.quota_currencies
+
+        if (process.env.LOCAL_ENV) {
+            userSettings = { quota_currencies: [] };
+            userSettings.quota_currencies.push('BTC');
+        }
+
+        if (userSettings.quota_currencies == undefined) {
+            if (userSettings == undefined)
+                userSettings = {};
     
+            userSettings.quota_currencies = []
+        }
+        
         quota_currencies.forEach(quota_currency => {
-            quota_currency.followed = followed_quota_currencies.indexOf(quota_currency.symbol) >= 0;
+            quota_currency.followed = userSettings.quota_currencies.indexOf(quota_currency.symbol) >= 0;
             quota_buttons.push({ text: `${quota_currency.followed ? '• ':''} alt/${quota_currency.symbol}`, callback_data: `settings.DB:SIG_${quota_currency.symbol}_${quota_currency.followed ? 'False' : 'True'}` });
         });
 
