@@ -15,7 +15,7 @@ var post = function (chat_id, optionals) {
         .then(response => {
             if (response.statusCode == 200) {
                 settings.profile = JSON.parse(response.body);
-                
+
                 //update all the kbs at once
                 kbs.updateKeyboardsSettings(settings.profile);
                 return settings.profile;
@@ -44,7 +44,7 @@ var keyboards = [
         kb: kbs.trader_keyboard
     },
     {
-        label: 'CUR',
+        label: 'SIG',
         kb: kbs.base_currency_keyboard
     },
     {
@@ -81,13 +81,17 @@ var settings = {
                 return post(chat_id, { is_muted: kv[1] });
             if (kv[0] == 'ISSUB')
                 return post(chat_id, { is_subscribed: kv[1] });
-            if (kv[0] == 'CUR')
-                return post(chat_id, { base_currency: kv[1] });
+            if (kv[0] == 'SIG') {
+                var quota_currency = { name: kv[1], follow: kv[2] };
+                var quota_currencies = [];
+                quota_currencies.push(quota_currency);
+                return post(chat_id, { quota_currencies: quota_currencies });
+            }
             if (kv[0] == 'COI') {
                 var coin = { name: kv[1], follow: kv[2] };
-                var coin_array = [];
-                coin_array.push(coin);
-                return post(chat_id, { coins: coin_array });
+                var altcoins_array = [];
+                altcoins_array.push(coin);
+                return post(chat_id, { altcoins: altcoins_array });
             }
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
