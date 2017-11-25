@@ -7,8 +7,7 @@ var buttons = [
 ];
 
 var extraButtons = [
-    [{ text: "Exchange currencies", callback_data: "settings.NAV:CUR" }],
-    [{ text: "Coins list", callback_data: "settings.NAV:COI" }],
+    [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
     [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
     [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
