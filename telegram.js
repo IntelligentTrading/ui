@@ -124,14 +124,21 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const feedback = match[1];
 
-  feedbackCmd.storeFeedback(feedback)
-    .then((result) => {
-      bot.sendMessage(chatId, result);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
+  if (feedback == undefined || feedback.length <= 0) {
+    bot.sendMessage(chatId,
+      "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
+  }
+  else {
+    feedbackCmd.storeFeedback(chatId, feedback)
+      .then((result) => {
+        console.log(result);
+        bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
+      })
+      .catch((reason) => {
+        console.log(reason);
+        bot.sendMessage(chatId, reason);
+      });
+  }
 });
 
 bot.onText(/\/about(.*)/, (msg, match) => {

@@ -20,7 +20,8 @@ var post = function (chat_id, optionals) {
                 kbs.updateKeyboardsSettings(settings.profile);
                 return settings.profile;
             }
-            else {
+            else 
+             {
                 throw new Error(response.statusMessage);
             }
         })
