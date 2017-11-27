@@ -12,6 +12,8 @@ var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume'];
+
 var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
@@ -262,7 +264,10 @@ bot.onText(/\/getMe/, (msg, match) => {
   bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
 
-bot.on('message', (msg) => {
+bot.onText(/\/\w+/, (msg, match) => {
   const chatId = msg.chat.id;
+  var command = match[0].replace('/', '');
+  if (commandsList.indexOf(command) < 0)
+    bot.sendMessage(chatId, `Sorry, I don't understand command /${command}, please check the list of available commands with /help.`);
 });
 
