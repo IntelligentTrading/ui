@@ -12,6 +12,8 @@ var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume'];
+
 var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
@@ -122,14 +124,21 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const feedback = match[1];
 
-  feedbackCmd.storeFeedback(feedback)
-    .then((result) => {
-      bot.sendMessage(chatId, result);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
+  if (feedback == undefined || feedback.length <= 0) {
+    bot.sendMessage(chatId,
+      "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
+  }
+  else {
+    feedbackCmd.storeFeedback(chatId, feedback)
+      .then((result) => {
+        console.log(result);
+        bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
+      })
+      .catch((reason) => {
+        console.log(reason);
+        bot.sendMessage(chatId, reason);
+      });
+  }
 });
 
 bot.onText(/\/about(.*)/, (msg, match) => {
@@ -262,7 +271,10 @@ bot.onText(/\/getMe/, (msg, match) => {
   bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
 
-bot.on('message', (msg) => {
+bot.onText(/\/\w+/, (msg, match) => {
   const chatId = msg.chat.id;
+  var command = match[0].replace('/', '');
+  if (commandsList.indexOf(command) < 0)
+    bot.sendMessage(chatId, `Sorry, I don't understand command /${command}, please check the list of available commands with /help.`);
 });
 
