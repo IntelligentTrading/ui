@@ -12,7 +12,7 @@ var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
-var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume'];
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token'];
 
 var qrbuilder = require('./util/qr-builder').builder;
 
