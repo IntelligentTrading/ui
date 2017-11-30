@@ -48,7 +48,7 @@ function getRSITemplate(message_data) {
 
   var rsi = {
     rsi_header_emoji: '📣',
-    rsi_text: `${rsi_emoji} RSI ${message_data.parseInt(rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
+    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
   }
 
   return rsi;
