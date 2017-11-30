@@ -122,6 +122,7 @@ bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
 
 bot.onText(/\/feedback(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
+  const username = msg.chat.username;
   const feedback = match[1];
 
   if (feedback == undefined || feedback.length <= 0) {
@@ -129,7 +130,7 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
       "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
   }
   else {
-    feedbackCmd.storeFeedback(chatId, feedback)
+    feedbackCmd.storeFeedback(chatId, username, feedback)
       .then((result) => {
         bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
       })

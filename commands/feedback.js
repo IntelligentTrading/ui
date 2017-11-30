@@ -1,12 +1,12 @@
 var rp = require('request-promise');
 
 var feedback = {
-    storeFeedback: (chat_id, msg) => {
+    storeFeedback: (chat_id, user, msg) => {
         var request_opts = {
             uri: `${process.env.ITT_NODE_SERVICES}/feedback`,
             resolveWithFullResponse: true,
             method: 'POST',
-            body: { chat_id: chat_id, type: 'feedback', content: msg },
+            body: { chat_id: chat_id, user: user, type: 'feedback', content: msg },
             json: true
         };
 
