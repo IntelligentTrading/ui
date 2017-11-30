@@ -43,7 +43,22 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, startCmd.text, opts).catch(reason => console.log(reason));
+  const url = "http://intelligenttrading.org/whitepaper.pdf";
+  startCmd.eula_kb.getButtons()
+    .then(btns => {
+      var options = {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: btns
+        }
+      };
+
+      bot.sendMessage(chatId, startCmd.eula_kb.message, options)
+        .catch(reason => console.log(reason));
+      //bot.sendMessage(chatId, startCmd.eula_kb.message, options)
+
+    })
+    .catch(reason => console.log(reason));
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
@@ -196,6 +211,28 @@ bot.on('callback_query', (callback_message) => {
     }
   };
 
+  if (cmd.category == 'registration') {
+    if (cmd.operation.action == 'DB') {
+      settingsCmd.store(chat_id, kb_data)
+        .then(() => {
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
+            .then(() => {
+              bot.sendMessage(chat_id, startCmd.text);
+            })
+            .catch(reason => {
+              console.log(reason);
+            });
+        })
+        .catch((reason) => {
+          console.log(reason);
+
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
+            .then(() => {
+              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+            });
+        });
+    }
+  }
   if (cmd.category == 'settings') {
 
     if (cmd.operation.action == 'NAV') {
@@ -217,7 +254,7 @@ bot.on('callback_query', (callback_message) => {
       });
     }
     if (cmd.operation.action == 'DB') {
-      var cmd_kb = settingsCmd.store(chat_id, kb_data)
+      settingsCmd.store(chat_id, kb_data)
         .then(() => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
