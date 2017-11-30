@@ -129,7 +129,7 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
       "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
   }
   else {
-    /*feedbackCmd.storeFeedback(chatId, feedback)
+    feedbackCmd.storeFeedback(chatId, feedback)
       .then((result) => {
         console.log(result);
         bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
@@ -137,8 +137,8 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
       .catch((reason) => {
         console.log(reason);
         bot.sendMessage(chatId, reason);
-      });*/
-      bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly.`);
+      });
+    bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly.`);
   }
 });
 
