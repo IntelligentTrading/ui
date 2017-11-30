@@ -138,7 +138,6 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
         console.log(reason);
         bot.sendMessage(chatId, reason);
       });
-    bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly.`);
   }
 });
 
