@@ -131,7 +131,6 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   else {
     feedbackCmd.storeFeedback(chatId, feedback)
       .then((result) => {
-        console.log(result);
         bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
       })
       .catch((reason) => {
