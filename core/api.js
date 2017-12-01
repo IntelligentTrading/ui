@@ -23,15 +23,15 @@ var api = {
         //! returns the list already
         return rpromise(request_opts);
     },
-    beta_users: () =>{
+    beta_users: () => {
         var request_opts = {
             uri: `${api_url}/users?beta_token_valid=true`,
         };
-        
+
         //! returns the list already
         return rpromise(request_opts);
     },
-    user: (chat_id,optionals) => {
+    user: (chat_id, optionals) => {
         if (chat_id == null || chat_id == undefined) {
             throw new Error('Chat id cannot be null or undefined');
         }
