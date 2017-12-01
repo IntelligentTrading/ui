@@ -21,7 +21,8 @@ var errorManager = require('./util/error').errorManager;
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
-const telegram_message_options = {
+
+const markdown_opts = {
   parse_mode: "Markdown"
 };
 
@@ -32,13 +33,13 @@ tickers.get()
     console.log('[Telegram bot] data not initialized.')
   });
 
-const opts =
+const nopreview_markdown_opts =
   {
     "parse_mode": "Markdown",
     "disable_web_page_preview": "true"
   };
 
-const opts_html =
+const nopreview_hmtl_opts =
   {
     "parse_mode": "HTML",
     "disable_web_page_preview": "true"
@@ -49,7 +50,7 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, startCmd.text, opts).catch(reason => console.log(reason));
+  bot.sendMessage(chatId, startCmd.text, nopreview_markdown_opts).catch(reason => console.log(reason));
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
@@ -57,7 +58,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const token = match[2];
 
   if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
-    bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
+    bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts).catch(reason => {
       errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
   }
@@ -70,15 +71,15 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
             ? settingsCmd.teamMemberSubscription
             : settingsCmd.subscribedMessage;
 
-          bot.sendMessage(chatId, subscriptionMessage, opts);
+          bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);
         }
         else {
-          bot.sendMessage(chatId, settingsCmd.tokenError, opts);
+          bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts);
         }
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, settingsCmd.subscriptionError, opts);
+        bot.sendMessage(chatId, settingsCmd.subscriptionError, nopreview_markdown_opts);
       })
   }
 });
@@ -100,15 +101,15 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
 
   priceCmd.getPrice(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options)
+      bot.sendMessage(chatId, result.toString(), nopreview_markdown_opts)
         .catch((reason) => {
           console.log(reason);
-          bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
+          bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
         });
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
+      bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
     });
 });
 
@@ -118,7 +119,7 @@ bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
 
   volumeCmd.getVolume(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options);
+      bot.sendMessage(chatId, result.toString(), markdown_opts);
     })
     .catch((reason) => {
       console.log(reason);
@@ -152,7 +153,7 @@ bot.onText(/\/about(.*)/, (msg, match) => {
 
   about.get()
     .then((result) => {
-      bot.sendMessage(chatId, result, opts_html);
+      bot.sendMessage(chatId, result, nopreview_hmtl_opts);
     })
     .catch((reason) => {
       console.log(reason);
