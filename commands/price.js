@@ -11,7 +11,7 @@ var price = {
             reject("Write `/price <ticker>` to get the latest price.\nFor example: /price ETH")
         } else {
             try {
-                var uri = `https://${process.env.ITT_API_HOST}/price?currency=${currency}`;
+                var uri = `https://${process.env.ITT_API_HOST}/price?coin=${currency}`;
 
                 request(uri, function (error, response, body) {
                     if (!error && response.statusCode == 200) {
@@ -46,16 +46,16 @@ function parse_info(info_data) {
 
     return tickers.get()
         .then((tkrs) => {
-            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.currency);
+            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.coin);
             currency_wiki_data = matching_tkrs[0];
 
-            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.currency}!`);
+            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.coin}!`);
             var currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
 
             var retrieved_price;
             var price_change_sign;
 
-            if (info_data.currency == 'BTC') {
+            if (info_data.coin == 'BTC') {
                 retrieved_price = `${parseFloat(info_data['price_usdt']).toFixed(2)} USD`;
             }
             else
