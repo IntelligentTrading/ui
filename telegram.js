@@ -50,7 +50,6 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
-<<<<<<< HEAD
   const url = "http://intelligenttrading.org/whitepaper.pdf";
   startCmd.eula_kb.getButtons()
     .then(btns => {
@@ -63,13 +62,8 @@ bot.onText(/\/start/, (msg, match) => {
 
       bot.sendMessage(chatId, startCmd.eula_kb.message, options)
         .catch(reason => console.log(reason));
-      //bot.sendMessage(chatId, startCmd.eula_kb.message, options)
-
     })
     .catch(reason => console.log(reason));
-=======
-  bot.sendMessage(chatId, startCmd.text, nopreview_markdown_opts).catch(reason => console.log(reason));
->>>>>>> master
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
