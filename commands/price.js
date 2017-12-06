@@ -5,13 +5,13 @@ require('../util/extensions');
 
 
 var price = {
-    getPrice: (coin) => new Promise((resolve, reject) => {
+    getPrice: (currency) => new Promise((resolve, reject) => {
 
-        if (coin === "") {
+        if (currency === "") {
             reject("Write `/price <ticker>` to get the latest price.\nFor example: /price ETH")
         } else {
             try {
-                var uri = `https://${process.env.ITT_API_HOST}/price?coin=${coin}`;
+                var uri = `https://${process.env.ITT_API_HOST}/price?currency=${currency}`;
 
                 request(uri, function (error, response, body) {
                     if (!error && response.statusCode == 200) {
@@ -22,7 +22,7 @@ var price = {
                                     resolve(retrievedPrice);
                                 });
                         } else {
-                            reject('Coin not found');
+                            reject('Currency not found');
                         }
                     }
                     else {
@@ -41,21 +41,21 @@ exports.price = price;
 
 function parse_info(info_data) {
 
-    var coin_wiki_data;
+    var currency_wiki_data;
     const wiki_url = "https://coinmarketcap.com/currencies";
 
     return tickers.get()
         .then((tkrs) => {
-            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.coin);
-            coin_wiki_data = matching_tkrs[0];
+            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.currency);
+            currency_wiki_data = matching_tkrs[0];
 
-            if (coin_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.coin}!`);
-            var coin_wiki = `*${coin_wiki_data.name}, *[${coin_wiki_data.symbol}](${wiki_url}/${coin_wiki_data.name})*, Rank #${coin_wiki_data.rank}*`
+            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.currency}!`);
+            var currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
 
             var retrieved_price;
             var price_change_sign;
 
-            if (info_data.coin == 'BTC') {
+            if (info_data.currency == 'BTC') {
                 retrieved_price = `${parseFloat(info_data['price_usdt']).toFixed(2)} USD`;
             }
             else
@@ -68,7 +68,7 @@ function parse_info(info_data) {
             else
                 price_change_sign = '➡️';
 
-            return `${coin_wiki}\nPrice: ${retrieved_price} (${(info_data.price_satoshis_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${info_data.timestamp.split('.')[0]}\nSource: ${info_data.source.toSentenceCase()}`;
+            return `${currency_wiki}\nPrice: ${retrieved_price} (${(info_data.price_satoshis_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${info_data.timestamp.split('.')[0]}\nSource: ${info_data.source.toSentenceCase()}`;
         })
         .catch(reason => errorManager.handleException(reason));
 }

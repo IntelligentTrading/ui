@@ -50,7 +50,7 @@ var keyboards = [
     },
     {
         label: 'COI',
-        kb: kbs.coins_keyboard
+        kb: kbs.currencies_keyboard
     }];
 
 var settings = {
@@ -89,10 +89,10 @@ var settings = {
                 return post(chat_id, { quota_currencies: quota_currencies });
             }
             if (kv[0] == 'COI') {
-                var coin = { name: kv[1], follow: kv[2] };
-                var altcoins_array = [];
-                altcoins_array.push(coin);
-                return post(chat_id, { altcoins: altcoins_array });
+                var currency = { name: kv[1], follow: kv[2] };
+                var currencies_array = [];
+                currencies_array.push(currency);
+                return post(chat_id, { currencies: currencies_array });
             }
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');

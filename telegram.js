@@ -109,7 +109,7 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
+      bot.sendMessage(chatId, errorManager.currency_error, markdown_opts);
     });
 });
 

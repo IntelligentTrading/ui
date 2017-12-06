@@ -59,7 +59,7 @@ function getBaseSignalTemplate(message_data) {
   var price;
   var currency_symbol;
 
-  if (message_data.coin == 'BTC') {
+  if (message_data.currency == 'BTC') {
     currency_symbol = '$';
     price = message_data.price_usdt;
     price_change = message_data.price_usdt_change;
@@ -72,7 +72,7 @@ function getBaseSignalTemplate(message_data) {
 
   var base_template = {
     horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
-    header: `[#${message_data.coin}](https://coinmarketcap.com/coins/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
+    header: `[#${message_data.currency}](https://coinmarketcap.com/currencies/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
     price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(1)}%*`,
     price_text: price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`
   }

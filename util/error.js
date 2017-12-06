@@ -4,6 +4,7 @@
 var errorManager = {
     generic_error_message:'Uh-Oh, something went wrong! Please retry...',
     communication_error_message:'Communication error...',
+    currency_error:'Currency not found',
     reject: (reason, err = null) => new Promise((resolve, reject) => {
         if (err != null)
             throw new Error(err);
