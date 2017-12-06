@@ -12,6 +12,7 @@ var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
+const tickers = require('./commands/data/tickers').tickers;
 var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token'];
 
 var qrbuilder = require('./util/qr-builder').builder;
@@ -20,19 +21,25 @@ var errorManager = require('./util/error').errorManager;
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
-const telegram_message_options = {
+
+const markdown_opts = {
   parse_mode: "Markdown"
 };
 
-console.log('Starting telegram bot service');
+console.log('[Telegram bot] initialize data...');
+tickers.get()
+  .then(() => console.log('[Telegram bot] data initialized.'))
+  .catch(reason => {
+    console.log('[Telegram bot] data not initialized.')
+  });
 
-const opts =
+const nopreview_markdown_opts =
   {
     "parse_mode": "Markdown",
     "disable_web_page_preview": "true"
   };
 
-const opts_html =
+const nopreview_hmtl_opts =
   {
     "parse_mode": "HTML",
     "disable_web_page_preview": "true"
@@ -43,6 +50,7 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
+<<<<<<< HEAD
   const url = "http://intelligenttrading.org/whitepaper.pdf";
   startCmd.eula_kb.getButtons()
     .then(btns => {
@@ -59,6 +67,9 @@ bot.onText(/\/start/, (msg, match) => {
 
     })
     .catch(reason => console.log(reason));
+=======
+  bot.sendMessage(chatId, startCmd.text, nopreview_markdown_opts).catch(reason => console.log(reason));
+>>>>>>> master
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
@@ -66,7 +77,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const token = match[2];
 
   if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
-    bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
+    bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts).catch(reason => {
       errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
   }
@@ -79,15 +90,15 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
             ? settingsCmd.teamMemberSubscription
             : settingsCmd.subscribedMessage;
 
-          bot.sendMessage(chatId, subscriptionMessage, opts);
+          bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);
         }
         else {
-          bot.sendMessage(chatId, settingsCmd.tokenError, opts);
+          bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts);
         }
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, settingsCmd.subscriptionError, opts);
+        bot.sendMessage(chatId, settingsCmd.subscriptionError, nopreview_markdown_opts);
       })
   }
 });
@@ -109,15 +120,15 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
 
   priceCmd.getPrice(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options)
+      bot.sendMessage(chatId, result.toString(), nopreview_markdown_opts)
         .catch((reason) => {
           console.log(reason);
-          bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
+          bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
         });
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
+      bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
     });
 });
 
@@ -127,7 +138,7 @@ bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
 
   volumeCmd.getVolume(coin)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options);
+      bot.sendMessage(chatId, result.toString(), markdown_opts);
     })
     .catch((reason) => {
       console.log(reason);
@@ -137,6 +148,7 @@ bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
 
 bot.onText(/\/feedback(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
+  const username = msg.chat.username;
   const feedback = match[1];
 
   if (feedback == undefined || feedback.length <= 0) {
@@ -144,9 +156,8 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
       "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
   }
   else {
-    feedbackCmd.storeFeedback(chatId, feedback)
+    feedbackCmd.storeFeedback(chatId, username, feedback)
       .then((result) => {
-        console.log(result);
         bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
       })
       .catch((reason) => {
@@ -161,7 +172,7 @@ bot.onText(/\/about(.*)/, (msg, match) => {
 
   about.get()
     .then((result) => {
-      bot.sendMessage(chatId, result, opts_html);
+      bot.sendMessage(chatId, result, nopreview_hmtl_opts);
     })
     .catch((reason) => {
       console.log(reason);

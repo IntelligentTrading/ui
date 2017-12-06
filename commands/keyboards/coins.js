@@ -1,10 +1,11 @@
 var Keyboard = require('./keyboard').Keyboard;
 var rp = require('request-promise');
 var _ = require('lodash');
+var tickers = require('../data/tickers').tickers;
 
 var buttons_line = [];
 var userSettings;
-var altcoins = [];
+var altcoins = []; // ? Should I use tickers.get() ? I'm adding a field here and the array is shared, so maybe not.
 
 var PAGE_COLS = 5;
 var PAGE_ROWS = 5;
@@ -61,25 +62,7 @@ var updateFollowedButtons = () => {
 }
 
 var loadCoins = () => {
-
-    if (altcoins.length > 0) {
-        return new Promise((resolve, reject) => {
-            resolve(altcoins);
-        })
-    }
-
-    return rp(`${process.env.ITT_NODE_SERVICES}/tickers`)
-        .then((json_tickers) => {
-            var tickers = JSON.parse(json_tickers);
-
-            Object.keys(tickers).forEach((key) => {
-                var ticker = { symbol: tickers[key].info.symbol, followed: false };
-                altcoins.push(ticker);
-            });
-        })
-        .catch((reason) => {
-            console.log(reason)
-        });
+    return tickers.get().then(tkrs => { altcoins = tkrs });
 }
 
 var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";
