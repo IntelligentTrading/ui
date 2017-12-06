@@ -9,8 +9,7 @@
   "main": "telegram.js",
   "scripts": {
     "start": "node index.js",
-    "chart": "node chart_dispatch.js",
-    "test": "node test.js"
+    "chart": "node chart_dispatch.js"
   },
   "dependencies": {
     "aws-sdk": "^2.145.0",
