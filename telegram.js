@@ -97,9 +97,9 @@ bot.onText(/\/help/, (msg, match) => {
 // match with /price, throw away all the blanks, match with any single char
 bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const coin = match[2]; // the captured "whatever"
+  const currency = match[2]; // the captured "whatever"
 
-  priceCmd.getPrice(coin)
+  priceCmd.getPrice(currency)
     .then((result) => {
       bot.sendMessage(chatId, result.toString(), nopreview_markdown_opts)
         .catch((reason) => {
@@ -115,9 +115,9 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
 
 bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const coin = match[2]; // the captured "whatever"
+  const currency = match[2]; // the captured "whatever"
 
-  volumeCmd.getVolume(coin)
+  volumeCmd.getVolume(currency)
     .then((result) => {
       bot.sendMessage(chatId, result.toString(), markdown_opts);
     })
