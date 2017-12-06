@@ -9,7 +9,10 @@ var api = {
     users: (filters) => {
         var request_opts = {
             uri: `${api_url}/users?${filters}`,
-            resolveWithFullResponse: true
+            resolveWithFullResponse: true,
+            headers: {
+                'API-KEY': api_key
+            }
         };
 
         //! returns the full response, with status code and body
@@ -18,6 +21,9 @@ var api = {
     itt_members: () => {
         var request_opts = {
             uri: `${api_url}/users?is_ITT_team=true`,
+            headers: {
+                'API-KEY': api_key
+            }
         };
 
         //! returns the list already
@@ -26,6 +32,9 @@ var api = {
     beta_users: () => {
         var request_opts = {
             uri: `${api_url}/users?beta_token_valid=true`,
+            headers: {
+                'API-KEY': api_key
+            }
         };
 
         //! returns the list already
@@ -42,7 +51,10 @@ var api = {
             method: 'POST',
             uri: `${api_url}/user`,
             form: postParameters,
-            resolveWithFullResponse: true
+            resolveWithFullResponse: true,
+            headers: {
+                'API-KEY': api_key
+            }
         };
 
         return rpromise(request_opts);
