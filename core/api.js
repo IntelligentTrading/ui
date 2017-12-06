@@ -1,7 +1,6 @@
 var request = require('request');
 var rpromise = require('request-promise');
 
-//! find a nice way to avoid this stuff all the time (ITT_STAGE_API_HOST)
 var api_url = `https://${process.env.ITT_API_HOST}`;
 var api_key = process.env.ITT_API_KEY;
 
