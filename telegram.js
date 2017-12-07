@@ -301,7 +301,7 @@ bot.onText(/\/getMe/, (msg, match) => {
   bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
 
-bot.onText(/\/\w+/, (msg, match) => {
+bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
   const chatId = msg.chat.id;
   var command = match[0].replace('/', '');
   if (commandsList.indexOf(command) < 0)
