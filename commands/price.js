@@ -2,39 +2,26 @@ const request = require('request');
 const errorManager = require('../util/error').errorManager;
 var tickers = require('./data/tickers').tickers;
 require('../util/extensions');
+var api = require('../core/api').api;
 
 
 var price = {
-    getPrice: (currency) => new Promise((resolve, reject) => {
+    getPrice: (currency) => {
 
-        if (currency === "") {
-            reject("Write `/price <ticker>` to get the latest price.\nFor example: /price ETH")
-        } else {
-            try {
-                var uri = `https://${process.env.ITT_API_HOST}/price?coin=${currency}`;
-
-                request(uri, function (error, response, body) {
-                    if (!error && response.statusCode == 200) {
-                        var info = JSON.parse(body)
-                        if ('price_satoshis' in info) {
-                            parse_info(info)
-                                .then((retrievedPrice) => {
-                                    resolve(retrievedPrice);
-                                });
-                        } else {
-                            reject('Currency not found');
-                        }
-                    }
-                    else {
-                        errorManager.handleException(error);
-                    }
-                });
-            }
-            catch (error) {
-                errorManager.handleException(error);
-            }
-        }
-    })
+        return api.price(currency)
+            .then(result => {
+                var info = JSON.parse(result)
+                if ('price_satoshis' in info) {
+                    return parse_info(info);
+                } else {
+                    return 'Currency not found';
+                }
+            })
+            .catch(reason => {
+                console.log(reason);
+                return "Write `/price <ticker>` to get the latest price.\nFor example: /price ETH";
+            });
+    }
 }
 
 exports.price = price;

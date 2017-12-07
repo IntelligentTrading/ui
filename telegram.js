@@ -1,7 +1,6 @@
 const request = require('request');
 const express = require('express');
 const app = express();
-const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 
 var startCmd = require('./commands/start').start;
@@ -19,6 +18,7 @@ var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
 
+const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
@@ -50,7 +50,8 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, startCmd.text, nopreview_markdown_opts).catch(reason => console.log(reason));
+  bot.sendMessage(chatId, startCmd.eula_text(chatId), markdown_opts)
+    .catch(reason => console.log(reason));
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
@@ -203,6 +204,28 @@ bot.on('callback_query', (callback_message) => {
     }
   };
 
+  if (cmd.category == 'registration') {
+    if (cmd.operation.action == 'DB') {
+      settingsCmd.store(chat_id, kb_data)
+        .then(() => {
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
+            .then(() => {
+              bot.sendMessage(chat_id, startCmd.text);
+            })
+            .catch(reason => {
+              console.log(reason);
+            });
+        })
+        .catch((reason) => {
+          console.log(reason);
+
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
+            .then(() => {
+              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+            });
+        });
+    }
+  }
   if (cmd.category == 'settings') {
 
     if (cmd.operation.action == 'NAV') {
@@ -224,7 +247,7 @@ bot.on('callback_query', (callback_message) => {
       });
     }
     if (cmd.operation.action == 'DB') {
-      var cmd_kb = settingsCmd.store(chat_id, kb_data)
+      settingsCmd.store(chat_id, kb_data)
         .then(() => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
@@ -278,7 +301,7 @@ bot.onText(/\/getMe/, (msg, match) => {
   bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
 });
 
-bot.onText(/\/\w+/, (msg, match) => {
+bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
   const chatId = msg.chat.id;
   var command = match[0].replace('/', '');
   if (commandsList.indexOf(command) < 0)
