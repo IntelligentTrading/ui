@@ -1,7 +1,6 @@
 const request = require('request');
 const express = require('express');
 const app = express();
-const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 
 var startCmd = require('./commands/start').start;
@@ -19,6 +18,7 @@ var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
 
+const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
@@ -50,19 +50,7 @@ const MAX_TOKEN_LENGTH = 8;
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  const url = "http://intelligenttrading.org/whitepaper.pdf";
-  startCmd.eula_kb.getButtons()
-    .then(btns => {
-      var options = {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: btns
-        }
-      };
-
-      bot.sendMessage(chatId, startCmd.eula_kb.message, options)
-        .catch(reason => console.log(reason));
-    })
+  bot.sendMessage(chatId, startCmd.eula_text(chatId), markdown_opts)
     .catch(reason => console.log(reason));
 });
 

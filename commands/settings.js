@@ -93,8 +93,6 @@ var settings = {
                 altcoins_array.push(coin);
                 return post(chat_id, { altcoins: altcoins_array });
             }
-            if (kv[0] == 'EULA')
-                return post(chat_id, { eula: kv[1] });
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
