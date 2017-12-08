@@ -13,7 +13,7 @@ var tickers = {
             });
         }
 
-        return rp(`${process.env.ITT_NODE_SERVICES}/tickersInfo`)
+        return rp(`${process.env.ITT_NODE_SERVICES}/api/tickersInfo`)
             .then((json_tickers) => {
                 var tickersContainer = JSON.parse(json_tickers);
                 cache.set('tickers', tickersContainer.tickers);
