@@ -1,6 +1,8 @@
 require('../util/extensions');
 var _ = require('lodash');
 
+var counter_coins = ['BTC','ETH','USDT','XMR'];
+
 function parseSignal(message_data) {
 
   var telegram_signal_message;
@@ -56,10 +58,12 @@ function getRSITemplate(message_data) {
 
 function getBaseSignalTemplate(message_data) {
 
-  var price;
-  var currency_symbol;
+  var price = message_data.price;
+  var currency_symbol = counter_coins[parseInt(message_data.base_coin)];
+  var price_change = message_data.price_change;
 
-  if (message_data.coin == 'BTC') {
+
+  /*if (message_data.coin == 'BTC') {
     currency_symbol = '$';
     price = message_data.price_usdt;
     price_change = message_data.price_usdt_change;
@@ -68,7 +72,7 @@ function getBaseSignalTemplate(message_data) {
     currency_symbol = 'BTC';
     price = message_data.price_satoshis / 100000000;
     price_change = message_data.price_satoshis_change;
-  }
+  }*/
 
   var base_template = {
     horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
@@ -133,31 +137,3 @@ var helper = {
 }
 
 exports.signalHelper = helper;
-
-/*{
-    '_state':  <django.db.models.base.ModelState object at 0x10dd3c9e8>,
-     'id':  6,
-     'created_at':  datetime.datetime(2017,11,9,20,27,13,240960),
-     'modified_at':  datetime.datetime(2017,11,9,20,27,13,240989),
-     'UI':  0,
-     'subscribers_only':  True,
-     'text':  '',
-     'source':  0,
-     'coin':  'DASH',
-     'signal':  'SMA',
-     'trend':  1,
-     'risk':  None,
-     'horizon':  0,
-     'strength_value':  1,
-     'strength_max':  3,
-     'price_satoshis':  4685451,
-     'price_satoshis_change':  0.0009908535119860589,
-     'price_usdt':  None,
-     'price_usdt_change':  None,
-     'volume_btc':  None,
-     'volume_btc_change':  None,
-     'volume_usdt':  None,
-     'volume_usdt_change':  None,
-     'timestamp':  datetime.datetime(2017,11,9,20,2,42,451940),
-     'sent_at':  datetime.datetime(1970,1,1,0,0)
-  }*/
