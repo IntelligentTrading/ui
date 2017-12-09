@@ -58,7 +58,7 @@ function getRSITemplate(message_data) {
 
 function getBaseSignalTemplate(message_data) {
 
-  var price = message_data.price;
+  var price = message_data.price / 100000000;
   var currency_symbol = counter_coins[parseInt(message_data.base_coin)];
   var price_change = message_data.price_change;
 
