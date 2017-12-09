@@ -3,6 +3,8 @@ var rpromise = require('request-promise');
 
 var api_url = `https://${process.env.ITT_API_HOST}`;
 var api_key = process.env.ITT_API_KEY;
+var node_svc = process.env.ITT_NODE_SERVICES;
+var node_api_key = process.env.NODE_SVC_API_KEY;
 
 function Options() {
     return {
@@ -57,6 +59,15 @@ var api = {
 
         var request_opts = new Options();
         request_opts.url = `${api_url}/price?coin=${symbol}`;
+
+        return rpromise(request_opts);
+    },
+    tickersInfo: () => {
+        var request_opts = {};
+        request_opts.url = `${node_svc}/api/tickersInfo`;
+        request_opts.headers = {
+            'NSVC-API-KEY': node_api_key
+        }
 
         return rpromise(request_opts);
     }
