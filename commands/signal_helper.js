@@ -1,6 +1,8 @@
 require('../util/extensions');
 var _ = require('lodash');
 
+var counter_coins = ['BTC','ETH','USDT','XMR'];
+
 function parseSignal(message_data) {
 
   var telegram_signal_message;
@@ -56,10 +58,12 @@ function getRSITemplate(message_data) {
 
 function getBaseSignalTemplate(message_data) {
 
-  var price;
-  var currency_symbol;
+  var price = message_data.price / 100000000;
+  var currency_symbol = counter_coins[parseInt(message_data.base_coin)];
+  var price_change = message_data.price_change / 100000000;
 
-  if (message_data.currency == 'BTC') {
+
+  /*if (message_data.coin == 'BTC') {
     currency_symbol = '$';
     price = message_data.price_usdt;
     price_change = message_data.price_usdt_change;
@@ -68,7 +72,7 @@ function getBaseSignalTemplate(message_data) {
     currency_symbol = 'BTC';
     price = message_data.price_satoshis / 100000000;
     price_change = message_data.price_satoshis_change;
-  }
+  }*/
 
   var base_template = {
     horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
