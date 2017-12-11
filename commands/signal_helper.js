@@ -58,10 +58,10 @@ function getRSITemplate(message_data) {
 
 function getBaseSignalTemplate(message_data) {
 
+  console.log(message_data);
   var price = message_data.price / 100000000;
   var currency_symbol = counter_coins[parseInt(message_data.base_coin)];
-  var price_change = message_data.price_change / 100000000;
-
+  var price_change = message_data.price_change;
 
   /*if (message_data.coin == 'BTC') {
     currency_symbol = '$';
@@ -77,7 +77,7 @@ function getBaseSignalTemplate(message_data) {
   var base_template = {
     horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
     header: `[#${message_data.coin}](https://coinmarketcap.com/coins/) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
-    price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(1)}%*`,
+    price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(6)}%*`,
     price_text: price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`
   }
 
