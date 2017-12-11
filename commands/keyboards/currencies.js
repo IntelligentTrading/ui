@@ -5,7 +5,7 @@ var tickers = require('../data/tickers').tickers;
 
 var buttons_line = [];
 var userSettings;
-var altcoins = []; // ? Should I use tickers.get() ? I'm adding a field here and the array is shared, so maybe not.
+var currencies = []; // ? Should I use tickers.get() ? I'm adding a field here and the array is shared, so maybe not.
 
 var PAGE_COLS = 5;
 var PAGE_ROWS = 5;
@@ -17,7 +17,7 @@ var getCurrentPage = (page_num = 0) => {
     var buttons = [];
 
     current_page = parseInt(page_num);
-    var total_number_of_pages = altcoins.length / PAGE_SIZE;
+    var total_number_of_pages = currencies.length / PAGE_SIZE;
 
     // 0 < 4
     var next_page = current_page < total_number_of_pages - 1 ? current_page + 1 : 0;
@@ -42,36 +42,36 @@ var getCurrentPage = (page_num = 0) => {
 var updateFollowedButtons = () => {
 
     if (process.env.LOCAL_ENV) {
-        userSettings = { altcoins: [] };
-        userSettings.altcoins.push('ETH', 'NEO', 'OMG');
+        userSettings = { currencies: [] };
+        userSettings.currencies.push('ETH', 'NEO', 'OMG');
     }
 
     buttons_line = [];
 
-    if (userSettings.altcoins == undefined) {
+    if (userSettings.currencies == undefined) {
         if (userSettings == undefined)
             userSettings = {};
 
-        userSettings.altcoins = []
+        userSettings.currencies = []
     }
 
-    altcoins.forEach(coin => {
-        coin.followed = userSettings.altcoins.indexOf(coin.symbol) >= 0;
-        buttons_line.push({ text: `${coin.followed ? '• ' : ''}${coin.symbol}`, callback_data: `settings.DB:COI_${coin.symbol}_${coin.followed ? 'False' : 'True'}` });
+    currencies.forEach(currency => {
+        currency.followed = userSettings.currencies.indexOf(currency.symbol) >= 0;
+        buttons_line.push({ text: `${currency.followed ? '• ' : ''}${currency.symbol}`, callback_data: `settings.DB:COI_${currency.symbol}_${currency.followed ? 'False' : 'True'}` });
     });
 }
 
-var loadCoins = () => {
-    return tickers.get().then(tkrs => { altcoins = tkrs });
+var loadcurrencies = () => {
+    return tickers.get().then(tkrs => { currencies = tkrs });
 }
 
-var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";
+var msg = "Please select the *currencies* to follow/unfollow in order to receive related signals.";
 var kb = new Keyboard(msg, []);
 
 kb.updateSettings = (settings) => {
     userSettings = settings;
 };
-kb.getButtons = (page_num) => loadCoins().then(() => {
+kb.getButtons = (page_num) => loadcurrencies().then(() => {
     updateFollowedButtons();
     return getCurrentPage(page_num);
 })

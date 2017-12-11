@@ -5,7 +5,7 @@ function Keyboard(message, buttons, extraButtons = null, showCancelButton = true
     this.buttons = buttons;
     this.extraButtons = extraButtons;
     this.showCancelButton = showCancelButton;
-    this.cancelButton = [{ text: "Cancel", callback_data: "settings.NAV:MAIN" }];
+    this.cancelButton = [{ text: "Back", callback_data: "settings.NAV:MAIN" }];
 }
 
 Keyboard.prototype.getButtons = function (keyboard_page) {
