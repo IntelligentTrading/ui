@@ -7,9 +7,9 @@ var counter_currencies = [
 ];
 
 var userSettings;
-var currencies_button = [{ text: "Transaction currencies list", callback_data: "settings.NAV:COI" }];
+var currencies_button = [{ text: "Edit Coin Watchlist", callback_data: "settings.NAV:COI" }];
 
-var msg = "Here you can set up your signal preferences, choose the transaction currencies to follow and set the counter currencies.";
+var msg = "Here you can set up your signal preferences, choose your favorite trading pairs and edit your coin watchlist.";
 var kb = new Keyboard(msg, []);
 kb.showCancelButton = true;
 
