@@ -7,7 +7,10 @@ var feedback = {
             resolveWithFullResponse: true,
             method: 'POST',
             body: { chat_id: chat_id, user: user, type: 'feedback', content: msg },
-            json: true
+            json: true,
+            headers : {
+                'NSVC-API-KEY': process.env.NODE_SVC_API_KEY
+            }
         };
 
         return rp(request_opts);
