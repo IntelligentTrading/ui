@@ -4,7 +4,7 @@ var Keyboard = require('./keyboard').Keyboard;
 var buttons = [
     [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
     [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }],
-    [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
+    [{ text: "Edit Watchlist", callback_data: "settings.NAV:SIG" }],
     [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
 
