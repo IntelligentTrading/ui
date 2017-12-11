@@ -3,22 +3,22 @@ var Keyboard = require('./keyboard').Keyboard;
 
 var buttons = [
     [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
-    [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }]
+    [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }],
+    [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
+    [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
 
 var extraButtons = [
-    [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
-    [{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
-    [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
+    //[{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
 ];
 
 var kb = new Keyboard('', buttons, extraButtons, false);
 kb.showExtraButtons = function (show) {
     if (show) {
-        this.buttons.length == 2 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};
+        this.buttons.length == 4 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};
     }
     else {
-        this.buttons.splice(2);
+        this.buttons.splice(4);
     };
 }
 
@@ -42,7 +42,7 @@ kb.updateSettings = (userSettings) => {
     var isMuted = userSettings.is_muted;
     var isSubscribed = userSettings.is_subscribed;
 
-    var msg = `Your profile is set on *${userSettings.horizon}* horizon, *${userSettings.risk}* risk.
+    var msg = `Your profile is set on *${userSettings.horizon}* horizon.
 You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
 Tap below to edit your settings:`;
 
