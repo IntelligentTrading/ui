@@ -11,7 +11,7 @@ var currencies_button = [{ text: "Edit Coin Watchlist", callback_data: "settings
 
 var msg = "Here you can set up your signal preferences, choose your favorite trading pairs and edit your coin watchlist.";
 var kb = new Keyboard(msg, []);
-kb.showCancelButton = true;
+kb.showBackButton = true;
 
 kb.updateSettings = (settings) => {
     userSettings = settings;
@@ -41,7 +41,7 @@ kb.getButtons = () => {
 
         buttons.push(counter_currency_buttons);
         buttons.push(currencies_button);
-        buttons.push(kb.cancelButton);
+        buttons.push(kb.backButton);
         resolve(buttons);
     });
 }

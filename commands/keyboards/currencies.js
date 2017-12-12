@@ -35,7 +35,7 @@ var getCurrentPage = (page_num = 0) => {
     }
     buttons.push(arrows);
     //I redefined the getButtons method, therefore I have to add CANCEL manually
-    buttons.push(kb.cancelButton);
+    buttons.push(kb.backButton);
     return buttons;
 }
 
@@ -65,7 +65,7 @@ var loadcurrencies = () => {
     return tickers.get().then(tkrs => { currencies = tkrs });
 }
 
-var msg = "Please select the *currencies* to follow/unfollow in order to receive related signals.";
+var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";
 var kb = new Keyboard(msg, []);
 
 kb.updateSettings = (settings) => {

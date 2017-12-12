@@ -100,9 +100,7 @@ var settings = {
     profile: {},
     getCurrent: (chat_id) => post(chat_id),
     subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
-    subscribedMessage: "You are now subscribed!I'll be providing you with trading signals whenever an interesting opportunity comes up." +
-        "This might take some time. Here are some helpful commands you can try out in the meanwhile:\n\n" + help.command_list,
-    teamMemberSubscription: "You are now subscribed as ITT Team Member!",
+    subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please /token _your token_, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
 }
