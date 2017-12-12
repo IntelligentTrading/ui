@@ -36,11 +36,11 @@ function notify(message_data) {
 
     console.log(`${message_data.signal} signal`);
 
-    if (horizon == 'short') { //! For the BETA we just skip the short horizon signals
+    /*if (horizon == 'short') { //! For the BETA we just skip the short horizon signals
       return new Promise((resolve, reject) => {
         reject('Short horizon signals are skipped in BETA');
       });
-    }
+    }*/
 
     var telegram_signal_message = signalHelper.parse(message_data);
 
