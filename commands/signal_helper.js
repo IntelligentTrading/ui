@@ -1,15 +1,15 @@
 require('../util/extensions');
+var tickers = require('./data/tickers').tickers;
 var _ = require('lodash');
 
 var counter_coins = ['BTC', 'ETH', 'USDT', 'XMR'];
 
 function parseSignal(message_data) {
 
-  var telegram_signal_message;
-
-  getBaseSignalTemplate(message_data)
+  return getBaseSignalTemplate(message_data)
     .then((bst) => {
 
+      var telegram_signal_message;
       if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
 
         var sma = getSMATemplate(message_data);
