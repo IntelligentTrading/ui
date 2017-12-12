@@ -97,8 +97,9 @@ const app = Consumer.create({
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
     var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
     var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
+    var isBaseCoin = decoded_message_body.base_coin == 0; //!until we allow USD based signals
 
-    if (hasValidTimestamp && !isDuplicateMessage) {
+    if (hasValidTimestamp && !isDuplicateMessage && isBaseCoin) {
       notify(decoded_message_body)
         .then((msg) => {
           console.log(`[Notified] Message ${message.MessageId}`);
