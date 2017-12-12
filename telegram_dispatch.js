@@ -36,12 +36,6 @@ function notify(message_data) {
 
     console.log(`${message_data.signal} signal`);
 
-    /*if (horizon == 'short') { //! For the BETA we just skip the short horizon signals
-      return new Promise((resolve, reject) => {
-        reject('Short horizon signals are skipped in BETA');
-      });
-    }*/
-
     return signalHelper.parse(message_data)
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
@@ -64,7 +58,7 @@ function notify(message_data) {
           return api.usersHorizons()
             .then(users => {
 
-              var filtered_users = users.filter(u => users.indexOf(u) >= horizons.indexOf(horizon));
+              var filtered_users = _.flattenDeep(users.filter(u => users.indexOf(u) >= horizons.indexOf(horizon)));
 
               if (process.env.LOCAL_ENV == undefined) {
                 filtered_users.forEach((chat_id) => {
@@ -91,38 +85,6 @@ function notify(message_data) {
       });
   }
 }
-/*return api.users(filters)
-  .then(function (response) {
-    if (response.statusCode == 200) {
-      var data = JSON.parse(response.body)
-
-      if (process.env.LOCAL_ENV == undefined) {
-        data.chat_ids.forEach((chat_id) => {
-          if (chat_id != undefined) {
-            bot.sendMessage(chat_id, telegram_signal_message, opts)
-              .catch((err) => {
-                var errMessage = `${err.message} :: chat ${chat_id}`;
-                console.log(errMessage);
-              });
-          }
-        });
-      }
-      else {
-        bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-          .catch((err) => {
-            console.log(err.message)
-          });
-      }
-    }
-    else {
-      console.log(error);
-    }
-  })
-  .catch((reason) => {
-    console.log(reason);
-  });*/
-
-
 
 var aws_queue_url = process.env.LOCAL_ENV
   ? `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`
