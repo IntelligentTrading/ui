@@ -69,7 +69,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
         console.log(userSettings);
         if (userSettings.beta_token_valid == true) {
           var subscriptionMessage = userSettings.is_ITT_team
-            ? settingsCmd.teamMemberSubscription
+            ? settingsCmd.subscribedMessage + ' (ITT Member)'
             : settingsCmd.subscribedMessage;
 
           bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);
@@ -228,7 +228,10 @@ bot.on('callback_query', (callback_message) => {
   }
   if (cmd.category == 'settings') {
 
-    if (cmd.operation.action == 'NAV') {
+    if (cmd.operation.action == 'CLOSE') {
+      bot.deleteMessage(chat_id, message_id).catch(reason => console.log(reason));
+    }
+    else if (cmd.operation.action == 'NAV') {
 
       cmd.operation.kb_label = kb_data.split('_')[0];
       cmd.operation.kb_page = kb_data.split('_')[1]
