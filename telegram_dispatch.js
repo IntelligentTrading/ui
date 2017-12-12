@@ -36,17 +36,13 @@ function notify(message_data) {
 
     console.log(`${message_data.signal} signal`);
 
-    /*if (horizon == 'short') { //! For the BETA we just skip the short horizon signals
-      return new Promise((resolve, reject) => {
-        reject('Short horizon signals are skipped in BETA');
-      });
-    }*/
-
-    signalHelper.parse(message_data)
+    return signalHelper.parse(message_data)
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
 
-          var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
+          var horizons = ['short','medium','long']
+
+          /*var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
           var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
           var beta_users_filter = 'beta_token_valid=true';
 
@@ -57,38 +53,34 @@ function notify(message_data) {
           var filters = [beta_users_filter];
 
           if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
-            filters.replace('&', '');
+            filters.replace('&', '');*/
 
-          return api.users(filters)
-            .then(function (response) {
-              if (response.statusCode == 200) {
-                var data = JSON.parse(response.body)
+          return api.usersHorizons()
+            .then(users => {
 
-                if (process.env.LOCAL_ENV == undefined) {
-                  data.chat_ids.forEach((chat_id) => {
-                    if (chat_id != undefined) {
-                      bot.sendMessage(chat_id, telegram_signal_message, opts)
-                        .catch((err) => {
-                          var errMessage = `${err.message} :: chat ${chat_id}`;
-                          console.log(errMessage);
-                        });
-                    }
-                  });
-                }
-                else {
-                  bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-                    .catch((err) => {
-                      console.log(err.message)
-                    });
-                }
+              var filtered_users = _.flattenDeep(users.filter(u => users.indexOf(u) >= horizons.indexOf(horizon)));
+
+              if (process.env.LOCAL_ENV == undefined) {
+                filtered_users.forEach((chat_id) => {
+                  if (chat_id != undefined) {
+                    bot.sendMessage(chat_id, telegram_signal_message, opts)
+                      .catch((err) => {
+                        var errMessage = `${err.message} :: chat ${chat_id}`;
+                        console.log(errMessage);
+                      });
+                  }
+                });
               }
               else {
-                console.log(error);
+                bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
+                  .catch((err) => {
+                    console.log(err.message)
+                  });
               }
             })
-            .catch((reason) => {
-              console.log(reason);
-            });
+            .catch(reason => {
+              console.log(reason)
+            })
         }
       });
   }
@@ -105,8 +97,9 @@ const app = Consumer.create({
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
     var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
     var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
+    var isBaseCoin = decoded_message_body.base_coin == 0; //!until we allow USD based signals
 
-    if (hasValidTimestamp && !isDuplicateMessage) {
+    if (hasValidTimestamp && !isDuplicateMessage && isBaseCoin) {
       notify(decoded_message_body)
         .then((msg) => {
           console.log(`[Notified] Message ${message.MessageId}`);
@@ -147,3 +140,4 @@ app.on('error', (err) => {
 });
 
 app.start();
+

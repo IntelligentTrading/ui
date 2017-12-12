@@ -6,7 +6,7 @@
   "engines": {
     "node": "6.11.1"
   },
-  "main": "telegram.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "chart": "node chart_dispatch.js",

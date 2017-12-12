@@ -55,6 +55,25 @@ var api = {
 
         return rpromise(request_opts);
     },
+    usersHorizons: () => {
+        var usersHorizons = [];
+        return rpromise(`${api_url}/users?beta_token_valid=true&horizon=short`)
+            .then((res) => {
+                var short_users = JSON.parse(res);
+                usersHorizons.push(short_users.chat_ids);
+                return rpromise(`${api_url}/users?beta_token_valid=true&horizon=medium`)
+                    .then((res) => {
+                        var medium_users = JSON.parse(res);
+                        usersHorizons.push(medium_users.chat_ids );
+                        return rpromise(`${api_url}/users?beta_token_valid=true&horizon=long`)
+                            .then((res) => {
+                                var long_users = JSON.parse(res);
+                                usersHorizons.push(long_users.chat_ids);
+                                return usersHorizons;
+                            })
+                    })
+            })
+    },
     price: (symbol) => {
 
         var request_opts = new Options();
