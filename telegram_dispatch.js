@@ -58,7 +58,7 @@ function notify(message_data) {
           return api.usersHorizons()
             .then(users => {
 
-              var filtered_users = _.flattenDeep(users.filter(u => users.indexOf(u) >= horizons.indexOf(horizon)));
+              var filtered_users = _.flattenDeep(users.filter(u => users.indexOf(u) <= horizons.indexOf(horizon)));
 
               if (process.env.LOCAL_ENV == undefined) {
                 filtered_users.forEach((chat_id) => {
