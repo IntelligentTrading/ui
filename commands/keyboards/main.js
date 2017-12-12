@@ -4,7 +4,7 @@ var Keyboard = require('./keyboard').Keyboard;
 var buttons = [
     [{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
     [{ text: "Turn alerts", callback_data: "settings.DB:ISMUTED_" }],
-    [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
+    //[{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
     [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
 
@@ -15,10 +15,10 @@ var extraButtons = [
 var kb = new Keyboard('', buttons, extraButtons, false, true);
 kb.showExtraButtons = function (show) {
     if (show) {
-        this.buttons.length == 4 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};
+        this.buttons.length == 3 ? this.buttons = _.concat(this.buttons, this.extraButtons) : {};
     }
     else {
-        this.buttons.splice(4);
+        this.buttons.splice(3);
     };
 }
 
