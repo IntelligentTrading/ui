@@ -42,54 +42,55 @@ function notify(message_data) {
       });
     }*/
 
-    var telegram_signal_message = signalHelper.parse(message_data);
+    signalHelper.parse(message_data)
+      .then(telegram_signal_message => {
+        if (telegram_signal_message != undefined) {
 
-    if (telegram_signal_message != undefined) {
+          var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
+          var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
+          var beta_users_filter = 'beta_token_valid=true';
 
-      var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
-      var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
-      var beta_users_filter = 'beta_token_valid=true';
+          //! BETA - no filters on risk and horizon, just skip the short horizon signals and
+          //! deliver everything to the beta users
+          //TODO var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
 
-      //! BETA - no filters on risk and horizon, just skip the short horizon signals and
-      //! deliver everything to the beta users
-      //TODO var filters = [risk_filter, horizon_filter,beta_users_filter].join('&');
+          var filters = [beta_users_filter];
 
-      var filters = [beta_users_filter];
+          if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
+            filters.replace('&', '');
 
-      if (filters.lastIndexOf('&') == filters.length - 1 || filters.indexOf('&') == 0)
-        filters.replace('&', '');
+          return api.users(filters)
+            .then(function (response) {
+              if (response.statusCode == 200) {
+                var data = JSON.parse(response.body)
 
-      return api.users(filters)
-        .then(function (response) {
-          if (response.statusCode == 200) {
-            var data = JSON.parse(response.body)
-
-            if (process.env.LOCAL_ENV == undefined) {
-              data.chat_ids.forEach((chat_id) => {
-                if (chat_id != undefined) {
-                  bot.sendMessage(chat_id, telegram_signal_message, opts)
+                if (process.env.LOCAL_ENV == undefined) {
+                  data.chat_ids.forEach((chat_id) => {
+                    if (chat_id != undefined) {
+                      bot.sendMessage(chat_id, telegram_signal_message, opts)
+                        .catch((err) => {
+                          var errMessage = `${err.message} :: chat ${chat_id}`;
+                          console.log(errMessage);
+                        });
+                    }
+                  });
+                }
+                else {
+                  bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
                     .catch((err) => {
-                      var errMessage = `${err.message} :: chat ${chat_id}`;
-                      console.log(errMessage);
+                      console.log(err.message)
                     });
                 }
-              });
-            }
-            else {
-              bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-                .catch((err) => {
-                  console.log(err.message)
-                });
-            }
-          }
-          else {
-            console.log(error);
-          }
-        })
-        .catch((reason) => {
-          console.log(reason);
-        });
-    }
+              }
+              else {
+                console.log(error);
+              }
+            })
+            .catch((reason) => {
+              console.log(reason);
+            });
+        }
+      });
   }
 }
 
