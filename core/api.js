@@ -77,7 +77,7 @@ var api = {
     price: (symbol) => {
 
         var request_opts = new Options();
-        request_opts.url = `${api_url}/price?coin=${symbol}`;
+        request_opts.url = `${api_url}/price?transaction_currency=${symbol}`;
 
         return rpromise(request_opts);
     },
