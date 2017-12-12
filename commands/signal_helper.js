@@ -2,7 +2,7 @@ require('../util/extensions');
 var tickers = require('./data/tickers').tickers;
 var _ = require('lodash');
 
-var counter_coins = ['BTC', 'ETH', 'USDT', 'XMR'];
+var counter_currencies = ['BTC', 'ETH', 'USDT', 'XMR'];
 
 function parseSignal(message_data) {
 
@@ -62,7 +62,7 @@ function getBaseSignalTemplate(message_data) {
 
   console.log(message_data);
   var price = message_data.price / 100000000;
-  var currency_symbol = counter_coins[parseInt(message_data.base_coin)];
+  var currency_symbol = counter_currencies[parseInt(message_data.counter_currency)];
   var price_change = message_data.price_change;
 
   /*if (message_data.coin == 'BTC') {
@@ -81,7 +81,7 @@ function getBaseSignalTemplate(message_data) {
 
   return tickers.get()
     .then((tkrs) => {
-      var matching_tkrs = tkrs.filter(t => t.symbol == message_data.coin);
+      var matching_tkrs = tkrs.filter(t => t.symbol == message_data.transaction_currency);
       currency_wiki_data = matching_tkrs[0];
 
       const coinmarketcap_url = "https://coinmarketcap.com/currencies/";
@@ -93,8 +93,8 @@ function getBaseSignalTemplate(message_data) {
     }).then((wiki_url) => {
       var base_template = {
         horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
-        header: `[${message_data.coin}](${wiki_url}) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
-        price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(6)}%*`,
+        header: `[${message_data.transaction_currency}](${wiki_url}) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
+        price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(2)}%*`,
         price_text: price == undefined ? "" : `price: ${currency_symbol} ${price.toFixed(8)}`
       }
 

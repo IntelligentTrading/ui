@@ -33,16 +33,16 @@ function parse_info(info_data) {
 
     return tickers.get()
         .then((tkrs) => {
-            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.coin);
+            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.transaction_currency);
             currency_wiki_data = matching_tkrs[0];
 
-            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.coin}!`);
+            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.transaction_currency}!`);
             var currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
 
             var retrieved_price;
             var price_change_sign;
 
-            if (info_data.base_coin == 0) {
+            if (info_data.counter_currency == 0) {
                 retrieved_price = `${parseFloat(info_data['price']/100000000).toFixed(6)} BTC`;
             }
             else
