@@ -8,7 +8,7 @@ var volume = {
             reject("Write `/volume <ticker>` to get the volume.\nFor example: /volume ETH")
         } else {
 
-            var uri = `https://${process.env.ITT_API_HOST}/volume?coin=${currency}`;
+            var uri = `https://${process.env.ITT_API_HOST}/volume?transaction_currency=${currency}`;
 
             request(uri, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
