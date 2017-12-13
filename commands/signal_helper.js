@@ -146,10 +146,16 @@ function isDuplicateMessage(message) {
   return true;
 }
 
+// If the counter and transaction currency are the same, skip
+function isCounterCurrency(messageBody) {
+  return messageBody.transaction_currency == counter_currencies[parseInt(messageBody.counter_currency)]
+}
+
 var helper = {
   parse: (message) => parseSignal(message),
-  hasValidTimestamp: (message) => hasValidTimestamp(message),
+  hasValidTimestamp: (message_body) => hasValidTimestamp(message_body),
   isDuplicateMessage: (message) => isDuplicateMessage(message),
+  isCounterCurrency: (message_body) => isCounterCurrency(message_body),
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
   decodeMessage: (message) => decodeMessage(message),
 }

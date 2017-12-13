@@ -40,7 +40,7 @@ function notify(message_data) {
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
 
-          var horizons = ['short','medium','long']
+          var horizons = ['short', 'medium', 'long']
 
           /*var risk_filter = risk && risk != '' && risk != 'None' ? `risk=${risk}` : '';
           var horizon_filter = horizon && horizon != '' && horizon != 'None' ? `horizon=${horizon}` : '';
@@ -96,10 +96,11 @@ const app = Consumer.create({
 
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
     var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
+    var isCounterCurrency = signalHelper.isCounterCurrency(decoded_message_body);
     var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
     var isBitcoin = decoded_message_body.counter_currency == 0; //!until we allow USD based signals
 
-    if (hasValidTimestamp && !isDuplicateMessage && isBitcoin) {
+    if (hasValidTimestamp && !isDuplicateMessage && isBitcoin && !isCounterCurrency) {
       notify(decoded_message_body)
         .then((msg) => {
           console.log(`[Notified] Message ${message.MessageId}`);
@@ -110,8 +111,18 @@ const app = Consumer.create({
         })
     }
     else {
-      var invalidReason = !hasValidTimestamp ? 'is too old' : 'is a duplicate';
-      console.log(`[Invalid] Message ${message.MessageId} ${invalidReason}`);
+
+      var invalidReasonsList = [];
+      if (!hasValidTimestamp)
+        invalidReasonsList.push('is too old');
+      if (isDuplicateMessage)
+        invalidReasonsList.push('is a duplicate');
+      if (isCounterCurrency)
+        invalidReasonsList.push('is counter currency');
+
+      var reasons = invalidReasonsList.join(',');
+
+      console.log(`[Invalid] Message ${message.MessageId} ${reasons}`);
     }
     done();
   },
