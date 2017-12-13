@@ -3,7 +3,7 @@ var Keyboard = require('./keyboard').Keyboard;
 var horizons = ['long', 'medium', 'short'];
 var buttons = [];
 
-var msg = "Please select which _trader profile_ suits you best.\nI will adjust your signals accordingly in conjunction with your risk profile.";
+var msg = "Please select which _trader profile_ suits you best.\nI will adjust your signals accordingly.";
 var kb = new Keyboard(msg, buttons);
 kb.updateSettings = (settings) => {
     kb.buttons = [];
