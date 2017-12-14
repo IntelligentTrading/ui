@@ -28,22 +28,33 @@ exports.price = price;
 
 function parse_info(info_data) {
 
-    var currency_wiki_data;
     const wiki_url = "https://coinmarketcap.com/currencies";
 
     return tickers.get()
         .then((tkrs) => {
-            var matching_tkrs = tkrs.filter(t => t.symbol == info_data.transaction_currency);
-            currency_wiki_data = matching_tkrs[0];
 
-            if (currency_wiki_data == undefined) throw new Error(`Wiki not found for ${info_data.transaction_currency}!`);
-            var currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
+            var currency_wiki;
+            if (tkrs == undefined || tkrs.length <= 0) {
+                currency_wiki = `*[${currency_wiki_data.symbol}](${wiki_url}})*`
+            }
+            else {
+                var matching_tkrs = tkrs.filter(t => t.symbol == info_data.transaction_currency);
+                var currency_wiki_data = matching_tkrs[0];
+
+                if (currency_wiki_data == undefined) {
+                    console.log(`Wiki not found for ${info_data.transaction_currency}!`);
+                    currency_wiki_data.symbol = info_data.transaction_currency;
+                    currency_wiki_data.name = '';
+                    currency_wiki_data.rank = '?'
+                }
+                currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
+            }
 
             var retrieved_price;
             var price_change_sign;
 
             if (info_data.counter_currency == 0) {
-                retrieved_price = `${parseFloat(info_data['price']/100000000).toFixed(6)} BTC`;
+                retrieved_price = `${parseFloat(info_data['price'] / 100000000).toFixed(6)} BTC`;
             }
             else
                 retrieved_price = `${parseFloat(info_data['price']).toFixed(2)} USD`; //!It might be not correct

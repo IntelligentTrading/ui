@@ -17,6 +17,9 @@ var tickers = {
 
         return api.tickersInfo()
             .then((json_tickers) => {
+                if (json_tickers == undefined)
+                    return [];
+
                 var tickersContainer = JSON.parse(json_tickers);
                 cache.set('tickers', tickersContainer.tickers);
                 return tickersContainer.tickers;
