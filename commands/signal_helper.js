@@ -76,16 +76,14 @@ function getBaseSignalTemplate(message_data) {
     price_change = message_data.price_satoshis_change;
   }*/
 
-
-  const wiki_url = "https://coinmarketcap.com/currencies";
-
   return tickers.get()
     .then((tkrs) => {
+      const coinmarketcap_url = "https://coinmarketcap.com/currencies/";
+      if (tkrs == undefined || tkrs.length <= 0)
+        return coinmarketcap_url;
+
       var matching_tkrs = tkrs.filter(t => t.symbol == message_data.transaction_currency);
       currency_wiki_data = matching_tkrs[0];
-
-      const coinmarketcap_url = "https://coinmarketcap.com/currencies/";
-
       if (currency_wiki_data == undefined) return coinmarketcap_url;
 
       return `${coinmarketcap_url}${currency_wiki_data.name}`;
