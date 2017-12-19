@@ -65,17 +65,6 @@ function getBaseSignalTemplate(message_data) {
   var currency_symbol = counter_currencies[parseInt(message_data.counter_currency)];
   var price_change = message_data.price_change;
 
-  /*if (message_data.coin == 'BTC') {
-    currency_symbol = '$';
-    price = message_data.price_usdt;
-    price_change = message_data.price_usdt_change;
-  }
-  else {
-    currency_symbol = 'BTC';
-    price = message_data.price_satoshis / 100000000;
-    price_change = message_data.price_satoshis_change;
-  }*/
-
   return tickers.get()
     .then((tkrs) => {
       const coinmarketcap_url = "https://coinmarketcap.com/currencies/";
@@ -144,7 +133,7 @@ function isDuplicateMessage(message) {
   return true;
 }
 
-// If the counter and transaction currency are the same, skip
+// If the counter and transaction currencies are the same, skip
 function isCounterCurrency(messageBody) {
   return messageBody.transaction_currency == counter_currencies[parseInt(messageBody.counter_currency)]
 }
