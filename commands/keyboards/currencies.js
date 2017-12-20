@@ -41,22 +41,17 @@ var getCurrentPage = (page_num = 0) => {
 
 var updateFollowedButtons = () => {
 
-    if (process.env.LOCAL_ENV) {
-        userSettings = { currencies: [] };
-        userSettings.currencies.push('ETH', 'NEO', 'OMG');
-    }
-
     buttons_line = [];
 
-    if (userSettings.currencies == undefined) {
-        if (userSettings == undefined)
-            userSettings = {};
+    if (userSettings == undefined)
+        userSettings = {};
 
-        userSettings.currencies = []
+    if (userSettings.transaction_currencies == undefined) {
+        userSettings.transaction_currencies = []
     }
 
     currencies.forEach(currency => {
-        currency.followed = userSettings.currencies.indexOf(currency.symbol) >= 0;
+        currency.followed = userSettings.transaction_currencies.indexOf(currency.symbol) >= 0;
         buttons_line.push({ text: `${currency.followed ? '• ' : ''}${currency.symbol}`, callback_data: `settings.DB:COI_${currency.symbol}_${currency.followed ? 'False' : 'True'}` });
     });
 }
