@@ -10,14 +10,35 @@ var kbs = require('./keyboards/keyboards').keyboards;
 
 var current_kb = kbs.main_keyboard;
 
-var post = function (chat_id, optionals) {
-    return api.user(chat_id, optionals)
+
+var updateSettingsOnCallback = (response_body) => {
+    var user_object = JSON.parse(response_body);
+    settings.profile = user_object.settings;
+    //update all the kbs at once
+    kbs.updateKeyboardsSettings(settings.profile);
+}
+
+var getUser = function (chat_id) {
+    return api.users(chat_id).then(response => {
+        if (response.statusCode == 200) {
+            updateSettingsOnCallback(response.body);
+            return settings.profile;
+        }
+        else {
+            throw new Error(response.statusMessage);
+        }
+    })
+        .catch((reason) => {
+            console.log(reason);
+            throw new Error(errorManager.genericErrorMessage);
+        })
+}
+
+var update = function (chat_id, optionals, url_segment) {
+    return api.user(chat_id, optionals, url_segment)
         .then(response => {
             if (response.statusCode == 200) {
-                settings.profile = JSON.parse(response.body);
-
-                //update all the kbs at once
-                kbs.updateKeyboardsSettings(settings.profile);
+                updateSettingsOnCallback(response.body);
                 return settings.profile;
             }
             else {
@@ -74,32 +95,32 @@ var settings = {
             let kv = param.split('_');
 
             if (kv[0] == 'HRZ')
-                return post(chat_id, { horizon: kv[1] });
+                return update(chat_id, { horizon: kv[1] });
             if (kv[0] == 'RSK')
-                return post(chat_id, { risk: kv[1] });
+                return update(chat_id, { risk: kv[1] });
             if (kv[0] == 'ISMUTED')
-                return post(chat_id, { is_muted: kv[1] });
+                return update(chat_id, { is_muted: kv[1] == 'True' });
             if (kv[0] == 'ISSUB')
-                return post(chat_id, { is_subscribed: kv[1] });
+                return update(chat_id, { is_subscribed: kv[1] == 'True' });
             if (kv[0] == 'SIG') {
-                var quota_currency = { name: kv[1], follow: kv[2] };
-                var quota_currencies = [];
-                quota_currencies.push(quota_currency);
-                return post(chat_id, { quota_currencies: quota_currencies });
+                var counter_currency = { symbol: kv[1], index: kv[2], follow: kv[3] == 'True' };
+                var counter_currencies = [];
+                counter_currencies.push(counter_currency);
+                return update(chat_id, { counter_currencies: counter_currencies }, 'counter_currencies');
             }
             if (kv[0] == 'COI') {
-                var currency = { name: kv[1], follow: kv[2] };
+                var currency = { symbol: kv[1], follow: kv[2] == 'True' };
                 var currencies_array = [];
                 currencies_array.push(currency);
-                return post(chat_id, { currencies: currencies_array });
+                return update(chat_id, { transaction_currencies: currencies_array }, 'transaction_currencies');
             }
             else
                 return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
         }
     },
     profile: {},
-    getCurrent: (chat_id) => post(chat_id),
-    subscribe: (chat_id, token) => post(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
+    getCurrent: (chat_id) => getUser(chat_id),
+    subscribe: (chat_id, token) => update(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please /token _your token_, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."

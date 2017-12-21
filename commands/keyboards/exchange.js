@@ -1,10 +1,11 @@
 var Keyboard = require('./keyboard').Keyboard;
+var tickers = require('../data/tickers').tickers;
 
-var counter_currencies = [
-        {symbol:'USD', followed: false },
-        {symbol:'ETH', followed: false },
-        {symbol:'BTC', followed: false }
-];
+var counter_currencies = [];
+
+tickers.counter_currencies().then(tccs => {
+    counter_currencies = tccs
+});
 
 var userSettings;
 var currencies_button = [{ text: "Edit Coin Watchlist", callback_data: "settings.NAV:COI" }];
@@ -22,21 +23,19 @@ kb.getButtons = () => {
         var counter_currency_buttons = [];
         var buttons = [];
 
-        if (process.env.LOCAL_ENV) {
-            userSettings = { counter_currencies: [] };
-            userSettings.counter_currencies.push('BTC');
-        }
+        if (userSettings == undefined)
+            userSettings = {};
 
         if (userSettings.counter_currencies == undefined) {
-            if (userSettings == undefined)
-                userSettings = {};
-    
             userSettings.counter_currencies = []
         }
-        
+
         counter_currencies.forEach(counter_currency => {
-            counter_currency.followed = userSettings.counter_currencies.indexOf(counter_currency.symbol) >= 0;
-            counter_currency_buttons.push({ text: `${counter_currency.followed ? '• ':''} alt/${counter_currency.symbol}`, callback_data: `settings.DB:SIG_${counter_currency.symbol}_${counter_currency.followed ? 'False' : 'True'}` });
+            var counter_currency_index = counter_currencies.indexOf(counter_currency);
+
+            counter_currency.followed = userSettings.counter_currencies.indexOf(counter_currency_index) >= 0;
+            if (counter_currency.enabled)
+                counter_currency_buttons.push({ text: `${counter_currency.followed ? '• ' : ''} alt/${counter_currency.symbol}`, callback_data: `settings.DB:SIG_${counter_currency.symbol}_${counter_currency_index}_${counter_currency.followed ? 'False' : 'True'}` });
         });
 
         buttons.push(counter_currency_buttons);
