@@ -165,24 +165,34 @@ bot.onText(/\/about(.*)/, (msg, match) => {
 bot.onText(/\/settings/, (msg, match) => {
   const chatId = msg.chat.id;
 
-  settingsCmd.getCurrent(chatId)
-    .then(() => {
+  settingsCmd.getUser(chatId)
+    .then((user) => {
 
-      // getCurrent sets the user settings and the keyboard message and buttons callback_data values,
-      // but it's an hidden dependency, maybe I should redesign the flow
-      var keyboard = settingsCmd.getKeyboard();
+      if (user.eula && user.settings.is_subscribed) {
+        var keyboard = settingsCmd.getKeyboard();
 
-      keyboard.getButtons().then((btns) => {
-        var settingsMessage = keyboard.message;
+        keyboard.getButtons().then((btns) => {
+          var settingsMessage = keyboard.message;
+          var options = {
+            parse_mode: "Markdown",
+            reply_markup: {
+              inline_keyboard: btns
+            }
+          };
+
+          bot.sendMessage(chatId, settingsMessage, options);
+        });
+      }
+      else {
         var options = {
           parse_mode: "Markdown",
-          reply_markup: {
-            inline_keyboard: btns
-          }
         };
 
-        bot.sendMessage(chatId, settingsMessage, options);
-      });
+        if (!user.eula)
+          bot.sendMessage(chatId, startCmd.eula_text(chat_id), options);
+        else
+          bot.sendMessage(chatId, settingsCmd.userNotSubscribed);
+      }
     })
     .catch((reason) => {
       console.log(reason);

@@ -22,7 +22,7 @@ var getUser = function (chat_id) {
     return api.updateUser(chat_id).then(response => {
         if (response.statusCode == 200) {
             updateSettingsOnCallback(response.body);
-            return settings.profile;
+            return JSON.parse(response.body);
         }
         else {
             throw new Error(response.statusMessage);
@@ -134,11 +134,12 @@ var settings = {
         }
     },
     profile: {},
-    getCurrent: (chat_id) => getUser(chat_id),
+    getUser: (chat_id) => getUser(chat_id),
     subscribe: (chat_id, token) => verify(chat_id, token ),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already in use. Please /token _your token_, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
+    tokenError: "Your token is invalid or already in use. Please use /token your_token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
+    userNotSubscribed: "Please use /token your_token in order to get signals or set you preferences.",
 }
 
 exports.settings = settings;
