@@ -15,10 +15,15 @@ function Options() {
 }
 
 var api = {
-    users: (chat_id = '') => {
+    users: (options = {}) => {
+
+        var chat_id = options.chat_id == undefined ? '' : options.chat_id;
+        var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
+
+        var stringified_filters = filters.join('&');
 
         var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users/${chat_id}`;
+        request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`;
         request_opts.resolveWithFullResponse = true;
 
         //! returns the full response, with status code and body
@@ -27,7 +32,7 @@ var api = {
     itt_members: () => {
 
         var request_opts = new Options();
-        request_opts.uri = `${api_url}/users?is_ITT_team=true`;
+        request_opts.uri = `${node_svc_api}/users?is_ITT_team=true`;
 
         //! returns the list already
         return rpromise(request_opts);
@@ -35,7 +40,7 @@ var api = {
     beta_users: () => {
 
         var request_opts = new Options();
-        request_opts.uri = `${api_url}/users?beta_token_valid=true`;
+        request_opts.uri = `${node_svc_api}/users?beta_token_valid=true`;
 
         //! returns the list already
         return rpromise(request_opts);
@@ -86,6 +91,15 @@ var api = {
     tickersInfo: () => {
         var request_opts = {};
         request_opts.url = `${node_svc_api}/tickersInfo`;
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts);
+    },
+    counterCurrencies: () => {
+        var request_opts = {};
+        request_opts.url = `${node_svc_api}/counter_currencies`;
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }

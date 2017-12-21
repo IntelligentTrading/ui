@@ -27,6 +27,16 @@ var tickers = {
             .catch((reason) => {
                 console.log(reason)
             });
+    },
+    counter_currencies: () => {
+        var counter_currencies = cache.get('counter_currencies');
+        if (counter_currencies != undefined) return new Promise((resolve, reject) => resolve(counter_currencies));
+
+        return api.counterCurrencies().then(json_ccs => {
+            var ccs = JSON.parse(json_ccs);
+            cache.set('counter_currencies', ccs);
+            return ccs;
+        });
     }
 }
 

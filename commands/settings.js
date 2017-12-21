@@ -103,10 +103,10 @@ var settings = {
             if (kv[0] == 'ISSUB')
                 return update(chat_id, { is_subscribed: kv[1] == 'True' });
             if (kv[0] == 'SIG') {
-                var counter_currency = { symbol: kv[1], follow: kv[2] == 'True' };
+                var counter_currency = { symbol: kv[1], index: kv[2], follow: kv[3] == 'True' };
                 var counter_currencies = [];
                 counter_currencies.push(counter_currency);
-                return update(chat_id, { counter_currencies: counter_currencies });
+                return update(chat_id, { counter_currencies: counter_currencies }, 'counter_currencies');
             }
             if (kv[0] == 'COI') {
                 var currency = { symbol: kv[1], follow: kv[2] == 'True' };
