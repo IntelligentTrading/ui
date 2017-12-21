@@ -69,7 +69,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
         console.log(userSettings);
         if (userSettings.beta_token_valid == true) {
           var subscriptionMessage = userSettings.is_ITT_team
-            ? settingsCmd.subscribedMessage + ' (ITT Member)'
+            ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
 
           bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);

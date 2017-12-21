@@ -29,6 +29,32 @@ var api = {
         //! returns the full response, with status code and body
         return rpromise(request_opts);
     },
+    verifyUser: (chat_id, token) => {
+
+        var request_opts = new Options();
+        request_opts.method = 'POST';
+        request_opts.uri = `${node_svc_api}/users/verify`;
+        request_opts.form = { chat_id: chat_id, token: token };
+        request_opts.resolveWithFullResponse = true;
+
+        //! returns the full response, with status code and body
+        return rpromise(request_opts);
+    },
+    updateUser: (chat_id, optionals, resource_url = '') => {
+        if (chat_id == null || chat_id == undefined) {
+            throw new Error('Chat id cannot be null or undefined');
+        }
+
+        var settings = { settings: optionals }
+
+        var request_opts = new Options();
+        request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`;
+        request_opts.method = 'PUT';
+        request_opts.form = settings;
+        request_opts.resolveWithFullResponse = true;
+
+        return rpromise(request_opts);
+    },
     itt_members: () => {
 
         var request_opts = new Options();
@@ -44,42 +70,6 @@ var api = {
 
         //! returns the list already
         return rpromise(request_opts);
-    },
-    user: (chat_id, optionals, resource_url = '') => {
-        if (chat_id == null || chat_id == undefined) {
-            throw new Error('Chat id cannot be null or undefined');
-        }
-
-        //var postParameters = Object.assign({}, { chat_id: chat_id }, optionals);
-
-        var settings = { settings: optionals }
-
-        var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`;
-        request_opts.method = 'PUT';
-        request_opts.form = settings;
-        request_opts.resolveWithFullResponse = true;
-
-        return rpromise(request_opts);
-    },
-    usersHorizons: () => {
-        var usersHorizons = [];
-        return rpromise(`${node_svc_api}/users?beta_token_valid=true&horizon=short`)
-            .then((res) => {
-                var short_users = JSON.parse(res);
-                usersHorizons.push(short_users.chat_ids);
-                return rpromise(`${node_svc_api}/users?beta_token_valid=true&horizon=medium`)
-                    .then((res) => {
-                        var medium_users = JSON.parse(res);
-                        usersHorizons.push(medium_users.chat_ids);
-                        return rpromise(`${node_svc_api}/users?beta_token_valid=true&horizon=long`)
-                            .then((res) => {
-                                var long_users = JSON.parse(res);
-                                usersHorizons.push(long_users.chat_ids);
-                                return usersHorizons;
-                            })
-                    })
-            })
     },
     price: (symbol) => {
 

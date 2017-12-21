@@ -41,9 +41,11 @@ function notify(message_data) {
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
 
-          var filters = ['beta_token_valid=true', buildHorizonFilter(horizon),
-            `transaction_currency=${message_data.transaction_currency}`, `counter_currency=${message_data.counter_currency}`];
-            
+          var filters = ['is_subscribed=true','beta_token_valid=true',
+            buildHorizonFilter(horizon),
+            `transaction_currency=${message_data.transaction_currency}`,
+            `counter_currency=${message_data.counter_currency}`];
+
           return api.users({ filters: filters }).then(full_response => {
 
             if (full_response.statusCode != 200) {

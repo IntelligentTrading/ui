@@ -19,7 +19,7 @@ var updateSettingsOnCallback = (response_body) => {
 }
 
 var getUser = function (chat_id) {
-    return api.user(chat_id).then(response => {
+    return api.updateUser(chat_id).then(response => {
         if (response.statusCode == 200) {
             updateSettingsOnCallback(response.body);
             return settings.profile;
@@ -35,7 +35,7 @@ var getUser = function (chat_id) {
 }
 
 var update = function (chat_id, optionals, url_segment) {
-    return api.user(chat_id, optionals, url_segment)
+    return api.updateUser(chat_id, optionals, url_segment)
         .then(response => {
             if (response.statusCode == 200) {
                 updateSettingsOnCallback(response.body);
@@ -49,6 +49,21 @@ var update = function (chat_id, optionals, url_segment) {
             console.log(reason);
             throw new Error(errorManager.genericErrorMessage);
         })
+}
+
+var verify = (chat_id, token) => {
+    return api.verifyUser(chat_id, token).then(response => {
+        if (response.statusCode == 200) {
+            updateSettingsOnCallback(response.body);
+            return settings.profile;
+        }
+        else {
+            throw new Error(response.statusMessage);
+        }
+    }).catch((reason) => {
+        console.log(reason);
+        throw new Error(errorManager.genericErrorMessage);
+    })
 }
 
 var keyboards = [
@@ -120,7 +135,7 @@ var settings = {
     },
     profile: {},
     getCurrent: (chat_id) => getUser(chat_id),
-    subscribe: (chat_id, token) => update(chat_id, { is_subscribed: 'True', is_muted: 'False', token: token, horizon: 'medium', risk: 'medium' }),
+    subscribe: (chat_id, token) => verify(chat_id, token ),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please /token _your token_, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list."
