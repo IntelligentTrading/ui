@@ -19,7 +19,7 @@ var updateSettingsOnCallback = (response_body) => {
 }
 
 var getUser = function (chat_id) {
-    return api.users(chat_id).then(response => {
+    return api.user(chat_id).then(response => {
         if (response.statusCode == 200) {
             updateSettingsOnCallback(response.body);
             return settings.profile;
