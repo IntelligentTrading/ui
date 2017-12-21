@@ -20,7 +20,7 @@ var api = {
         var chat_id = options.chat_id == undefined ? '' : options.chat_id;
         var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
 
-        var stringified_filters = filters.join('&');
+        var stringified_filters = filters ? filters.join('&') : '';
 
         var request_opts = new Options();
         request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`;
