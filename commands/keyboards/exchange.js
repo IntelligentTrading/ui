@@ -10,12 +10,22 @@ tickers.counter_currencies().then(tccs => {
 var userSettings;
 var currencies_button = [{ text: "Edit Coin Watchlist", callback_data: "settings.NAV:COI" }];
 
-var msg = "Here you can set up your signal preferences, choose your favorite trading pairs and edit your coin watchlist.";
+var msg = "Here you can set up your signal preferences.";
 var kb = new Keyboard(msg, []);
 kb.showBackButton = true;
 
 kb.updateSettings = (settings) => {
     userSettings = settings;
+    var followed_counter_currencies = [];
+    userSettings.counter_currencies.forEach(counter_currency => {
+        followed_counter_currencies.push(`alt/${counter_currencies[counter_currency].symbol}`)
+    })
+
+    if (followed_counter_currencies.length == 0)
+        kb.message = `${msg} You are not following any coin.`;
+    else {
+        kb.message = `${msg} You are currently following ${followed_counter_currencies.join(', ')}.`
+    }
 }
 
 kb.getButtons = () => {
