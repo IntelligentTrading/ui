@@ -66,8 +66,8 @@ function getBaseSignalTemplate(message_data) {
   var counter_currency_index = parseInt(message_data.counter_currency);
 
   // Let's round to the appropriate digits according to each counter currency
-  var rounding_digits = [8, 2, 2, 2]
-  var price = (message_data.price / 100000000).toFixed(rounding_digits[counter_currency_index]);
+  var rounding_digits = [8, 5, 5, 5]
+  var price = (message_data.price / 100000000).toPrecision(rounding_digits[counter_currency_index]);
 
   var currency_symbol = counter_currencies[counter_currency_index].symbol;
   var price_change = message_data.price_change;
