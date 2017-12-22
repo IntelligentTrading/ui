@@ -75,7 +75,8 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
           bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);
         }
         else {
-          bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts);
+          bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts)
+          .catch(reason => console.log(reason));
         }
       })
       .catch((reason) => {
@@ -310,6 +311,12 @@ bot.onText(/\/getMe/, (msg, match) => {
   const username = msg.from.username;
 
   bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
+});
+
+bot.on('message', (msg) => {
+  if (msg.location) {
+    // Auto-adjust UTC
+  }
 });
 
 bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
