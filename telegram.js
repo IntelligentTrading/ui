@@ -134,13 +134,12 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
   const feedback = match[1];
 
   if (feedback == undefined || feedback.length <= 0) {
-    bot.sendMessage(chatId,
-      "Got any comments? We'd love to hear those! You can send us your thoughts by simply typing them behind the /feedback command. For example: /feedback More signals!");
+    bot.sendMessage(chatId, feedbackCmd.helpText);
   }
   else {
     feedbackCmd.storeFeedback(chatId, username, feedback)
       .then((result) => {
-        bot.sendMessage(chatId, `Thanks! Your feedback has been sent to the team and will be reviewed shortly. (Feedback code: ${result.body.shortLink})`);
+        bot.sendMessage(chatId, feedbackCmd.thanksText(result.body.shortLink));
       })
       .catch((reason) => {
         console.log(reason);
@@ -189,13 +188,14 @@ bot.onText(/\/settings/, (msg, match) => {
         };
 
         if (!user.eula)
-          bot.sendMessage(chatId, startCmd.eula_text(chat_id), options);
+          bot.sendMessage(chatId, startCmd.eula_text(chatId), options);
         else
           bot.sendMessage(chatId, settingsCmd.userNotSubscribed);
       }
     })
     .catch((reason) => {
       console.log(reason);
+      bot.sendMessage(chatId, errorManager.generic_error_message);
     });
 });
 
@@ -231,7 +231,7 @@ bot.on('callback_query', (callback_message) => {
 
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
             .then(() => {
-              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+              bot.sendMessage(chat_id, errorManager.settings_error);
             });
         });
     }
@@ -265,8 +265,6 @@ bot.on('callback_query', (callback_message) => {
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
             .then((any) => {
 
-              //var main_kb = settingsCmd.getKeyboard('MAIN');
-
               var current_kb = settingsCmd.getCurrentKeyboard();
               current_kb.getButtons().then(btns => {
                 bot.editMessageText(current_kb.message, {
@@ -285,7 +283,7 @@ bot.on('callback_query', (callback_message) => {
 
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
             .then(() => {
-              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
+              bot.sendMessage(chat_id, errorManager.settings_error);
             });
         });
     }
