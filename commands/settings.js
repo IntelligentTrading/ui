@@ -19,16 +19,21 @@ var updateSettingsOnCallback = (response_body) => {
 }
 
 var getUser = function (chat_id) {
-    return api.updateUser(chat_id).then(response => {
-        if (response.statusCode == 200) {
-            updateSettingsOnCallback(response.body);
-            return JSON.parse(response.body);
-        }
-        else {
-            throw new Error(response.statusMessage);
-        }
-    })
-        .catch((reason) => {
+    return api.users({ chat_id: chat_id })
+        .then(response => {
+            if (response.statusCode == 200) {
+
+                if (response.body && response.body != '{}') {
+                    updateSettingsOnCallback(response.body);
+                }
+
+                return JSON.parse(response.body);
+            }
+            else {
+                console.log(response);
+                throw new Error(response.statusMessage);
+            }
+        }).catch((reason) => {
             console.log(reason);
             throw new Error(errorManager.genericErrorMessage);
         })
@@ -135,7 +140,7 @@ var settings = {
     },
     profile: {},
     getUser: (chat_id) => getUser(chat_id),
-    subscribe: (chat_id, token) => verify(chat_id, token ),
+    subscribe: (chat_id, token) => verify(chat_id, token),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please use /token your_token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
