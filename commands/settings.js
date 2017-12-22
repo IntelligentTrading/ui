@@ -59,6 +59,11 @@ var update = function (chat_id, optionals, url_segment) {
 var verify = (chat_id, token) => {
     return api.verifyUser(chat_id, token).then(response => {
         if (response.statusCode == 200) {
+            //! Verify response content!!!
+            var err = JSON.parse(response.body).err;
+            if (err) {
+                return { err: err }
+            }
             updateSettingsOnCallback(response.body);
             return settings.profile;
         }
@@ -143,8 +148,8 @@ var settings = {
     subscribe: (chat_id, token) => verify(chat_id, token),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already in use. Please use /token your_token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
-    userNotSubscribed: "Please use /token your_token in order to get signals or set you preferences.",
+    tokenError: "Your token is invalid or already in use. Please use /token your-token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
+    userNotSubscribed: "Please use /token your-token in order to get signals or set you preferences.",
 }
 
 exports.settings = settings;
