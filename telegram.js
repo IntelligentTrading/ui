@@ -22,6 +22,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
+const timezone = require('geo-tz');
+
 const markdown_opts = {
   parse_mode: "Markdown"
 };
@@ -316,6 +318,8 @@ bot.onText(/\/getMe/, (msg, match) => {
 bot.on('message', (msg) => {
   if (msg.location) {
     // Auto-adjust UTC
+    var tz = timezone.tzMoment(msg.location.latitude,msg.location.longitude)
+    console.log(tz);
   }
 });
 
