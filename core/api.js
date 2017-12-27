@@ -55,6 +55,21 @@ var api = {
 
         return rpromise(request_opts);
     },
+    setTimezone: (chat_id, area, hours_diff) => {
+        if (chat_id == null || chat_id == undefined) {
+            throw new Error('Chat id cannot be null or undefined');
+        }
+
+        var timezone = { timezone: { area: area, hours_diff: hours_diff } }
+
+        var request_opts = new Options();
+        request_opts.uri = `${node_svc_api}/users/${chat_id}/timezone`;
+        request_opts.method = 'PUT';
+        request_opts.form = timezone;
+        request_opts.resolveWithFullResponse = true;
+
+        return rpromise(request_opts);
+    },
     itt_members: () => {
 
         var request_opts = new Options();

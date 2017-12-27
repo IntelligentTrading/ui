@@ -1,3 +1,5 @@
+import { api } from './core/api';
+
 const request = require('request');
 const express = require('express');
 const app = express();
@@ -78,7 +80,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
         }
         else {
           bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts)
-          .catch(reason => console.log(reason));
+            .catch(reason => console.log(reason));
         }
       })
       .catch((reason) => {
@@ -318,8 +320,9 @@ bot.onText(/\/getMe/, (msg, match) => {
 bot.on('message', (msg) => {
   if (msg.location) {
     // Auto-adjust UTC
-    var tz = timezone.tzMoment(msg.location.latitude,msg.location.longitude)
-    console.log(tz);
+    var tz = timezone.tzMoment(msg.location.latitude, msg.location.longitude)
+    api.setTimezone(msg.chat.id, tz._z.name, tz._z.abbrs[1])
+    console.log(`${msg.chat.id} @${tz._z.name} ${tz._z.abbrs[1]} hours`);
   }
 });
 
