@@ -41,7 +41,7 @@ function notify(message_data) {
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
 
-          var filters = ['is_subscribed=true','beta_token_valid=true',
+          var filters = ['is_subscribed=true', 'beta_token_valid=true',
             buildHorizonFilter(horizon),
             `transaction_currencies=${message_data.transaction_currency}`,
             `counter_currencies=${message_data.counter_currency}`];
@@ -57,9 +57,9 @@ function notify(message_data) {
             if (process.env.LOCAL_ENV == undefined) {
               users.forEach(user => {
 
-                bot.sendMessage(user.chat_id, telegram_signal_message, opts)
+                bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
                   .catch(err => {
-                    var errMessage = `${err.message} :: chat ${user.chat_id}`;
+                    var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
                     console.log(errMessage);
                   });
               });
