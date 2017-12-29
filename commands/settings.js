@@ -19,7 +19,7 @@ var updateSettingsOnCallback = (response_body) => {
 }
 
 var getUser = function (chat_id) {
-    return api.users({ chat_id: chat_id })
+    return api.users({ telegram_chat_id: chat_id })
         .then(response => {
             if (response.statusCode == 200) {
 

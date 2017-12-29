@@ -17,7 +17,7 @@ function Options() {
 var api = {
     users: (options = {}) => {
 
-        var chat_id = options.chat_id == undefined ? '' : options.chat_id;
+        var chat_id = options.telegram_chat_id == undefined ? '' : options.telegram_chat_id;
         var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
 
         var stringified_filters = filters ? filters.join('&') : '';
@@ -34,7 +34,7 @@ var api = {
         var request_opts = new Options();
         request_opts.method = 'POST';
         request_opts.uri = `${node_svc_api}/users/verify`;
-        request_opts.form = { chat_id: chat_id, token: token };
+        request_opts.form = { telegram_chat_id: chat_id, token: token };
         request_opts.resolveWithFullResponse = true;
 
         //! returns the full response, with status code and body
@@ -51,6 +51,21 @@ var api = {
         request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`;
         request_opts.method = 'PUT';
         request_opts.form = settings;
+        request_opts.resolveWithFullResponse = true;
+
+        return rpromise(request_opts);
+    },
+    setTimezone: (chat_id, area, hours_diff) => {
+        if (chat_id == null || chat_id == undefined) {
+            throw new Error('Chat id cannot be null or undefined');
+        }
+
+        var timezone = { timezone: { area: area, hours_diff: hours_diff } }
+
+        var request_opts = new Options();
+        request_opts.uri = `${node_svc_api}/users/${chat_id}/timezone`;
+        request_opts.method = 'PUT';
+        request_opts.form = timezone;
         request_opts.resolveWithFullResponse = true;
 
         return rpromise(request_opts);
