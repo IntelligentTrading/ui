@@ -76,6 +76,10 @@ var verify = (chat_id, token) => {
     })
 }
 
+var setTimezone = (telegram_chat_id, timezone, time_difference) => {
+    return api.setTimezone(telegram_chat_id, timezone, time_difference)
+}
+
 var keyboards = [
     {
         label: 'MAIN',
@@ -146,6 +150,7 @@ var settings = {
     profile: {},
     getUser: (chat_id) => getUser(chat_id),
     subscribe: (chat_id, token) => verify(chat_id, token),
+    setTimezone: (telegram_chat_id, timezone, time_diff) => setTimezone(telegram_chat_id, timezone, time_diff),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please use /token your-token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
