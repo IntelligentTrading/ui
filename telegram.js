@@ -319,8 +319,14 @@ bot.on('message', (msg) => {
   if (msg.location) {
     // Auto-adjust UTC
     var tz = timezone.tzMoment(msg.location.latitude, msg.location.longitude)
-    api.setTimezone(msg.chat.id, tz._z.name, tz._z.abbrs[1])
-    console.log(`${msg.chat.id} @${tz._z.name} ${tz._z.abbrs[1]} hours`);
+    settingsCmd.setTimezone(msg.chat.id, tz._z.name, tz._z.abbrs[1])
+      .then(result => {
+        bot.sendMessage(msg.chat.id, `Your timezone is now updated to *${tz._z.name}*`, markdown_opts)
+      })
+      .catch(reason => {
+        bot.sendMessage(msg.chat.id, errorManager.generic_error_message)
+        console.log(reason)
+      })
   }
 });
 

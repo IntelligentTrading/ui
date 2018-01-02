@@ -57,11 +57,13 @@ function notify(message_data) {
             if (process.env.LOCAL_ENV == undefined) {
               users.forEach(user => {
 
-                bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
-                  .catch(err => {
-                    var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
-                    console.log(errMessage);
-                  });
+                if (user.eula) {
+                  bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
+                    .catch(err => {
+                      var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
+                      console.log(errMessage);
+                    });
+                }
               });
             }
             else {
