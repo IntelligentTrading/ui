@@ -60,7 +60,7 @@ var api = {
             throw new Error('Chat id cannot be null or undefined');
         }
 
-        var timezone = { timezone: { area: area, hours_diff: hours_diff } }
+        var timezone = { settings: { timezone: area, time_diff: hours_diff } }
 
         var request_opts = new Options();
         request_opts.uri = `${node_svc_api}/users/${chat_id}/timezone`;
