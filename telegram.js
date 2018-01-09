@@ -202,6 +202,17 @@ bot.onText(/\/settings/, (msg, match) => {
     });
 });
 
+bot.onText(/\/select_all_signals/, (msg, match) => {
+  settingsCmd.selectAllSignals(msg.chat.id)
+    .then(() => {
+      bot.sendMessage(msg.chat.id, 'You are now subscribed to all the signals!')
+        .catch((reason) => console.log(reason))
+    })
+    .catch(() => {
+      bot.sendMessage(msg.chat.id, errorManager.settings_error);
+    })
+});
+
 bot.on('callback_query', (callback_message) => {
 
   var message_id = callback_message.message.message_id;

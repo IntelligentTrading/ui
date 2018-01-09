@@ -155,6 +155,7 @@ var settings = {
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please use /token your-token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
     userNotSubscribed: "Please use /token your-token in order to get signals or set you preferences.",
+    selectAllSignals: (chat_id) => api.selectAllSignals(chat_id)
 }
 
 exports.settings = settings;
