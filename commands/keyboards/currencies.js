@@ -13,10 +13,10 @@ var PAGE_SIZE = PAGE_COLS * PAGE_ROWS;
 
 var current_page = 0;
 
-var getCurrentPage = (page_num = 0) => {
+var getCurrentPage = (page_num) => {
     var buttons = [];
 
-    current_page = parseInt(page_num);
+    current_page = page_num ? parseInt(page_num) : current_page;
     var total_number_of_pages = currencies.length / PAGE_SIZE;
 
     // 0 < 4
@@ -57,7 +57,12 @@ var updateFollowedButtons = () => {
 }
 
 var loadcurrencies = () => {
-    return tickers.get().then(tkrs => { currencies = tkrs });
+    return tickers.get().then(tkrs => {
+        currencies =
+            tkrs.sort((a, b) => {
+                return parseInt(a.rank) - parseInt(b.rank)
+            })
+    });
 }
 
 var msg = "Please select the *coins* to follow/unfollow in order to receive related signals.";

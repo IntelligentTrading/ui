@@ -173,7 +173,7 @@ bot.onText(/\/settings/, (msg, match) => {
       if (user.eula && user.settings.is_subscribed) {
         var keyboard = settingsCmd.getKeyboard();
 
-        keyboard.getButtons().then((btns) => {
+        keyboard.getButtons(0).then((btns) => {
           var settingsMessage = keyboard.message;
           var options = {
             parse_mode: "Markdown",
@@ -247,7 +247,7 @@ bot.on('callback_query', (callback_message) => {
     else if (cmd.operation.action == 'NAV') {
 
       cmd.operation.kb_label = kb_data.split('_')[0];
-      cmd.operation.kb_page = kb_data.split('_')[1]
+      cmd.operation.kb_page = kb_data.split('_')[1] ? kb_data.split('_')[1] : "0";
 
       var cmd_kb = settingsCmd.getKeyboard(cmd.operation.kb_label);
 

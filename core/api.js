@@ -93,9 +93,9 @@ var api = {
 
         return rpromise(request_opts);
     },
-    tickersInfo: () => {
+    tickers: () => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/tickersInfo`;
+        request_opts.url = `${node_svc_api}/tickers`;
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
