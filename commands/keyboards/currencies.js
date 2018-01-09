@@ -17,7 +17,7 @@ var getCurrentPage = (page_num) => {
     var buttons = [];
 
     current_page = page_num ? parseInt(page_num) : current_page;
-    var total_number_of_pages = currencies.length / PAGE_SIZE;
+    var total_number_of_pages = Math.ceil(currencies.length / PAGE_SIZE);
 
     // 0 < 4
     var next_page = current_page < total_number_of_pages - 1 ? current_page + 1 : 0;
@@ -28,6 +28,10 @@ var getCurrentPage = (page_num) => {
 
     //get PAGE_SIZE elements for each page (25)
     var page_buttons = buttons_line.slice(current_page * PAGE_SIZE, current_page * PAGE_SIZE + PAGE_SIZE);
+
+    while (page_buttons.length < PAGE_SIZE) {
+        page_buttons.push({ text: ' ', callback_data: 'IGNORE' });
+    }
 
     for (i = 0; i <= total_number_of_pages; i++) {
         var page_buttons_row = page_buttons.slice(i * PAGE_COLS, i * PAGE_COLS + PAGE_COLS);

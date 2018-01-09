@@ -207,6 +207,9 @@ bot.on('callback_query', (callback_message) => {
   var message_id = callback_message.message.message_id;
   var chat_id = callback_message.message.chat.id;
 
+  if (callback_message.data == 'IGNORE')
+    return;
+
   var data_array = callback_message.data.split('.'); // eg.: settings_RSK
   var kb_data = data_array[1].split(':')[1];
 
