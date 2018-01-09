@@ -15,14 +15,14 @@ var tickers = {
             });
         }
 
-        return api.tickersInfo()
+        return api.tickers()
             .then((json_tickers) => {
                 if (json_tickers == undefined)
                     return [];
 
-                var tickersContainer = JSON.parse(json_tickers);
-                cache.set('tickers', tickersContainer.tickers);
-                return tickersContainer.tickers;
+                var tickers = JSON.parse(json_tickers);
+                cache.set('tickers', tickers);
+                return tickers;
             })
             .catch((reason) => {
                 console.log(reason)
