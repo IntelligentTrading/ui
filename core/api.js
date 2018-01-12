@@ -120,6 +120,16 @@ var api = {
         }
 
         return rpromise(request_opts);
+    },
+    getPlanFor: (signal) => {
+        var request_opts = {};
+        request_opts.url = `${node_svc_api}/plans/${signal}`;
+        request_opts.method = 'GET';
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts);
     }
 }
 
