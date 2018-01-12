@@ -54,7 +54,7 @@ function parse_info(info_data) {
             var price_change_sign;
 
             if (info_data.counter_currency == 0) {
-                retrieved_price = `${Number(parseFloat(info_data['price'] / 100000000).toFixed(8))} BTC`;
+                retrieved_price = `${parseFloat(info_data['price'] / 100000000).toFixed(8)} BTC`;
             }
             else
                 retrieved_price = `${Number(parseFloat(info_data['price']).toFixed(2))} USD`; //!It might be not correct
