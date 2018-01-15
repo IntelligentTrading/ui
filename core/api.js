@@ -29,11 +29,11 @@ var api = {
         //! returns the full response, with status code and body
         return rpromise(request_opts);
     },
-    verifyUser: (chat_id, token) => {
+    subscribeUser: (chat_id, token) => {
 
         var request_opts = new Options();
         request_opts.method = 'POST';
-        request_opts.uri = `${node_svc_api}/users/verify`;
+        request_opts.uri = `${node_svc_api}/users/subscribe`;
         request_opts.form = { telegram_chat_id: chat_id, token: token };
         request_opts.resolveWithFullResponse = true;
 
@@ -81,7 +81,7 @@ var api = {
     beta_users: () => {
 
         var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users?beta_token_valid=true`;
+        request_opts.uri = `${node_svc_api}/users?subscription_plan=1`;
 
         //! returns the list already
         return rpromise(request_opts);
@@ -125,6 +125,17 @@ var api = {
         var request_opts = {};
         request_opts.url = `${node_svc_api}/plans/${signal}`;
         request_opts.method = 'GET';
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts);
+    },
+    generateToken: (plan, admin_token) => {
+        var request_opts = {};
+        request_opts.url = `${node_svc_api}/users/generate/${plan}`;
+        request_opts.method = 'POST';
+        request_opts.form = { token: admin_token };
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }

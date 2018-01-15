@@ -44,8 +44,7 @@ function notify(message_data) {
           api.getPlanFor(message_data.signal).then(jsonPlan => {
 
             var plan = JSON.parse(jsonPlan);
-            var filters = ['is_subscribed=true', 'beta_token_valid=true',
-              buildHorizonFilter(horizon),
+            var filters = [buildHorizonFilter(horizon),
               `transaction_currencies=${message_data.transaction_currency}`,
               `counter_currencies=${message_data.counter_currency}`];
 
