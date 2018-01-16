@@ -47,8 +47,6 @@ const nopreview_hmtl_opts =
     "disable_web_page_preview": "true"
   };
 
-const MAX_TOKEN_LENGTH = 8;
-
 bot.onText(/\/start/, (msg, match) => {
   const chatId = msg.chat.id;
 
@@ -60,7 +58,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const token = match[2];
 
-  if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
+  if (token == undefined || token == "") {
     bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts).catch(reason => {
       errorManager.handleException(reason, errorManager.communication_error_message + reason);
     });
@@ -69,7 +67,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
     settingsCmd.subscribe(chatId, token)
       .then((userSettings) => {
         console.log(userSettings);
-        if (userSettings.beta_token_valid == true) {
+        if (userSettings && !userSettings.errors && userSettings.is_subscribed == true) {
           var subscriptionMessage = userSettings.is_ITT_team
             ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
@@ -211,6 +209,24 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
     .catch(() => {
       bot.sendMessage(msg.chat.id, errorManager.settings_error);
     })
+});
+
+bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
+  const chat_id = msg.chat.id;
+  var admin_token = match[2].split(' ')[0];
+  var plan = match[2].split(' ')[1];
+
+  settingsCmd.generateCodeForPlan(plan, admin_token)
+    .then(result => {
+      var license = JSON.parse(result)
+      bot.sendMessage(chat_id, license.code, markdown_opts)
+    })
+    .catch(reason => {
+      console.log(reason)
+      bot.sendMessage(chat_id, 'You are not authorized to perform this operation.');
+    })
+
+
 });
 
 bot.on('callback_query', (callback_message) => {

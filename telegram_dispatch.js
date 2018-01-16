@@ -41,41 +41,42 @@ function notify(message_data) {
       .then(telegram_signal_message => {
         if (telegram_signal_message != undefined) {
 
-          var filters = ['is_subscribed=true', 'beta_token_valid=true',
-            buildHorizonFilter(horizon),
-            `transaction_currencies=${message_data.transaction_currency}`,
-            `counter_currencies=${message_data.counter_currency}`];
+          api.getPlanFor(message_data.signal).then(jsonPlan => {
 
-          return api.users({ filters: filters }).then(full_response => {
+            var plan = JSON.parse(jsonPlan);
+            var filters = [buildHorizonFilter(horizon),
+              `transaction_currencies=${message_data.transaction_currency}`,
+              `counter_currencies=${message_data.counter_currency}`];
 
-            if (full_response.statusCode != 200) {
-              console.log(full_response.statusMessage);
-              throw new Error(errorManager.generic_error_message);
-            }
+            return api.users({ filters: filters }).then(full_response => {
 
-            var users = JSON.parse(full_response.body);
-            if (process.env.LOCAL_ENV == undefined) {
-              users.forEach(user => {
+              if (full_response.statusCode != 200) {
+                console.log(full_response.statusMessage);
+                throw new Error(errorManager.generic_error_message);
+              }
 
-                if (user.eula) {
-                  bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
-                    .catch(err => {
-                      var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
-                      console.log(errMessage);
-                    });
-                }
-              });
-            }
-            else {
-              bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-                .catch((err) => {
-                  console.log(err.message)
-                });
-            }
-          })
-            .catch(reason => {
-              console.log(reason)
+              var users = JSON.parse(full_response.body);
+              if (process.env.LOCAL_ENV == undefined) {
+                users.filter(user => user.eula && user.settings.subscription_plan >= plan.accessLevel)
+                  .map(user => {
+                    bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
+                      .catch(err => {
+                        var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
+                        console.log(errMessage);
+                      });
+                  })
+              }
+              else {
+                bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
+                  .catch((err) => {
+                    console.log(err.message)
+                  });
+              }
             })
+              .catch(reason => {
+                console.log(reason)
+              })
+          })
         }
       });
   }

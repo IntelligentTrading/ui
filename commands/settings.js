@@ -56,8 +56,8 @@ var update = function (chat_id, optionals, url_segment) {
         })
 }
 
-var verify = (chat_id, token) => {
-    return api.verifyUser(chat_id, token).then(response => {
+var subscribeUser = (chat_id, token) => {
+    return api.subscribeUser(chat_id, token).then(response => {
         if (response.statusCode == 200) {
             //! Verify response content!!!
             var err = JSON.parse(response.body).err;
@@ -149,7 +149,8 @@ var settings = {
     },
     profile: {},
     getUser: (chat_id) => getUser(chat_id),
-    subscribe: (chat_id, token) => verify(chat_id, token),
+    generateCodeForPlan: (plan, admin_token) => api.generateToken(plan, admin_token),
+    subscribe: (chat_id, token) => subscribeUser(chat_id, token),
     setTimezone: (telegram_chat_id, timezone, time_diff) => setTimezone(telegram_chat_id, timezone, time_diff),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
