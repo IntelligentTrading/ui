@@ -67,7 +67,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
     settingsCmd.subscribe(chatId, token)
       .then((userSettings) => {
         console.log(userSettings);
-        if (userSettings && !userSettings.errors && userSettings.is_subscribed == true) {
+        if (userSettings && !userSettings.errors) {
           var subscriptionMessage = userSettings.is_ITT_team
             ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
@@ -168,7 +168,7 @@ bot.onText(/\/settings/, (msg, match) => {
   settingsCmd.getUser(chatId)
     .then((user) => {
 
-      if (user.eula && user.settings.is_subscribed) {
+      if (user.eula) {
         var keyboard = settingsCmd.getKeyboard();
 
         keyboard.getButtons(0).then((btns) => {

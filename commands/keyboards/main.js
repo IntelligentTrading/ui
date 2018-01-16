@@ -40,8 +40,6 @@ kb.updateButtons = (message, isSubscribed, isMuted) => {
 
 kb.updateSettings = (userSettings) => {
     var isMuted = userSettings.is_muted;
-    var isSubscribed = userSettings.is_subscribed;
-
     var msg = `Your profile is set on *${userSettings.horizon}* horizon.
 You are ${isSubscribed ? '*subscribed*' : '*not subscribed*'} to signals and your notifications are ${isMuted ? '*muted*' : '*active*'}.
 Tap below to edit your settings:`;
