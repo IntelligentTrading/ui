@@ -187,11 +187,7 @@ bot.onText(/\/settings/, (msg, match) => {
         var options = {
           parse_mode: "Markdown",
         };
-
-        if (!user.eula)
-          bot.sendMessage(chatId, startCmd.eula_text(chatId), options);
-        else
-          bot.sendMessage(chatId, settingsCmd.userNotSubscribed);
+        bot.sendMessage(chatId, startCmd.eula_text(chatId), options);
       }
     })
     .catch((reason) => {
