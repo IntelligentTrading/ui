@@ -48,23 +48,19 @@ const nopreview_hmtl_opts =
   };
 
 bot.onText(/\/start/, (msg, match) => {
-  const chatId = msg.chat.id;
-
-  bot.sendMessage(chatId, startCmd.eula_text(chatId), markdown_opts)
-    .catch(reason => console.log(reason));
+  const chat_id = msg.chat.id;
+  apollo.send('EULA', chat_id);
 });
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const token = match[2];
 
   if (token == undefined || token == "") {
-    bot.sendMessage(chatId, settingsCmd.tokenError, nopreview_markdown_opts).catch(reason => {
-      errorManager.handleException(reason, errorManager.communication_error_message + reason);
-    });
+    apollo.send('TOKEN', chat_id);
   }
   else {
-    settingsCmd.subscribe(chatId, token)
+    settingsCmd.subscribe(chat_id, token)
       .then((userSettings) => {
         console.log(userSettings);
         if (userSettings && !userSettings.err) {
@@ -72,100 +68,94 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
             ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
 
-          bot.sendMessage(chatId, subscriptionMessage, nopreview_markdown_opts);
+          bot.sendMessage(chat_id, subscriptionMessage, nopreview_markdown_opts);
         }
         else {
-          bot.sendMessage(chatId, userSettings.err, nopreview_markdown_opts)
-            .catch(reason => console.log(reason));
+          userSettings.err == "EULA" ? apollo.send('EULA', chat_id) : apollo.send('CUSTOM', chat_id, userSettings.err)
         }
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, settingsCmd.subscriptionError, nopreview_markdown_opts);
+        apollo.send('GENERIC', chat_id);
       })
   }
 });
 
 bot.onText(/\/help/, (msg, match) => {
-  const chatId = msg.chat.id;
-
-  bot.sendMessage(chatId, helpCmd.text())
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
+  const chat_id = msg.chat.id;
+  bot.sendMessage(chat_id, helpCmd.text())
 });
 
 // match with /price, throw away all the blanks, match with any single char
 bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const currency = match[2]; // the captured "whatever"
 
   priceCmd.getPrice(currency)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), nopreview_markdown_opts)
+      bot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
         .catch((reason) => {
           console.log(reason);
-          bot.sendMessage(chatId, errorManager.generic_error_message, markdown_opts);
+          apollo.send('GENERIC', chat_id);
         });
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, errorManager.currency_error, markdown_opts);
+      apollo.send('CUSTOM', chat_id, errorManager.currency_error);
     });
 });
 
 bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const currency = match[2]; // the captured "whatever"
 
   volumeCmd.getVolume(currency)
     .then((result) => {
-      bot.sendMessage(chatId, result.toString(), markdown_opts);
+      bot.sendMessage(chat_id, result.toString(), markdown_opts);
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, reason);
+      bot.sendMessage(chat_id, reason);
     });
 });
 
 bot.onText(/\/feedback(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const username = msg.chat.username;
   const feedback = match[1];
 
   if (feedback == undefined || feedback.length <= 0) {
-    bot.sendMessage(chatId, feedbackCmd.helpText);
+    bot.sendMessage(chat_id, feedbackCmd.helpText);
   }
   else {
-    feedbackCmd.storeFeedback(chatId, username, feedback)
+    feedbackCmd.storeFeedback(chat_id, username, feedback)
       .then((result) => {
-        bot.sendMessage(chatId, feedbackCmd.thanksText(result.body.shortLink));
+        bot.sendMessage(chat_id, feedbackCmd.thanksText(result.body.shortLink));
       })
       .catch((reason) => {
         console.log(reason);
-        bot.sendMessage(chatId, reason);
+        apollo.send('CUSTOM', chat_id, reason);
       });
   }
 });
 
 bot.onText(/\/about(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
 
   about.get()
     .then((result) => {
-      bot.sendMessage(chatId, result, nopreview_hmtl_opts);
+      bot.sendMessage(chat_id, result, nopreview_hmtl_opts);
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, reason);
+      apollo.send('CUSTOM', chat_id, reason);
     });
 });
 
 bot.onText(/\/settings/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
 
-  settingsCmd.getUser(chatId)
+  settingsCmd.getUser(chat_id)
     .then((user) => {
 
       if (user.eula) {
@@ -180,19 +170,16 @@ bot.onText(/\/settings/, (msg, match) => {
             }
           };
 
-          bot.sendMessage(chatId, settingsMessage, options);
+          bot.sendMessage(chat_id, settingsMessage, options);
         });
       }
       else {
-        var options = {
-          parse_mode: "Markdown",
-        };
-        bot.sendMessage(chatId, startCmd.eula_text(chatId), options);
+        apollo.send('EULA', chat_id);
       }
     })
     .catch((reason) => {
       console.log(reason);
-      bot.sendMessage(chatId, errorManager.generic_error_message);
+      apollo.send('GENERIC', chat_id);
     });
 });
 
@@ -203,7 +190,7 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
         .catch((reason) => console.log(reason))
     })
     .catch(() => {
-      bot.sendMessage(msg.chat.id, errorManager.settings_error);
+      apollo.send('SETTINGS', chat_id);
     })
 });
 
@@ -219,10 +206,8 @@ bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
     })
     .catch(reason => {
       console.log(reason)
-      bot.sendMessage(chat_id, 'You are not authorized to perform this operation.');
+      apollo.send('AUTH', chat_id);
     })
-
-
 });
 
 bot.on('callback_query', (callback_message) => {
@@ -260,7 +245,7 @@ bot.on('callback_query', (callback_message) => {
 
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
             .then(() => {
-              bot.sendMessage(chat_id, errorManager.settings_error);
+              apollo.send('SETTINGS', chat_id);
             });
         });
     }
@@ -312,7 +297,7 @@ bot.on('callback_query', (callback_message) => {
 
           bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
             .then(() => {
-              bot.sendMessage(chat_id, errorManager.settings_error);
+              apollo.send('SETTINGS', chat_id);
             });
         });
     }
@@ -323,22 +308,22 @@ bot.on('callback_query', (callback_message) => {
 });
 
 bot.onText(/\/qr (.+)/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const qr_input = match[1];
 
   var code = qrbuilder.build(qr_input, function (image_name) {
-    bot.sendPhoto(chatId, image_name, { caption: qr_input }).then(function () {
+    bot.sendPhoto(chat_id, image_name, { caption: qr_input }).then(function () {
       fs.unlinkSync(image_name);
     });
   });
 });
 
 bot.onText(/\/getMe/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   const userId = msg.from.id;
   const username = msg.from.username;
 
-  bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
+  bot.sendMessage(chat_id, `Your chat_id is ${chat_id}, userId ${userId} and username ${username}`);
 });
 
 bot.on('message', (msg) => {
@@ -350,16 +335,47 @@ bot.on('message', (msg) => {
         bot.sendMessage(msg.chat.id, `Your timezone is now updated to *${tz._z.name}*`, markdown_opts)
       })
       .catch(reason => {
-        bot.sendMessage(msg.chat.id, errorManager.generic_error_message)
+        apollo.send('GENERIC', chat_id);
         console.log(reason)
       })
   }
 });
 
 bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
-  const chatId = msg.chat.id;
+  const chat_id = msg.chat.id;
   var command = match[0].replace('/', '');
   if (commandsList.indexOf(command) < 0)
-    bot.sendMessage(chatId, `Sorry, I don't understand command /${command}, please check the list of available commands with /help.`);
+    bot.sendMessage(chat_id, `Sorry, I don't understand command /${command}, please check the list of available commands with /help.`);
 });
 
+var apollo = {
+  send: (category, chat_id, custom_message = "") => {
+
+    var message = "";
+
+    if (category == "EULA") {
+      message = startCmd.eula_text(chat_id);
+    }
+    else if (category == "GENERIC") {
+      message = errorManager.generic_error_message;
+    }
+    else if (category == "SETTINGS") {
+      message = errorManager.settings_error;
+    }
+    else if (category == "COMMUNICATION") {
+      message = communication_error_message
+    }
+    else if (category == "TOKEN") {
+      message = settingsCmd.tokenError
+    }
+    else if (category == "CUSTOM") {
+      message = custom_message
+    }
+    else if (category == "AUTH") {
+      message = 'You are not authorized to perform this operation.'
+    }
+
+    return bot.sendMessage(chat_id, message, markdown_opts)
+      .catch(reason => console.log(reason));
+  }
+}

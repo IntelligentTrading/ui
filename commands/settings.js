@@ -144,7 +144,7 @@ var settings = {
                 return update(chat_id, { transaction_currencies: currencies_array }, 'transaction_currencies');
             }
             else
-                return errorManager.reject('Something well wrong, please retry or contact us!', 'Invalid callback_data key');
+                return errorManager.reject('Something went wrong, please retry or contact us!', 'Invalid callback_data key');
         }
     },
     profile: {},
