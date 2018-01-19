@@ -21,6 +21,11 @@ function parseSignal(message_data) {
         var rsi = getRSITemplate(message_data);
         telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
       }
+      
+      if (message_data.signal == 'kumo_breakout') {
+        var kumo = getKumoTemplate(message_data);
+        telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text}`;
+      }
 
       return telegram_signal_message;
     });
@@ -59,6 +64,20 @@ function getRSITemplate(message_data) {
   return rsi;
 }
 
+function getKumoTemplate(message_data) {
+  
+  var ichi_emoji = `${(message_data.trend == -1 ? '🆘' : '✅')}`;
+  var ichi_breakout = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
+  var ichi_bias = `${(message_data.trend == -1 ? 'Bear' : 'Bull')}`;
+  
+  var ichimoku = {
+    ichimoku_header_emoji: 'ℹ️',
+    ichimoku_text: `Ichimoku: ${ichi_breakout} Cloud Breakout ${ichi_emoji}\nITT Bias: ${ichi_bias} trend continuation likely.`
+  }
+
+  return ichimoku;
+}
+
 function getBaseSignalTemplate(message_data) {
 
   console.log(message_data);
@@ -89,7 +108,10 @@ function getBaseSignalTemplate(message_data) {
         horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
         header: `[${message_data.transaction_currency}](${wiki_url}) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
         price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(2)}%*`,
-        price_text: price == undefined ? "" : `price: ${currency_symbol} ${price}`
+        price_text: price == undefined ? "" : `price: ${currency_symbol} ${price}`,
+        currency_symbol: currency_symbol,
+        price: price,
+        wiki_header: `[${message_data.transaction_currency}](${wiki_url})`
       }
 
       return base_template;
