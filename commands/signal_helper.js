@@ -155,12 +155,13 @@ function hasValidTimestamp(messageBody) {
     Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
 }
 
-function isDuplicateMessage(message) {
+function isDuplicateMessage(messageId, signalId) {
 
   cleanSortedCache();
 
-  if (sorted_messages_cache.map(msg => msg.id).indexOf(message.MessageId) < 0) {
-    sortedSignalInsertion({ id: message.MessageId, timestamp: Date.now() });
+  if (sorted_messages_cache.filter(record => record.messageId == messageId || record.signalId == signalId).length <= 0) {
+
+    sortedSignalInsertion({ messageId: messageId, signalId: signalId, timestamp: Date.now() });
     return false;
   }
 
@@ -175,7 +176,7 @@ function isCounterCurrency(messageBody) {
 var helper = {
   parse: (message) => parseSignal(message),
   hasValidTimestamp: (message_body) => hasValidTimestamp(message_body),
-  isDuplicateMessage: (message) => isDuplicateMessage(message),
+  isDuplicateMessage: (messageId, signalId) => isDuplicateMessage(messageId, signalId),
   isCounterCurrency: (message_body) => isCounterCurrency(message_body),
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
   decodeMessage: (message) => decodeMessage(message),

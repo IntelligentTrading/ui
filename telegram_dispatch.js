@@ -103,7 +103,7 @@ const app = Consumer.create({
     var decoded_message_body = signalHelper.decodeMessage(message.Body);
     var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
     var isCounterCurrency = signalHelper.isCounterCurrency(decoded_message_body);
-    var isDuplicateMessage = signalHelper.isDuplicateMessage(message);
+    var isDuplicateMessage = signalHelper.isDuplicateMessage(message.MessageId, decoded_message_body.id);
 
     if (hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency) {
       notify(decoded_message_body)
