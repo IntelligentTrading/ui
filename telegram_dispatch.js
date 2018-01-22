@@ -43,10 +43,15 @@ function notify(message_data) {
 
           api.getPlanFor(message_data.signal).then(jsonPlan => {
 
+
+            if (!jsonPlan || jsonPlan.length < 1)
+              throw new Error(errorManager.generic_error_message);
+              
             var plan = JSON.parse(jsonPlan);
+
             var filters = [buildHorizonFilter(horizon),
-              `transaction_currencies=${message_data.transaction_currency}`,
-              `counter_currencies=${message_data.counter_currency}`];
+            `transaction_currencies=${message_data.transaction_currency}`,
+            `counter_currencies=${message_data.counter_currency}`];
 
             return api.users({ filters: filters }).then(full_response => {
 
