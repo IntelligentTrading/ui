@@ -23,8 +23,8 @@ function parseSignal(message_data) {
       }
 
       if (message_data.signal == 'RSI_Cumulative') {
-        var rsi = getRSITemplate(message_data, true);
-        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
+        var rsi_sma = getRsiSmaTemplate(message_data);
+        telegram_signal_message = `${rsi_sma.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi_sma.rsi_general_trend}\n${rsi_sma.rsi_text}\n${rsi_sma.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
       }
 
       if (message_data.signal == 'kumo_breakout') {
@@ -51,7 +51,7 @@ function getSMATemplate(message_data) {
   return sma_template;
 }
 
-function getRSITemplate(message_data, skip_strength = false) {
+function getRSITemplate(message_data) {
 
   if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
     throw new Error('Invalid RSI value');
@@ -59,15 +59,34 @@ function getRSITemplate(message_data, skip_strength = false) {
   var rsi_emoji = `${(message_data.trend == -1 ? '✅' : '⛔')}`;
   var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
   var rsi_strength_values = ['', 'Very', 'Extremely'];
-  var rsi_strength = skip_strength ? '' : rsi_strength_values[message_data.strength_value - 1];
+  var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
 
   var rsi = {
     rsi_header_emoji: '📣',
-    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${!skip_strength && message_data.strength_value == 3 ? '⚠️' : ''}`,
+    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
   }
 
   return rsi;
 }
+
+function getRsiSmaTemplate(message_data) {
+  
+    if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
+      throw new Error('Invalid RSI value');
+  
+    var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '⛔')}`;
+    var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
+    
+    var rsi_sma = {
+      rsi_header_emoji: 'ℹ️',
+      rsi_general_trend: `General trend: *${(message_data.trend == -1 ? 'Bullish' : 'Bearish')}*`,
+      rsi_text: `RSI: *${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+      rsi_itt_bias: `ITT Bias: Trend reversal to the *${(message_data.trend == -1 ? 'upside' : 'downside')}* is near.`,
+    }
+  
+    return rsi_sma;
+  }
+
 
 function getKumoTemplate(message_data) {
 
