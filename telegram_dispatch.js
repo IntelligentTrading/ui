@@ -127,7 +127,7 @@ const app = Consumer.create({
 
       var reasons = invalidReasonsList.join(',');
 
-      console.log(`[Invalid] Message ${message.MessageId} ${reasons}`);
+      console.log(`[Invalid] SQS message ${message.MessageId} for signal ${decoded_message_body.id} ${reasons}`);
     }
     done();
   },
