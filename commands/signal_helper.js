@@ -21,7 +21,12 @@ function parseSignal(message_data) {
         var rsi = getRSITemplate(message_data);
         telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
       }
-      
+
+      if (message_data.signal == 'RSI_Cumulative') {
+        var rsi = getRSITemplate(message_data, true);
+        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
+      }
+
       if (message_data.signal == 'kumo_breakout') {
         var kumo = getKumoTemplate(message_data);
         telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text}`;
@@ -46,7 +51,7 @@ function getSMATemplate(message_data) {
   return sma_template;
 }
 
-function getRSITemplate(message_data) {
+function getRSITemplate(message_data, skip_strength = false) {
 
   if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
     throw new Error('Invalid RSI value');
@@ -54,22 +59,22 @@ function getRSITemplate(message_data) {
   var rsi_emoji = `${(message_data.trend == -1 ? '✅' : '⛔')}`;
   var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
   var rsi_strength_values = ['', 'Very', 'Extremely'];
-  var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
+  var rsi_strength = skip_strength ? '' : rsi_strength_values[message_data.strength_value - 1];
 
   var rsi = {
     rsi_header_emoji: '📣',
-    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
+    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${!skip_strength && message_data.strength_value == 3 ? '⚠️' : ''}`,
   }
 
   return rsi;
 }
 
 function getKumoTemplate(message_data) {
-  
+
   var ichi_emoji = `${(message_data.trend == -1 ? '🆘' : '✅')}`;
   var ichi_breakout = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
   var ichi_bias = `${(message_data.trend == -1 ? 'Bear' : 'Bull')}`;
-  
+
   var ichimoku = {
     ichimoku_header_emoji: 'ℹ️',
     ichimoku_text: `Ichimoku: ${ichi_breakout} Cloud Breakout ${ichi_emoji}\nITT Bias: ${ichi_bias} trend continuation likely.`
