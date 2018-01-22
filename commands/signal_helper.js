@@ -21,7 +21,7 @@ function parseSignal(message_data) {
         var rsi = getRSITemplate(message_data);
         telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
       }
-      
+
       if (message_data.signal == 'kumo_breakout') {
         var kumo = getKumoTemplate(message_data);
         telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text}`;
@@ -65,11 +65,11 @@ function getRSITemplate(message_data) {
 }
 
 function getKumoTemplate(message_data) {
-  
+
   var ichi_emoji = `${(message_data.trend == -1 ? '🆘' : '✅')}`;
   var ichi_breakout = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
   var ichi_bias = `${(message_data.trend == -1 ? 'Bear' : 'Bull')}`;
-  
+
   var ichimoku = {
     ichimoku_header_emoji: 'ℹ️',
     ichimoku_text: `Ichimoku: ${ichi_breakout} Cloud Breakout ${ichi_emoji}\nITT Bias: ${ichi_bias} trend continuation likely.`
@@ -150,12 +150,13 @@ function hasValidTimestamp(messageBody) {
     Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
 }
 
-function isDuplicateMessage(message) {
+function isDuplicateMessage(messageId, signalId) {
 
   cleanSortedCache();
 
-  if (sorted_messages_cache.map(msg => msg.id).indexOf(message.MessageId) < 0) {
-    sortedSignalInsertion({ id: message.MessageId, timestamp: Date.now() });
+  if (sorted_messages_cache.filter(record => record.messageId == messageId || record.signalId == signalId).length <= 0) {
+
+    sortedSignalInsertion({ messageId: messageId, signalId: signalId, timestamp: Date.now() });
     return false;
   }
 
@@ -170,7 +171,7 @@ function isCounterCurrency(messageBody) {
 var helper = {
   parse: (message) => parseSignal(message),
   hasValidTimestamp: (message_body) => hasValidTimestamp(message_body),
-  isDuplicateMessage: (message) => isDuplicateMessage(message),
+  isDuplicateMessage: (messageId, signalId) => isDuplicateMessage(messageId, signalId),
   isCounterCurrency: (message_body) => isCounterCurrency(message_body),
   sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
   decodeMessage: (message) => decodeMessage(message),
