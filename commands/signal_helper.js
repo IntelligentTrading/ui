@@ -29,7 +29,7 @@ function parseSignal(message_data) {
 
       if (message_data.signal == 'kumo_breakout') {
         var kumo = getKumoTemplate(message_data);
-        telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text}`;
+        telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text} (${bst.horizon_text})`;
       }
 
       return telegram_signal_message;
@@ -129,7 +129,7 @@ function getBaseSignalTemplate(message_data) {
 
     }).then((wiki_url) => {
       var base_template = {
-        horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon (${message_data.source.toSentenceCase()})` : message_data.horizon,
+        horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon` : message_data.horizon,
         header: `[${message_data.transaction_currency}](${wiki_url}) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
         price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(2)}%*`,
         price_text: price == undefined ? "" : `price: ${currency_symbol} ${price}`,
