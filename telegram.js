@@ -228,6 +228,16 @@ bot.on('callback_query', (callback_message) => {
     }
   };
 
+  if (cmd.category == 'panic') { //panic.DB:BULL_${feed.id}`
+    if (cmd.operation.action == 'DB') {
+      var sentimentFeedback = kb_data.split('_')[0];
+      var feedId = kb_data.split('_')[1];
+
+      //!FIX with proper save routine
+      /*api.saveNewsFeed(feedId, sentimentFeedback)
+        .catch(err => console.log(err))*/
+    }
+  }
   if (cmd.category == 'registration') {
     if (cmd.operation.action == 'DB') {
       settingsCmd.store(chat_id, kb_data)
