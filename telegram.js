@@ -233,8 +233,13 @@ bot.on('callback_query', (callback_message) => {
       var sentimentFeedback = kb_data.split('_')[0];
       var feedId = kb_data.split('_')[1];
 
+      bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction saved!' })
+      .catch(reason => {
+        console.log(reason);
+      });
       //!FIX with proper save routine
       /*api.saveNewsFeed(feedId, sentimentFeedback)
+      
         .catch(err => console.log(err))*/
     }
   }
