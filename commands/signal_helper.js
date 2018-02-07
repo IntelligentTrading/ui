@@ -18,8 +18,8 @@ function parseSignal(message_data) {
       }
 
       if (message_data.signal == 'RSI') {
-        var rsi = getRSITemplate(message_data);
-        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.header}\n${bst.price_change_text}, ${bst.price_text}\n${rsi.rsi_text}\n${bst.horizon_text}\n`;
+        var rsi = getRsiSmaTemplate(message_data);
+        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\n${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
       }
 
       if (message_data.signal == 'RSI_Cumulative') {
@@ -74,7 +74,7 @@ function getRsiSmaTemplate(message_data) {
     if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
       throw new Error('Invalid RSI value');
   
-    var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '⛔')}`;
+    var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '🆘')}`;
     var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
     
     var rsi_sma = {
