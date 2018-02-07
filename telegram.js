@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 
+var api = require('./core/api').api;
+
 var startCmd = require('./commands/start').start;
 var helpCmd = require('./commands/help').help;
 var priceCmd = require('./commands/price').price;
@@ -17,6 +19,7 @@ var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', '
 var qrbuilder = require('./util/qr-builder').builder;
 
 var errorManager = require('./util/error').errorManager;
+var sentimentUtil = require('./util/sentiment').sentimentUtil;
 
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -230,17 +233,26 @@ bot.on('callback_query', (callback_message) => {
 
   if (cmd.category == 'panic') { //panic.DB:BULL_${feed.id}`
     if (cmd.operation.action == 'DB') {
-      var sentimentFeedback = kb_data.split('_')[0];
+      var reaction = kb_data.split('_')[0];
       var feedId = kb_data.split('_')[1];
 
-      bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction saved!' })
-      .catch(reason => {
-        console.log(reason);
-      });
-      //!FIX with proper save routine
-      /*api.saveNewsFeed(feedId, sentimentFeedback)
-      
-        .catch(err => console.log(err))*/
+      api.addFeedReaction(feedId, reaction, chat_id)
+        .then(updatedFeed => {
+          var updatedText = sentimentUtil.messageTemplate(updatedFeed, callback_message.message);
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction saved!' })
+            .then(res => {
+              bot.editMessageText(updatedText,
+                {
+                  chat_id: chat_id,
+                  message_id: message_id,
+                  parse_mode: 'Markdown'
+                });
+            })
+        })
+        .catch(err => {
+          console.log(err)
+          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction timespan expired!' })
+        })
     }
   }
   if (cmd.category == 'registration') {

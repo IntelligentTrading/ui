@@ -141,6 +141,32 @@ var api = {
         }
 
         return rpromise(request_opts);
+    },
+    addFeedReaction: (feedId, reaction, chat_id) => {
+        var request_opts = {
+            uri: `${node_svc_api}/panic`,
+            method: 'PUT',
+            body: {
+                feedId: feedId,
+            },
+            json: true,
+            headers: {
+                'NSVC-API-KEY': node_svc_api_key
+            }
+        }
+
+        var ittReaction = '';
+
+        switch (reaction) {
+            case 'BULL': ittReaction = 'ittBullish'; break;
+            case 'BEAR': ittReaction = 'ittBearish'; break;
+            case 'IMP': ittReaction = 'ittImportant'; break;
+        }
+
+        request_opts.body[ittReaction] = [];
+        request_opts.body[ittReaction].push(chat_id);
+
+        return rpromise(request_opts);
     }
 }
 
