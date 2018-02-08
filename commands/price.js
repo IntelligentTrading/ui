@@ -17,10 +17,6 @@ var price = {
                     return 'Currency not found';
                 }
             })
-            .catch(reason => {
-                console.log(reason);
-                return "Write `/price <ticker>` to get the latest price.\nFor example: /price ETH";
-            });
     }
 }
 

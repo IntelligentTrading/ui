@@ -94,18 +94,19 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
   const currency = match[2]; // the captured "whatever"
 
-  priceCmd.getPrice(currency)
-    .then((result) => {
-      bot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
-        .catch((reason) => {
-          console.log(reason);
-          apollo.send('GENERIC', chat_id);
-        });
-    })
-    .catch((reason) => {
-      console.log(reason);
-      apollo.send('CUSTOM', chat_id, errorManager.currency_error);
-    });
+  if (!currency) {
+    apollo.send('PRICE', chat_id);
+  }
+  else {
+    priceCmd.getPrice(currency)
+      .then((result) => {
+        bot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
+      })
+      .catch(reason => {
+        console.log(reason);
+        apollo.send('PRICE', chat_id);
+      })
+  }
 });
 
 bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
@@ -397,6 +398,9 @@ var apollo = {
     }
     else if (category == "CUSTOM") {
       message = custom_message
+    }
+    else if (category == "PRICE") {
+      message = "Write `/price <ticker>` to get the latest price.\nFor example: /price ETH";
     }
     else if (category == "AUTH") {
       message = 'You are not authorized to perform this operation.'
