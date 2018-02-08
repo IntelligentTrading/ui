@@ -129,6 +129,8 @@ var settings = {
                 return update(chat_id, { risk: kv[1] });
             if (kv[0] == 'ISMUTED')
                 return update(chat_id, { is_muted: kv[1] == 'True' });
+            if (kv[0] == 'CROWD')
+                return update(chat_id, { is_crowd_enabled: kv[1] == 'True' });
             if (kv[0] == 'ISSUB')
                 return update(chat_id, { is_subscribed: kv[1] == 'True' });
             if (kv[0] == 'SIG') {

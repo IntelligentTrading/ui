@@ -9,10 +9,13 @@ tickers.counter_currencies().then(tccs => {
 
 var userSettings;
 var currencies_button = [{ text: "Edit Coin Watchlist", callback_data: "settings.NAV:COI" }];
+var panic_button = [{ text: "Turn Crowd Sentiment OFF", callback_data: "settings.DB:CROWD_" }];
 
 var msg = "Here you can set up your signal preferences.";
 var kb = new Keyboard(msg, []);
 kb.showBackButton = true;
+
+
 
 kb.updateSettings = (settings) => {
     userSettings = settings;
@@ -20,6 +23,11 @@ kb.updateSettings = (settings) => {
     userSettings.counter_currencies.forEach(counter_currency => {
         followed_counter_currencies.push(`alt/${counter_currencies[counter_currency].symbol}`)
     })
+
+    panic_button[0].text = settings.is_crowd_enabled ? 'Turn Crowd Sentiment OFF' : 'Turn Crowd Sentiment ON';
+    panic_button[0].callback_data = settings.is_crowd_enabled
+        ? panic_button[0].callback_data.split('_')[0] + '_False'
+        : panic_button[0].callback_data.split('_')[0] + '_True';
 
     if (followed_counter_currencies.length == 0)
         kb.message = `${msg} You are not following any coin.`;
@@ -50,6 +58,7 @@ kb.getButtons = () => {
 
         buttons.push(counter_currency_buttons);
         buttons.push(currencies_button);
+        buttons.push(panic_button);
         buttons.push(kb.backButton);
         resolve(buttons);
     });

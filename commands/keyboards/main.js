@@ -26,17 +26,6 @@ kb.updateButtons = (message, isSubscribed, isMuted) => {
 
     kb.message = message;
 
-    /*buttons[0][0].text = isSubscribed ? 'Unsubscribe' : 'Subscribe';
-    buttons[0][0].callback_data = isSubscribed
-        ? buttons[0][0].callback_data.split('_')[0] + '_False'
-        : buttons[0][0].callback_data.split('_')[0] + '_True';
-
-    // Dynamic Alert button
-    buttons[1][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
-    buttons[1][0].callback_data = isMuted
-        ? buttons[1][0].callback_data.split('_')[0] + '_False'
-        : buttons[1][0].callback_data.split('_')[0] + '_True';*/
-
     buttons[0][0].text = isMuted ? 'Turn alerts ON' : 'Turn alerts OFF';
     buttons[0][0].callback_data = isMuted
         ? buttons[0][0].callback_data.split('_')[0] + '_False'
