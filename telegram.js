@@ -232,6 +232,30 @@ bot.on('callback_query', (callback_message) => {
     }
   };
 
+  if (cmd.category == 'hint') {
+    if (cmd.operation.action == 'DB') {
+      var hint_action = kb_data.split('_')[0];
+      var hint_button = kb_data.split('_')[1];
+
+      if (hint_action == 'SIGALL') {
+
+        if (hint_button == 'Y') {
+          settingsCmd.selectAllSignals(chat_id)
+            .then(() => {
+              bot.sendMessage(chat_id, 'You are now subscribed to all the signals!')
+                .catch((reason) => console.log(reason))
+            })
+            .catch(() => {
+              apollo.send('SETTINGS', chat_id);
+            })
+        } else {
+          bot.sendMessage(chat_id, 'You can always select your currencies of interest with the /settings command!')
+            .catch((reason) => console.log(reason))
+        }
+      }
+    }
+  }
+
   if (cmd.category == 'panic') { //panic.DB:BULL_${feed.id}`
     if (cmd.operation.action == 'DB') {
       var reaction = kb_data.split('_')[0];
