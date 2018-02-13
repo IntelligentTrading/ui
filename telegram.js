@@ -270,7 +270,8 @@ bot.on('callback_query', (callback_message) => {
                 {
                   chat_id: chat_id,
                   message_id: message_id,
-                  parse_mode: 'Markdown'
+                  parse_mode: 'Markdown',
+                  disable_web_page_preview: true
                 });
             })
         })
