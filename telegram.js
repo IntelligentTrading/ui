@@ -14,7 +14,7 @@ var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
 const tickers = require('./commands/data/tickers').tickers;
-var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token'];
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard'];
 
 var qrbuilder = require('./util/qr-builder').builder;
 
@@ -24,6 +24,9 @@ var sentimentUtil = require('./util/sentiment').sentimentUtil;
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
+
+const Wizard = require('./commands/wizard').Wizard;
+var wiz = new Wizard(bot);
 
 const timezone = require('geo-tz');
 
@@ -214,6 +217,10 @@ bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
     })
 });
 
+bot.onText(/\/wizard/, (msg, match) => {
+  wiz.run(msg.chat.id)
+})
+
 bot.on('callback_query', (callback_message) => {
 
   var message_id = callback_message.message.message_id;
@@ -232,14 +239,38 @@ bot.on('callback_query', (callback_message) => {
     }
   };
 
+  if (cmd.category == 'wizard') {
+    wiz.bot_callback(chat_id, kb_data)
+  }
+
+  if (cmd.category == 'question') { // question.topic:subject_result -> question.feed:toomany_Y
+    var question_action = kb_data.split('_')[0];
+    var question_button = kb_data.split('_')[1];
+
+    var analytics = {
+      telegram_chat_id: chat_id,
+      topic: question_action,
+      answer: question_button
+    }
+
+    api.analytics(analytics)
+      .then(() => {
+        bot.sendMessage(chat_id, 'You are now subscribed to all the signals!')
+          .catch((reason) => console.log(reason))
+      })
+      .catch(() => {
+        apollo.send('SETTINGS', chat_id);
+      })
+  }
+
   if (cmd.category == 'hint') {
     if (cmd.operation.action == 'DB') {
-      var hint_action = kb_data.split('_')[0];
-      var hint_button = kb_data.split('_')[1];
+      var question_action = kb_data.split('_')[0];
+      var question_button = kb_data.split('_')[1];
 
-      if (hint_action == 'SIGALL') {
+      if (question_action == 'SIGALL') {
 
-        if (hint_button == 'Y') {
+        if (question_button == 'Y') {
           settingsCmd.selectAllSignals(chat_id)
             .then(() => {
               bot.sendMessage(chat_id, 'You are now subscribed to all the signals!')
