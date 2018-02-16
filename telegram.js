@@ -14,7 +14,7 @@ var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
 const tickers = require('./commands/data/tickers').tickers;
-var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard'];
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard', 'getMe'];
 
 var qrbuilder = require('./util/qr-builder').builder;
 
