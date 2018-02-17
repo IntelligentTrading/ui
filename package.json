@@ -17,13 +17,13 @@
     "body-parser": "^1.18.2",
     "ejs": "2.5.6",
     "express": "4.15.2",
+    "geo-tz": "^3.3.4",
     "lodash": "^4.17.4",
+    "node-cache": "^4.1.1",
     "node-telegram-bot-api": "^0.29.0",
     "plotly": "^1.0.6",
     "qr-image": "^3.2.0",
-    "sqs-consumer": "^3.8.0",
-    "node-cache": "^4.1.1",
-    "geo-tz": "^3.3.4"
+    "sqs-consumer": "^3.8.0"
   },
   "devDependencies": {
     "request": "^2.81.0",
