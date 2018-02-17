@@ -56,7 +56,7 @@ function Wizard(bot) {
 
         var text = "💡*Enable sentiment alerts*\nLast step! We offer Crowd Sentiment alerts, they tell you what's going on in the market. Would you like us to enable them?"
         var crowd_btns = [{
-            "text": "Turn Om",
+            "text": "Turn On",
             "callback_data": "wizard.DB:CROWD_true"
         },
         {
