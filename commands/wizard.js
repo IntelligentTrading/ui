@@ -6,17 +6,17 @@ function Wizard(bot) {
 
     //Step 1
     this.setTraderProfile = (chat_id) => {
-        var text = "💡*Hint*\nFirst, let's set up your trading profile. Which one of these three suits you best? Be careful, depending on your choice you will get less (or more) trade alerts. Long term investors get the least!"
+        var text = "💡*Pick your profile*\nFirst, let's set up your trading profile. These profiles use 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
         var horizon_btns = [{
-            "text": "Daytrader",
+            "text": "High Risk",
             "callback_data": "wizard.DB:HRZ_short"
         },
         {
-            "text": "Swingtrader",
+            "text": "Medium Risk",
             "callback_data": "wizard.DB:HRZ_medium"
         },
         {
-            "text": "Investor",
+            "text": "Low Risk",
             "callback_data": "wizard.DB:HRZ_long"
         }];
 
@@ -32,13 +32,13 @@ function Wizard(bot) {
     //Step 2
     this.setTransactionCurrencies = (chat_id) => {
 
-        var text = "💡*Hint*\nGreat! To make sure you are receiving enough signals, we suggest starting by enabling every single altcoin available. You can always change it later manually. Would you like us to do it for you now?"
+        var text = "💡*Enable all altcoins*\nGreat! We suggest enabling all altcoins at first. You can always change it later manually."
         var sigall_btns = [{
-            "text": "Yes",
+            "text": "Enable all",
             "callback_data": "wizard.DB:SIGALL_true"
         },
         {
-            "text": "No",
+            "text": "No thanks",
             "callback_data": "wizard.DB:SIGALL_false"
         }];
 
@@ -54,13 +54,13 @@ function Wizard(bot) {
     //Step 3
     this.setCrowdSentiment = (chat_id) => {
 
-        var text = "💡*Hint*\nLast step! We offer Crowd Sentiment alerts, which help you gain insight on the general market and coin sentiment. Would you like us to enable the feed?"
+        var text = "💡*Enable sentiment alerts*\nLast step! We offer Crowd Sentiment alerts, they tell you what's going on in the market. Would you like us to enable them?"
         var crowd_btns = [{
-            "text": "Yes",
+            "text": "Turn Om",
             "callback_data": "wizard.DB:CROWD_true"
         },
         {
-            "text": "No",
+            "text": "Turn Off",
             "callback_data": "wizard.DB:CROWD_false"
         }];
 
@@ -111,7 +111,7 @@ function Wizard(bot) {
 
             api.updateUser(chat_id, { is_crowd_enabled: callback_data[1] })
                 .then(() => {
-                    this.bot.sendMessage(chat_id, 'Perfect! You are all set, but you can change your choices using the /settings command or running the /wizard again!');
+                    this.bot.sendMessage(chat_id, 'Thanks for your help! Please keep in mind it could take a while before alerts come in!');
                 }).catch((reason) => this.wizError(chat_id, reason))
 
         }
