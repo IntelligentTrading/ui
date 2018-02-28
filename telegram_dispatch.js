@@ -56,22 +56,15 @@ function notify(message_data) {
             return api.users({ filters: filters }).then(response => {
 
               var users = JSON.parse(response);
-              if (process.env.LOCAL_ENV == undefined) {
-                users.filter(user => user.eula && user.settings.subscription_plan >= plan.accessLevel)
-                  .map(user => {
-                    bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
-                      .catch(err => {
-                        var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
-                        console.log(errMessage);
-                      });
-                  })
-              }
-              else {
-                bot.sendMessage(process.env.TELEGRAM_TEST_CHAT_ID, telegram_signal_message, opts)
-                  .catch((err) => {
-                    console.log(err.message)
-                  });
-              }
+
+              users.filter(user => user.eula && user.settings.subscription_plan >= plan[0].accessLevel)
+                .map(user => {
+                  bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
+                    .catch(err => {
+                      var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
+                      console.log(errMessage);
+                    });
+                })
             })
               .catch(reason => {
                 console.log(reason)
