@@ -11,9 +11,8 @@ var kbs = require('./keyboards/keyboards').keyboards;
 var current_kb = kbs.main_keyboard;
 
 
-var updateSettingsOnCallback = (response_body) => {
-    var user_object = JSON.parse(response_body);
-    settings.profile = user_object.settings;
+var updateSettingsOnCallback = (user) => {
+    settings.profile = user.settings;
     //update all the kbs at once
     kbs.updateKeyboardsSettings(settings.profile);
 }
@@ -21,18 +20,10 @@ var updateSettingsOnCallback = (response_body) => {
 var getUser = function (chat_id) {
     return api.users({ telegram_chat_id: chat_id })
         .then(response => {
-            if (response.statusCode == 200) {
-
-                if (response.body && response.body != '{}') {
-                    updateSettingsOnCallback(response.body);
-                }
-
-                return JSON.parse(response.body);
+            if (response) {
+                updateSettingsOnCallback(JSON.parse(response))
             }
-            else {
-                console.log(response);
-                throw new Error(response.statusMessage);
-            }
+            return JSON.parse(response);
         }).catch((reason) => {
             console.log(reason);
             throw new Error(errorManager.genericErrorMessage);
@@ -42,13 +33,8 @@ var getUser = function (chat_id) {
 var update = function (chat_id, optionals, url_segment) {
     return api.updateUser(chat_id, optionals, url_segment)
         .then(response => {
-            if (response.statusCode == 200) {
-                updateSettingsOnCallback(response.body);
-                return settings.profile;
-            }
-            else {
-                throw new Error(response.statusMessage);
-            }
+            updateSettingsOnCallback(JSON.parse(response))
+            return settings.profile;
         })
         .catch((reason) => {
             console.log(reason);
@@ -57,27 +43,16 @@ var update = function (chat_id, optionals, url_segment) {
 }
 
 var subscribeUser = (chat_id, token) => {
-    return api.subscribeUser(chat_id, token).then(response => {
-        if (response.statusCode == 200) {
-            //! Verify response content!!!
-            var err = JSON.parse(response.body).err;
-            if (err) {
-                return { err: err }
-            }
-            updateSettingsOnCallback(response.body);
-            return settings.profile;
+    return api.subscribeUser(chat_id, token).then(responseJSON => {
+        var responseObj = JSON.parse(responseJSON);
+        if (responseObj.success) {
+            updateSettingsOnCallback(responseObj.user)
         }
-        else {
-            throw new Error(response.statusMessage);
-        }
+        return responseObj
     }).catch((reason) => {
         console.log(reason);
         throw new Error(errorManager.genericErrorMessage);
     })
-}
-
-var setTimezone = (telegram_chat_id, timezone, time_difference) => {
-    return api.setTimezone(telegram_chat_id, timezone, time_difference)
 }
 
 var keyboards = [
@@ -137,13 +112,13 @@ var settings = {
                 var counter_currency = { symbol: kv[1], index: kv[2], follow: kv[3] == 'True' };
                 var counter_currencies = [];
                 counter_currencies.push(counter_currency);
-                return update(chat_id, { counter_currencies: counter_currencies }, 'counter_currencies');
+                return update(chat_id, { currencies: counter_currencies }, 'currencies/counter');
             }
             if (kv[0] == 'COI') {
                 var currency = { symbol: kv[1], follow: kv[2] == 'True' };
-                var currencies_array = [];
-                currencies_array.push(currency);
-                return update(chat_id, { transaction_currencies: currencies_array }, 'transaction_currencies');
+                var transaction_currencies = [];
+                transaction_currencies.push(currency);
+                return update(chat_id, { currencies: transaction_currencies }, 'currencies/transaction');
             }
             else
                 return errorManager.reject('Something went wrong, please retry or contact us!', 'Invalid callback_data key');
@@ -151,9 +126,8 @@ var settings = {
     },
     profile: {},
     getUser: (chat_id) => getUser(chat_id),
-    generateCodeForPlan: (plan, admin_token) => api.generateToken(plan, admin_token),
+    generateCodeForPlan: (plan) => api.generateToken(plan),
     subscribe: (chat_id, token) => subscribeUser(chat_id, token),
-    setTimezone: (telegram_chat_id, timezone, time_diff) => setTimezone(telegram_chat_id, timezone, time_diff),
     subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
     subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
     tokenError: "Your token is invalid or already in use. Please use /token your-token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",

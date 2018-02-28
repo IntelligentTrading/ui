@@ -6,7 +6,7 @@ var feedback = {
             uri: `${process.env.ITT_NODE_SERVICES}/api/feedback`,
             resolveWithFullResponse: true,
             method: 'POST',
-            body: { chat_id: chat_id, user: user, type: 'feedback', content: msg },
+            body: { chat_id: chat_id, user: user, content: msg },
             json: true,
             headers: {
                 'NSVC-API-KEY': process.env.NODE_SVC_API_KEY

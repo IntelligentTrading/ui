@@ -67,17 +67,17 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   }
   else {
     settingsCmd.subscribe(chat_id, token)
-      .then((userSettings) => {
-        console.log(userSettings);
-        if (userSettings && !userSettings.err) {
-          var subscriptionMessage = userSettings.is_ITT_team
+      .then((result) => {//{ success: true, message: 'Token redeemed correctly!', user: result }
+
+        if (result.success) {
+          var subscriptionMessage = result.user.is_ITT_team
             ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
 
           bot.sendMessage(chat_id, subscriptionMessage, nopreview_markdown_opts);
         }
         else {
-          userSettings.err == "EULA" ? apollo.send('EULA', chat_id) : apollo.send('CUSTOM', chat_id, userSettings.err)
+          result.message == "EULA" ? apollo.send('EULA', chat_id) : apollo.send('CUSTOM', chat_id, result.message)
         }
       })
       .catch((reason) => {
@@ -201,12 +201,13 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
     })
 });
 
-bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
+//! This goes in the admin dashboard
+/*bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
   var admin_token = match[2].split(' ')[0];
   var plan = match[2].split(' ')[1];
 
-  settingsCmd.generateCodeForPlan(plan, admin_token)
+  settingsCmd.generateCodeForPlan(plan)
     .then(result => {
       var license = JSON.parse(result)
       bot.sendMessage(chat_id, license.code, markdown_opts)
@@ -215,7 +216,7 @@ bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
       console.log(reason)
       apollo.send('AUTH', chat_id);
     })
-});
+});*/
 
 bot.onText(/\/wizard/, (msg, match) => {
   wiz.run(msg.chat.id)
@@ -241,26 +242,6 @@ bot.on('callback_query', (callback_message) => {
 
   if (cmd.category == 'wizard') {
     wiz.bot_callback(chat_id, kb_data)
-  }
-
-  if (cmd.category == 'question') { // question.topic:subject_result -> question.feed:toomany_Y
-    var question_action = kb_data.split('_')[0];
-    var question_button = kb_data.split('_')[1];
-
-    var analytics = {
-      telegram_chat_id: chat_id,
-      topic: question_action,
-      answer: question_button
-    }
-
-    api.analytics(analytics)
-      .then(() => {
-        bot.sendMessage(chat_id, 'You are now subscribed to all the signals!')
-          .catch((reason) => console.log(reason))
-      })
-      .catch(() => {
-        apollo.send('SETTINGS', chat_id);
-      })
   }
 
   if (cmd.category == 'hint') {
@@ -389,18 +370,7 @@ bot.on('callback_query', (callback_message) => {
   else {
     bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: '' });
   }
-});
-
-bot.onText(/\/qr (.+)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  const qr_input = match[1];
-
-  var code = qrbuilder.build(qr_input, function (image_name) {
-    bot.sendPhoto(chat_id, image_name, { caption: qr_input }).then(function () {
-      fs.unlinkSync(image_name);
-    });
-  });
-});
+})
 
 bot.onText(/\/getMe/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -408,21 +378,6 @@ bot.onText(/\/getMe/, (msg, match) => {
   const username = msg.from.username;
 
   bot.sendMessage(chat_id, `Your chat_id is ${chat_id}, userId ${userId} and username ${username}`);
-});
-
-bot.on('message', (msg) => {
-  if (msg.location) {
-    // Auto-adjust UTC
-    var tz = timezone.tzMoment(msg.location.latitude, msg.location.longitude)
-    settingsCmd.setTimezone(msg.chat.id, tz._z.name, tz._z.abbrs[1])
-      .then(result => {
-        bot.sendMessage(msg.chat.id, `Your timezone is now updated to *${tz._z.name}*`, markdown_opts)
-      })
-      .catch(reason => {
-        apollo.send('GENERIC', chat_id);
-        console.log(reason)
-      })
-  }
 });
 
 bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
