@@ -53,14 +53,9 @@ function notify(message_data) {
             `transaction_currencies=${message_data.transaction_currency}`,
             `counter_currencies=${message_data.counter_currency}`, 'is_muted=false'];
 
-            return api.users({ filters: filters }).then(full_response => {
+            return api.users({ filters: filters }).then(response => {
 
-              if (full_response.statusCode != 200) {
-                console.log(full_response.statusMessage);
-                throw new Error(errorManager.generic_error_message);
-              }
-
-              var users = JSON.parse(full_response.body);
+              var users = JSON.parse(response);
               if (process.env.LOCAL_ENV == undefined) {
                 users.filter(user => user.eula && user.settings.subscription_plan >= plan.accessLevel)
                   .map(user => {
