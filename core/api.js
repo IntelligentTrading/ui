@@ -24,49 +24,26 @@ var api = {
 
         var request_opts = new Options();
         request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`;
-        request_opts.resolveWithFullResponse = true;
 
-        //! returns the full response, with status code and body
         return rpromise(request_opts);
     },
     subscribeUser: (chat_id, token) => {
 
         var request_opts = new Options();
         request_opts.method = 'POST';
-        request_opts.uri = `${node_svc_api}/users/subscribe`;
-        request_opts.form = { telegram_chat_id: chat_id, token: token };
-        request_opts.resolveWithFullResponse = true;
-
-        //! returns the full response, with status code and body
+        request_opts.uri = `${node_svc_api}/license/subscribe`;
+        request_opts.form = { telegram_chat_id: chat_id, licenseCode: token };
         return rpromise(request_opts);
     },
-    updateUser: (chat_id, optionals, resource_url = '') => {
+    updateUser: (chat_id, settings, resource_url = '') => {
         if (chat_id == null || chat_id == undefined) {
             throw new Error('Chat id cannot be null or undefined');
         }
-
-        var settings = { settings: optionals }
 
         var request_opts = new Options();
         request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`;
         request_opts.method = 'PUT';
         request_opts.form = settings;
-        request_opts.resolveWithFullResponse = true;
-
-        return rpromise(request_opts);
-    },
-    setTimezone: (chat_id, area, hours_diff) => {
-        if (chat_id == null || chat_id == undefined) {
-            throw new Error('Chat id cannot be null or undefined');
-        }
-
-        var timezone = { settings: { timezone: area, time_diff: hours_diff } }
-
-        var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users/${chat_id}/timezone`;
-        request_opts.method = 'PUT';
-        request_opts.form = timezone;
-        request_opts.resolveWithFullResponse = true;
 
         return rpromise(request_opts);
     },
@@ -133,9 +110,8 @@ var api = {
     },
     generateToken: (plan, admin_token) => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/users/generate/${plan}`;
+        request_opts.url = `${node_svc_api}/license/generate/${plan}`;
         request_opts.method = 'POST';
-        request_opts.form = { token: admin_token };
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
