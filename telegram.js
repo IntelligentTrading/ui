@@ -14,7 +14,7 @@ var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
 const tickers = require('./commands/data/tickers').tickers;
-var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard', 'getMe'];
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard', 'getMe', 'upgrade'];
 
 var qrbuilder = require('./util/qr-builder').builder;
 
@@ -25,8 +25,10 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-const Wizard = require('./commands/wizard').Wizard;
-var wiz = new Wizard(bot);
+const Wizard = require('./commands/wizard').Wizard
+var wiz = new Wizard(bot)
+const PaymentController = require('./commands/payment')
+var payment = new PaymentController(bot)
 
 const timezone = require('geo-tz');
 
@@ -200,6 +202,10 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
       apollo.send('SETTINGS', chat_id);
     })
 });
+
+bot.onText(/\/upgrade/, (msg, match) => {
+  payment.pay(msg.chat.id)
+})
 
 //! This goes in the admin dashboard
 /*bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {

@@ -9,8 +9,7 @@
   "main": "telegram.js",
   "scripts": {
     "start": "node index.js",
-    "chart": "node chart_dispatch.js",
-    "test": "node test.js"
+    "test": "nyc --reporter=text mocha --timeout=10000 --exit"
   },
   "dependencies": {
     "aws-sdk": "^2.145.0",
@@ -23,12 +22,18 @@
     "node-telegram-bot-api": "^0.29.0",
     "plotly": "^1.0.6",
     "qr-image": "^3.2.0",
-    "sqs-consumer": "^3.8.0"
+    "sqs-consumer": "^3.8.0",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "colors": "^1.1.2",
+    "mocha": "^5.0.0",
+    "sinon": "^4.4.2"
   },
   "devDependencies": {
     "request": "^2.81.0",
     "request-promise": "^4.2.2",
-    "tape": "^4.7.0"
+    "tape": "^4.7.0",
+    "nyc": "^11.4.1"
   },
   "repository": {
     "type": "git",
