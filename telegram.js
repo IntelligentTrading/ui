@@ -14,7 +14,8 @@ var settingsCmd = require('./commands/settings').settings;
 const about = require('./commands/about').about;
 
 const tickers = require('./commands/data/tickers').tickers;
-var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume', 'token', 'wizard', 'getMe', 'upgrade'];
+var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume',
+  'token', 'wizard', 'getMe', 'upgrade', 'verifytx'];
 
 var qrbuilder = require('./util/qr-builder').builder;
 
@@ -204,7 +205,12 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
 });
 
 bot.onText(/\/upgrade/, (msg, match) => {
-  payment.pay(msg.chat.id)
+  payment.upgrade(msg.chat.id)
+})
+
+bot.onText(/\/verifytx(\s*)(.*)/, (msg, match) => {
+  const tx = match[2];
+  payment.verifyTx(msg.chat.id, tx)
 })
 
 //! This goes in the admin dashboard
@@ -248,6 +254,10 @@ bot.on('callback_query', (callback_message) => {
 
   if (cmd.category == 'wizard') {
     wiz.bot_callback(chat_id, kb_data)
+  }
+
+  if (cmd.category == 'payment') {
+    payment.callback(chat_id, callback_message.data)
   }
 
   if (cmd.category == 'hint') {
