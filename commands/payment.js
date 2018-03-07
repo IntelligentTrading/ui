@@ -7,11 +7,11 @@ module.exports = class PaymentController {
         this.bot = bot
     }
 
-    upgrade(chat_id) {
+    async upgrade(chat_id) {
 
-        var daysLeft = 0
+        var status = await paymentApi.userInfo(chat_id)
 
-        var text = `💰 *Upgrade*\n\nI'll guide you throw the upgrade process. You have currently ${daysLeft} paid days left. How many days do you want to add to your subscription?`
+        var text = `💰 *Upgrade*\n\nYou have currently ${status.subscriptionDaysLeft} paid days left (exp. date ${status.expirationDate}). How many days do you want to add to your subscription?`
 
         var subscription_days_btns = [{
             "text": "15 days",
