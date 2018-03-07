@@ -8,7 +8,7 @@ var userSettings;
 var currencies = []; // ? Should I use tickers.get() ? I'm adding a field here and the array is shared, so maybe not.
 
 var PAGE_COLS = 5;
-var PAGE_ROWS = 5;
+var PAGE_ROWS = 4;
 var PAGE_SIZE = PAGE_COLS * PAGE_ROWS;
 
 var current_page = 0;
