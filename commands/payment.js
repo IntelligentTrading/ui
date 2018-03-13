@@ -76,7 +76,7 @@ module.exports = class PaymentController {
     ittRxAddress(chat_id, proceed) {
         //requires API or env variable
         //! Test account #2
-        var rxAddress = '0x529506f3C2bDC4f51eF0fD59a7552fd62d41e6Fd'
+        var rxAddress = '0xABCDabcd1234567890'
         if (proceed == 'true') {
             this.bot.sendMessage(chat_id, `Great, you can now send the ITT to this address:\n${rxAddress}`)
                 .then(() => {
