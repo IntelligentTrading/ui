@@ -7,31 +7,32 @@ module.exports = class PaymentController {
         this.bot = bot
     }
 
-    async upgrade(chat_id) {
+    upgrade(chat_id) {
 
-        var status = await paymentApi.userInfo(chat_id)
+        paymentApi.userInfo(chat_id)
+            .then(status => {
+                var text = `*Upgrade*\n\nYou have currently ${status.subscriptionDaysLeft} paid days left (exp. date ${status.expirationDate}). How many days do you want to add to your subscription?`
 
-        var text = `*Upgrade*\n\nYou have currently ${status.subscriptionDaysLeft} paid days left (exp. date ${status.expirationDate}). How many days do you want to add to your subscription?`
+                var subscription_days_btns = [{
+                    "text": "15 days",
+                    "callback_data": "payment.ittToPay:15"
+                },
+                {
+                    "text": "30 days",
+                    "callback_data": "payment.ittToPay:30"
+                },
+                {
+                    "text": "90 days",
+                    "callback_data": "payment.ittToPay:90"
+                }];
 
-        var subscription_days_btns = [{
-            "text": "15 days",
-            "callback_data": "payment.ittToPay:15"
-        },
-        {
-            "text": "30 days",
-            "callback_data": "payment.ittToPay:30"
-        },
-        {
-            "text": "90 days",
-            "callback_data": "payment.ittToPay:90"
-        }];
-
-        var opts =
-            {
-                parse_mode: 'Markdown',
-                reply_markup: { inline_keyboard: [subscription_days_btns] }
-            }
-        this.bot.sendMessage(chat_id, text, opts);
+                var opts =
+                    {
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [subscription_days_btns] }
+                    }
+                this.bot.sendMessage(chat_id, text, opts);
+            })
     }
 
     verifyTx(chat_id, txHash) {
