@@ -19,7 +19,7 @@ var chat_id = process.env.TELEGRAM_TEST_CHAT_ID
 var callbackDays = 15
 
 // Transaction with > 12 ETH on Ropsten test net
-var ropstenSampleTx = '0x07f3879c01ca1610c66af28a7f4c44d9636b2913869f89a184a3223356a54a20'
+var sampleTx = '0x3b84bb43306f2aaa4928e814b991be3eb74f8e0a6a2798a02172706e36041653'
 
 describe('Payment Controller', () => {
     it('starts the payment process on /upgrade', () => {
@@ -54,9 +54,9 @@ describe('Payment Controller', () => {
 
     it('Transaction verification calls etherscan API and returns the transaction on success', () => {
         var paymentApiSpy = sinon.spy(paymentApi, 'verify')
-        return payment.verifyTx(chat_id, ropstenSampleTx).then(transaction => {
-            expect(paymentApiSpy.getCall(0).args[0]).to.be.equal(ropstenSampleTx)
-            expect(transaction.hash).to.be.equal(ropstenSampleTx)
+        return payment.verifyTx(chat_id, sampleTx).then(transaction => {
+            expect(paymentApiSpy.getCall(0).args[0]).to.be.equal(sampleTx)
+            expect(transaction.hash).to.be.equal(sampleTx)
             paymentApiSpy.restore()
         })
     })
