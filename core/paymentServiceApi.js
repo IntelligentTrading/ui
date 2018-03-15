@@ -24,5 +24,10 @@ module.exports = {
         request_opts.method = 'GET'
         request_opts.uri = `${node_svc_api}/payment/status/${telegram_chat_id}`
         return rpromise(request_opts)
+    },
+    getWalletAddress: (telegram_chat_id) => {
+        request_opts.method = 'GET'
+        request_opts.uri = `${node_svc_api}/wallet/address/${telegram_chat_id}`
+        return rpromise(request_opts)
     }
 }
