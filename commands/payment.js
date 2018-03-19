@@ -75,16 +75,18 @@ module.exports = class PaymentController {
     }
 
     ittRxAddress(chat_id, proceed) {
-        //requires API or env variable
-        //! Test account #2
-        var rxAddress = '0xABCDabcd1234567890'
-        if (proceed == 'true') {
-            this.bot.sendMessage(chat_id, `Great, you can now send the ITT to this address:\n${rxAddress}`)
-                .then(() => {
-                    this.bot.sendMessage(chat_id, `Once done execute /verifytx followed by the transaction address to confirm the payment.`)
-                })
-            return rxAddress
-        }
+
+        if (proceed == 'false')
+            return this.bot.sendMessage(chat_id, `Great, you can always come back later to upgrade you status.`)
+
+        return paymentApi.getWalletAddress(chat_id)
+            .then(addx => {
+                this.bot.sendMessage(chat_id, `Great, you can now send the ITT to this address:\n${addx}`)
+                    .then(() => {
+                        this.bot.sendMessage(chat_id, `Once done execute /verifytx followed by the transaction address to confirm the payment.`)
+                    })
+                return addx
+            })
     }
 
     callback(chat_id, data, finalize) {
