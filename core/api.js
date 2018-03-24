@@ -72,7 +72,7 @@ var api = {
     },
     tickers: () => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/tickers`;
+        request_opts.url = `${node_svc_api}/tickers/transaction_currencies`;
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
@@ -81,7 +81,7 @@ var api = {
     },
     counterCurrencies: () => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/counter_currencies`;
+        request_opts.url = `${node_svc_api}/tickers/counter_currencies`;
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
