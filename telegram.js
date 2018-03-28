@@ -28,8 +28,6 @@ const bot = new TelegramBot(token, { polling: true });
 
 const Wizard = require('./commands/wizard').Wizard
 var wiz = new Wizard(bot)
-const PaymentController = require('./commands/payment')
-var payment = new PaymentController(bot)
 
 const timezone = require('geo-tz');
 
@@ -204,15 +202,6 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
     })
 });
 
-bot.onText(/\/upgrade/, (msg, match) => {
-  payment.upgrade(msg.chat.id)
-})
-
-bot.onText(/\/verifytx(\s*)(.*)/, (msg, match) => {
-  const tx = match[2];
-  payment.verifyTx(msg.chat.id, tx)
-})
-
 //! This goes in the admin dashboard
 /*bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -254,10 +243,6 @@ bot.on('callback_query', (callback_message) => {
 
   if (cmd.category == 'wizard') {
     wiz.bot_callback(chat_id, kb_data)
-  }
-
-  if (cmd.category == 'payment') {
-    payment.callback(chat_id, callback_message.data)
   }
 
   if (cmd.category == 'hint') {

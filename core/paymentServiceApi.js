@@ -11,13 +11,11 @@ var request_opts = {
 }
 
 module.exports = {
-    verify: (txHash, telegram_chat_id) => {
+    // transaction must be a JSON object with the full transaction as on Etherscan
+    verify: (transaction, telegram_chat_id) => {
         request_opts.method = 'POST'
         request_opts.uri = `${node_svc_api}/payment/verify`
-        request_opts.body = {
-            txHash: txHash,
-            telegram_chat_id: telegram_chat_id
-        }
+        request_opts.body = transaction
         return rpromise(request_opts)
     },
     userInfo: (telegram_chat_id) => {
