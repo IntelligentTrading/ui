@@ -54,7 +54,7 @@ function notify(message_data) {
             return api.users({ filters: filters }).then(usersJson => {
 
               var users = JSON.parse(usersJson)
-              users.filter(user => user.eula && IsSubscribed(user, signal))
+              users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
                 .map(subscribedUser => {
                   bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts)
                     .catch(err => {
