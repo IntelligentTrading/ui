@@ -16,7 +16,7 @@ else {
 
 
 var start = {
-    eula_text: (chat_id) => `Hi! I'm the ITT Trading Bot. Before you activate your account you MUST accept the [EULA](https://t.me/iv?url=https%3A%2F%2F${eula_endpoint}%2Feula%3Fu%3D${chat_id}&rhash=${rhash})`
+    eula_text: (chat_id) => `Hi! I'm the ITT Trading Bot. Before you activate your account you MUST accept the [Terms of Use](https://t.me/iv?url=https%3A%2F%2F${eula_endpoint}%2Feula%3Fu%3D${chat_id}&rhash=${rhash})`
 }
 
 exports.start = start;

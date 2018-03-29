@@ -6,7 +6,7 @@ function Wizard(bot) {
 
     //Step 1
     this.setTraderProfile = (chat_id) => {
-        var text = "💡*Pick your profile*\nFirst, let's set up your trading profile. These profiles use 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
+        var text = "💡*Pick your profile* (Step 1/3)\nFirst, let's set up your trading profile. These profiles use 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
         var horizon_btns = [{
             "text": "High Risk",
             "callback_data": "wizard.DB:HRZ_short"
@@ -32,7 +32,7 @@ function Wizard(bot) {
     //Step 2
     this.setTransactionCurrencies = (chat_id) => {
 
-        var text = "💡*Enable all altcoins*\nGreat! We suggest enabling all altcoins at first. You can always change it later manually."
+        var text = "💡*Enable all altcoins* (Step 2/3)\nGreat! We suggest enabling all altcoins at first. You can always change it later manually."
         var sigall_btns = [{
             "text": "Enable all",
             "callback_data": "wizard.DB:SIGALL_true"
@@ -54,7 +54,7 @@ function Wizard(bot) {
     //Step 3
     this.setCrowdSentiment = (chat_id) => {
 
-        var text = "💡*Enable sentiment alerts*\nLast step! We offer Crowd Sentiment alerts, they tell you what's going on in the market. Would you like us to enable them?"
+        var text = "💡*Enable sentiment alerts* (Step 3/3)\nLast step! We offer Crowd Sentiment alerts, they tell you what's going on in the market. Would you like us to enable them?"
         var crowd_btns = [{
             "text": "Turn On",
             "callback_data": "wizard.DB:CROWD_true"

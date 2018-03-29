@@ -225,7 +225,8 @@ bot.on('callback_query', (callback_message) => {
   };
 
   if (cmd.category == 'wizard') {
-    wiz.bot_callback(chat_id, kb_data)
+    bot.deleteMessage(chat_id, message_id)
+      .then(() => wiz.bot_callback(chat_id, kb_data))
   }
 
   if (cmd.category == 'hint') {
