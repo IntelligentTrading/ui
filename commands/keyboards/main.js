@@ -33,9 +33,6 @@ kb.updateButtons = (message, isSubscribed, isMuted) => {
 }
 
 kb.updateSettings = (userSettings) => {
-    var subscription_plans = ['free', 'beta', 'paid'];
-    var subscription_plan = userSettings.subscription_plan == 100 ? 'ITT' : subscription_plans[userSettings.subscription_plan];
-
     var isMuted = userSettings.is_muted;
     var subscriptionExpirationDate = userSettings.subscriptions.paid
     var msg = `Your profile is set on *${userSettings.horizon}* horizon.

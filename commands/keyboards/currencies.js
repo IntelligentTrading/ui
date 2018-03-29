@@ -56,7 +56,7 @@ var updateFollowedButtons = () => {
 
     currencies.forEach(currency => {
         currency.followed = userSettings.transaction_currencies.indexOf(currency.symbol) >= 0;
-        buttons_line.push({ text: `${currency.followed ? '• ' : ''}${currency.symbol}`, callback_data: `settings.DB:COI_${currency.symbol}_${currency.followed ? 'False' : 'True'}` });
+        buttons_line.push({ text: `${currency.followed ? '✓ ' : ''}${currency.symbol}`, callback_data: `settings.DB:COI_${currency.symbol}_${currency.followed ? 'False' : 'True'}` });
     });
 }
 

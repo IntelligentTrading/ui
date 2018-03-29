@@ -31,8 +31,8 @@ var api = {
 
         var request_opts = new Options();
         request_opts.method = 'POST';
-        request_opts.uri = `${node_svc_api}/license/subscribe`;
-        request_opts.form = { telegram_chat_id: chat_id, licenseCode: token };
+        request_opts.uri = `${node_svc_api}/license/subscribe`
+        request_opts.form = { telegram_chat_id: chat_id, licenseCode: token }
         return rpromise(request_opts);
     },
     updateUser: (chat_id, settings, resource_url = '') => {
@@ -51,14 +51,6 @@ var api = {
 
         var request_opts = new Options();
         request_opts.uri = `${node_svc_api}/users?is_ITT_team=true`;
-
-        //! returns the list already
-        return rpromise(request_opts);
-    },
-    beta_users: () => {
-
-        var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users?subscription_plan=1`;
 
         //! returns the list already
         return rpromise(request_opts);
@@ -98,9 +90,9 @@ var api = {
 
         return rpromise(request_opts);
     },
-    getPlanFor: (signal) => {
+    getSignals: (signal) => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/plans/${signal}`;
+        request_opts.url = `${node_svc_api}/signals/${signal}`;
         request_opts.method = 'GET';
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
