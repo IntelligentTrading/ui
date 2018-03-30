@@ -47,6 +47,7 @@ function notify(message_data) {
             if (!signalsJson || signalsJson.length < 1) throw new Error(errorManager.generic_error_message)
 
             var signal = JSON.parse(signalsJson)[0]
+            signal.trend = message_data.trend
             var filters = [buildHorizonFilter(horizon),
             `transaction_currencies=${message_data.transaction_currency}`,
             `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
@@ -68,12 +69,14 @@ function notify(message_data) {
 }
 
 function IsSubscribed(user, signal) {
+  var isSubscribed = false
   signal.deliverTo.forEach(level => {
-    var userLevel = user.settings.subscriptions[level]
-    if (userLevel && dateUtil.getDaysLeftFrom(userLevel) > 0)
-      return true
+    var userLevelExpirationDate = user.settings.subscriptions[level]
+
+    isSubscribed = isSubscribed || (userLevelExpirationDate && dateUtil.getDaysLeftFrom(userLevelExpirationDate) > 0)
+    //&& (level != 'free' || level == 'free' && signal.trend > 0))
   })
-  return false
+  return isSubscribed
 }
 
 var buildHorizonFilter = (horizon) => {
