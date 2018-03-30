@@ -28,8 +28,6 @@ const bot = new TelegramBot(token, { polling: true });
 
 const Wizard = require('./commands/wizard').Wizard
 var wiz = new Wizard(bot)
-const PaymentController = require('./commands/payment')
-var payment = new PaymentController(bot)
 
 const timezone = require('geo-tz');
 
@@ -88,12 +86,12 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
         apollo.send('GENERIC', chat_id);
       })
   }
-});
+})
 
 bot.onText(/\/help/, (msg, match) => {
   const chat_id = msg.chat.id;
   bot.sendMessage(chat_id, helpCmd.text())
-});
+})
 
 // match with /price, throw away all the blanks, match with any single char
 bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
@@ -113,7 +111,7 @@ bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
         apollo.send('PRICE', chat_id);
       })
   }
-});
+})
 
 bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -147,7 +145,7 @@ bot.onText(/\/feedback(.*)/, (msg, match) => {
         apollo.send('CUSTOM', chat_id, reason);
       });
   }
-});
+})
 
 bot.onText(/\/about(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -204,32 +202,6 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
     })
 });
 
-bot.onText(/\/upgrade/, (msg, match) => {
-  payment.upgrade(msg.chat.id)
-})
-
-bot.onText(/\/verifytx(\s*)(.*)/, (msg, match) => {
-  const tx = match[2];
-  payment.verifyTx(msg.chat.id, tx)
-})
-
-//! This goes in the admin dashboard
-/*bot.onText(/\/keygen(\s*)(.*)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  var admin_token = match[2].split(' ')[0];
-  var plan = match[2].split(' ')[1];
-
-  settingsCmd.generateCodeForPlan(plan)
-    .then(result => {
-      var license = JSON.parse(result)
-      bot.sendMessage(chat_id, license.code, markdown_opts)
-    })
-    .catch(reason => {
-      console.log(reason)
-      apollo.send('AUTH', chat_id);
-    })
-});*/
-
 bot.onText(/\/wizard/, (msg, match) => {
   wiz.run(msg.chat.id)
 })
@@ -254,10 +226,6 @@ bot.on('callback_query', (callback_message) => {
 
   if (cmd.category == 'wizard') {
     wiz.bot_callback(chat_id, kb_data)
-  }
-
-  if (cmd.category == 'payment') {
-    payment.callback(chat_id, callback_message.data)
   }
 
   if (cmd.category == 'hint') {

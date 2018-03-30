@@ -53,7 +53,7 @@ kb.getButtons = () => {
 
             counter_currency.followed = userSettings.counter_currencies.indexOf(counter_currency_index) >= 0;
             if (counter_currency.enabled)
-                counter_currency_buttons.push({ text: `${counter_currency.followed ? '• ' : ''} alt/${counter_currency.symbol}`, callback_data: `settings.DB:SIG_${counter_currency.symbol}_${counter_currency_index}_${counter_currency.followed ? 'False' : 'True'}` });
+                counter_currency_buttons.push({ text: `${counter_currency.followed ? '✓ ' : ''} alt/${counter_currency.symbol}`, callback_data: `settings.DB:SIG_${counter_currency.symbol}_${counter_currency_index}_${counter_currency.followed ? 'False' : 'True'}` });
         });
 
         buttons.push(counter_currency_buttons);

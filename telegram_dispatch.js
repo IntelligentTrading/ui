@@ -1,5 +1,6 @@
 var errorManager = require('./util/error.js').errorManager;
 require('./util/extensions');
+var dateUtil = require('./util/dates')
 var _ = require('lodash');
 const request = require('request');
 const TelegramBot = require('node-telegram-bot-api');
@@ -39,40 +40,43 @@ function notify(message_data) {
 
     return signalHelper.parse(message_data)
       .then(telegram_signal_message => {
-        if (telegram_signal_message != undefined) {
+        if (!telegram_signal_message) throw new Error(errorManager.generic_error_message)
 
-          api.getPlanFor(message_data.signal).then(jsonPlan => {
+        api.getSignals(message_data.signal)
+          .then(signalsJson => {
+            if (!signalsJson || signalsJson.length < 1) throw new Error(errorManager.generic_error_message)
 
-
-            if (!jsonPlan || jsonPlan.length < 1)
-              throw new Error(errorManager.generic_error_message);
-
-            var plan = JSON.parse(jsonPlan);
-
+            var signal = JSON.parse(signalsJson)[0]
+            signal.trend = message_data.trend
             var filters = [buildHorizonFilter(horizon),
             `transaction_currencies=${message_data.transaction_currency}`,
-            `counter_currencies=${message_data.counter_currency}`, 'is_muted=false'];
+            `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
 
-            return api.users({ filters: filters }).then(response => {
+            return api.users({ filters: filters }).then(usersJson => {
 
-              var users = JSON.parse(response);
-
-              users.filter(user => user.eula && user.settings.subscription_plan >= plan[0].accessLevel)
-                .map(user => {
-                  bot.sendMessage(user.telegram_chat_id, telegram_signal_message, opts)
+              var users = JSON.parse(usersJson)
+              users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
+                .map(subscribedUser => {
+                  bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts)
                     .catch(err => {
-                      var errMessage = `${err.message} :: chat ${user.telegram_chat_id}`;
-                      console.log(errMessage);
-                    });
+                      console.log(`${err.message} :: chat ${user.telegram_chat_id}`)
+                    })
                 })
             })
-              .catch(reason => {
-                console.log(reason)
-              })
           })
-        }
-      });
+      })
   }
+}
+
+function IsSubscribed(user, signal) {
+  var isSubscribed = false
+  signal.deliverTo.forEach(level => {
+    var userLevelExpirationDate = user.settings.subscriptions[level]
+
+    isSubscribed = isSubscribed || (userLevelExpirationDate && dateUtil.getDaysLeftFrom(userLevelExpirationDate) > 0)
+    //&& (level != 'free' || level == 'free' && signal.trend > 0))
+  })
+  return isSubscribed
 }
 
 var buildHorizonFilter = (horizon) => {
@@ -120,7 +124,7 @@ const app = Consumer.create({
     done();
   },
   sqs: new AWS.SQS()
-});
+})
 
 app.on('message_received', (msg) => {
 
@@ -129,19 +133,22 @@ app.on('message_received', (msg) => {
   app.handleMessage(msg, function (err) {
     if (err) console.log(err);
   })
-});
+})
 
 app.on('message_processed', (msg) => {
   console.log(`[Processed] Message ${msg.MessageId}`);
-});
+})
 
 app.on('processing_error', (err, signal) => {
   console.log(err.message);
-});
+})
 
 app.on('error', (err) => {
   console.log(err.message);
-});
+})
 
-app.start();
+app.start()
+
+
+module.exports.notify = notify
 

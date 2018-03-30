@@ -1,5 +1,6 @@
-var _ = require('lodash');
-var Keyboard = require('./keyboard').Keyboard;
+var _ = require('lodash')
+var Keyboard = require('./keyboard').Keyboard
+var dateHelper = require('../../util/dates')
 
 var buttons = [
     //[{ text: "Subscribe", callback_data: "settings.DB:ISSUB_" }],
@@ -7,7 +8,6 @@ var buttons = [
     [{ text: "Edit Signals", callback_data: "settings.NAV:SIG" }],
     [{ text: "Edit Trader Profile", callback_data: "settings.NAV:HRZ" }]
 ];
-
 var extraButtons = [
     //[{ text: "Edit Risk Profile", callback_data: "settings.NAV:RSK" }],
 ];
@@ -33,12 +33,16 @@ kb.updateButtons = (message, isSubscribed, isMuted) => {
 }
 
 kb.updateSettings = (userSettings) => {
-    var subscription_plans = ['free', 'beta', 'paid'];
-    var subscription_plan = userSettings.subscription_plan == 100 ? 'ITT' : subscription_plans[userSettings.subscription_plan];
-
     var isMuted = userSettings.is_muted;
+    var subscriptionExpirationDate = userSettings.subscriptions.paid
     var msg = `Your profile is set on *${userSettings.horizon}* horizon.
-You are subscribed to the *${subscription_plan}* plan and your notifications are ${isMuted ? '*muted*' : '*active*'}.
+You will receive paid signals until ${subscriptionExpirationDate.split('T')[0]} (${dateHelper.getDaysLeftFrom(subscriptionExpirationDate)} days left).
+Send 1 ITT for each additional day, using the following address as receiver:
+
+*${userSettings.ittWalletReceiverAddress}*
+
+You will be notified as soon as the transaction is confirmed.
+
 Tap below to edit your settings:`;
 
     kb.updateButtons(msg, undefined, isMuted);
