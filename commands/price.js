@@ -9,10 +9,10 @@ var price = {
     getPrice: (currency) => {
 
         return api.price(currency)
-            .then(result => {
-                var info = JSON.parse(result)
-                if ('price' in info) {
-                    return parse_info(info);
+            .then(json => {
+                var info = JSON.parse(json)
+                if ('results' in info) {
+                    return parse_info(info.results[0]);
                 } else {
                     return 'Currency not found';
                 }
@@ -22,7 +22,22 @@ var price = {
 
 exports.price = price;
 
-function parse_info(info_data) {
+
+/*{
+    "count": 187206,
+    "next": "https://itt-core-stage.herokuapp.com/api/v2/prices/ETH?page=2",
+    "previous": null,
+    "results": [
+      {
+        "timestamp": "2018-03-29T10:52:58.887630",
+        "source": 0,
+        "counter_currency": 0,
+        "transaction_currency": "ETH",
+        "price": 5479978
+      }
+    ]
+}*/
+function parse_info(price_result) {
 
     const wiki_url = "https://coinmarketcap.com/currencies";
 
@@ -34,12 +49,12 @@ function parse_info(info_data) {
                 currency_wiki = `*[${currency_wiki_data.symbol}](${wiki_url}})*`
             }
             else {
-                var matching_tkrs = tkrs.filter(t => t.symbol == info_data.transaction_currency);
+                var matching_tkrs = tkrs.filter(t => t.symbol == price_result.transaction_currency);
                 var currency_wiki_data = matching_tkrs[0];
 
                 if (currency_wiki_data == undefined) {
-                    console.log(`Wiki not found for ${info_data.transaction_currency}!`);
-                    currency_wiki_data.symbol = info_data.transaction_currency;
+                    console.log(`Wiki not found for ${price_result.transaction_currency}!`);
+                    currency_wiki_data.symbol = price_result.transaction_currency;
                     currency_wiki_data.name = '';
                     currency_wiki_data.rank = '?'
                 }
@@ -49,20 +64,22 @@ function parse_info(info_data) {
             var retrieved_price;
             var price_change_sign;
 
-            if (info_data.counter_currency == 0) {
-                retrieved_price = `${parseFloat(info_data['price'] / 100000000).toFixed(8)} BTC`;
+            if (price_result.counter_currency == 0) {
+                retrieved_price = `${parseFloat(price_result['price'] / 100000000).toFixed(8)} BTC`;
             }
             else
-                retrieved_price = `${Number(parseFloat(info_data['price']).toFixed(2))} USD`; //!It might be not correct
+                retrieved_price = `${Number(parseFloat(price_result['price']).toFixed(2))} USD`; //!It might be not correct
 
-            if (info_data.price_change > 0)
-                price_change_sign = '↗️';
-            else if (info_data.price_change < 0)
-                price_change_sign = '↘️';
+            if (price_result.price_change > 0)
+                price_change_sign = '▲';
+            else if (price_result.price_change < 0)
+                price_change_sign = '🔻';
             else
-                price_change_sign = '➡️';
+                price_change_sign = '►';
 
-            return `${currency_wiki}\nPrice: ${retrieved_price} (${(info_data.price_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${info_data.timestamp.split('.')[0]}\nSource: ${info_data.source.toSentenceCase()}`;
+            return `${currency_wiki}\nPrice: ${retrieved_price} (${(price_result.price_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${price_result.timestamp.split('.')[0]}\nSource: ${exchanges[price_result.source]}`;
         })
         .catch(reason => errorManager.handleException(reason));
 }
+
+var exchanges = ['Poloniex']
