@@ -42,38 +42,42 @@ function notify(message_data) {
       .then(telegram_signal_message => {
         if (!telegram_signal_message) throw new Error(errorManager.generic_error_message)
 
-        api.getSignals(message_data.signal)
+        return api.getSignals(message_data.signal)
           .then(signalsJson => {
-            if (!signalsJson || signalsJson.length < 1) throw new Error(errorManager.generic_error_message)
+            if (signalsJson && JSON.parse(signalsJson).length > 0) {
 
-            var signal = JSON.parse(signalsJson)[0]
-            var filters = [buildHorizonFilter(horizon),
-            `transaction_currencies=${message_data.transaction_currency}`,
-            `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
+              var signal = JSON.parse(signalsJson)[0]
+              signal.trend = message_data.trend
+              var filters = [buildHorizonFilter(horizon),
+              `transaction_currencies=${message_data.transaction_currency}`,
+              `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
 
-            return api.users({ filters: filters }).then(usersJson => {
+              return api.users({ filters: filters }).then(usersJson => {
 
-              var users = JSON.parse(usersJson)
-              users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
-                .map(subscribedUser => {
-                  bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts)
-                    .catch(err => {
-                      console.log(`${err.message} :: chat ${user.telegram_chat_id}`)
-                    })
-                })
-            })
+                var users = JSON.parse(usersJson)
+                users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
+                  .map(subscribedUser => {
+                    bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts)
+                      .catch(err => {
+                        console.log(`${err.message} :: chat ${user.telegram_chat_id}`)
+                      })
+                  })
+              })
+            }
           })
       })
   }
 }
 
 function IsSubscribed(user, signal) {
+  var isSubscribed = false
   signal.deliverTo.forEach(level => {
-    var userLevel = user.settings.subscriptions[level]
-    if (userLevel && dateUtil.getDaysLeftFrom(userLevel) > 0)
-      return true
+    var userLevelExpirationDate = user.settings.subscriptions[level]
+
+    isSubscribed = isSubscribed || (userLevelExpirationDate && dateUtil.getDaysLeftFrom(userLevelExpirationDate) > 0)
+    //&& (level != 'free' || level == 'free' && signal.trend > 0))
   })
-  return false
+  return isSubscribed
 }
 
 var buildHorizonFilter = (horizon) => {
