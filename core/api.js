@@ -1,7 +1,8 @@
 var request = require('request');
 var rpromise = require('request-promise');
 
-var api_url = `https://${process.env.ITT_API_HOST}`;
+var api_version = 'v2'
+var api_url = `https://${process.env.ITT_API_HOST}/${api_version}`;
 var api_key = process.env.ITT_API_KEY;
 var node_svc_api = `${process.env.ITT_NODE_SERVICES}/api`;
 var node_svc_api_key = process.env.NODE_SVC_API_KEY;
@@ -58,8 +59,10 @@ var api = {
     price: (symbol) => {
 
         var request_opts = new Options();
-        request_opts.url = `${api_url}/price?transaction_currency=${symbol}`;
-
+        request_opts.url = `${api_url}/resampled-prices/${symbol}`
+        request_opts.headers = {
+            'API-KEY': api_key
+        }
         return rpromise(request_opts);
     },
     tickers: () => {
