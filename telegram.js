@@ -4,6 +4,7 @@ const app = express();
 const fs = require('fs');
 
 var api = require('./core/api').api;
+require('./util/extensions')
 
 var startCmd = require('./commands/start').start;
 var helpCmd = require('./commands/help').help;
@@ -26,8 +27,9 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-const Wizard = require('./commands/wizard').Wizard
-var wiz = new Wizard(bot)
+const WizardClass = require('./commands/wizard')
+var wizardCtrl = new WizardClass(bot)
+
 
 const timezone = require('geo-tz');
 
@@ -203,30 +205,32 @@ bot.onText(/\/select_all_signals/, (msg, match) => {
 });
 
 bot.onText(/\/wizard/, (msg, match) => {
-  wiz.run(msg.chat.id)
+  wizardCtrl.cmd(msg, match)
 })
 
 bot.on('callback_query', (callback_message) => {
 
-  var message_id = callback_message.message.message_id;
-  var chat_id = callback_message.message.chat.id;
+  if (callback_message.data.isJSON()) {
+    var callback_data = JSON.parse(callback_message.data)
+    if (callback_data.cmd == 'wizard') {
+      wizardCtrl.callback(callback_message)
+      return;
+    }
+  }
 
   if (callback_message.data == 'IGNORE')
     return;
 
-  var data_array = callback_message.data.split('.'); // eg.: settings_RSK
-  var kb_data = data_array[1].split(':')[1];
+  var message_id = callback_message.message.message_id
+  var chat_id = callback_message.message.chat.id
+  var data_array = callback_message.data.split('.') // eg.: settings_RSK
+  var kb_data = data_array[1].split(':')[1]
 
   var cmd = {
     category: data_array[0],
     operation: {
       action: data_array[1].split(':')[0]
     }
-  };
-
-  if (cmd.category == 'wizard') {
-    bot.deleteMessage(chat_id, message_id)
-      .then(() => wiz.bot_callback(chat_id, kb_data))
   }
 
   if (cmd.category == 'hint') {
