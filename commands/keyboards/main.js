@@ -36,7 +36,7 @@ kb.updateSettings = (userSettings) => {
     var isMuted = userSettings.is_muted;
     var subscriptionExpirationDate = userSettings.subscriptions.paid
     var msg = `Your profile is set on *${userSettings.horizon}* horizon.
-You will receive paid signals until ${subscriptionExpirationDate.split('T')[0]} (${dateHelper.getDaysLeftFrom(subscriptionExpirationDate)} days left).
+You will receive paid signals until ${subscriptionExpirationDate.split('T')[0]} (${Math.max(0, dateHelper.getDaysLeftFrom(subscriptionExpirationDate))} days left).
 Send 1 ITT for each additional day, using the following address as receiver:
 
 *${userSettings.ittWalletReceiverAddress}*
