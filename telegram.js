@@ -6,60 +6,33 @@ const fs = require('fs');
 var api = require('./core/api').api;
 require('./util/extensions')
 
-var startCmd = require('./commands/start').start;
-var helpCmd = require('./commands/help').help;
-var priceCmd = require('./commands/price').price;
-var volumeCmd = require('./commands/volume').volume;
-var feedbackCmd = require('./commands/feedback').feedback;
 var settingsCmd = require('./commands/settings').settings;
-const about = require('./commands/about').about;
 
 const tickers = require('./commands/data/tickers').tickers;
 var commandsList = ['start', 'help', 'settings', 'feedback', 'about', 'price', 'volume',
   'token', 'wizard', 'getMe', 'upgrade', 'verifytx'];
 
-var qrbuilder = require('./util/qr-builder').builder;
-
 var errorManager = require('./util/error').errorManager;
 var sentimentUtil = require('./util/sentiment').sentimentUtil;
 
-const TelegramBot = require('node-telegram-bot-api');
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+var telegram = require('./bot/telegramInstance')
+var bot = telegram.bot
 
-const WizardClass = require('./commands/wizard')
-var wizardCtrl = new WizardClass(bot)
+var commandsManager = {}
 
+var commandFiles = fs.readdirSync('./commands/controllers')
 
-const timezone = require('geo-tz');
-
-const markdown_opts = {
-  parse_mode: "Markdown"
-};
+commandFiles.forEach(cf => {
+  var commandClass = require(`./commands/controllers/${cf}`)
+  commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
+})
 
 console.log('[Telegram bot] initialize data...');
 tickers.get()
   .then(() => console.log('[Telegram bot] data initialized.'))
   .catch(reason => {
     console.log('[Telegram bot] data not initialized.')
-  });
-
-const nopreview_markdown_opts =
-  {
-    "parse_mode": "Markdown",
-    "disable_web_page_preview": "true"
-  };
-
-const nopreview_hmtl_opts =
-  {
-    "parse_mode": "HTML",
-    "disable_web_page_preview": "true"
-  };
-
-bot.onText(/\/start/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  apollo.send('EULA', chat_id);
-});
+  })
 
 bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -77,7 +50,7 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
             ? settingsCmd.subscribedMessage + '\n(Welcome ITT Member)'
             : settingsCmd.subscribedMessage;
 
-          bot.sendMessage(chat_id, subscriptionMessage, nopreview_markdown_opts);
+          bot.sendMessage(chat_id, subscriptionMessage, telegram.nopreview_markdown_opts);
         }
         else {
           result.message == "EULA" ? apollo.send('EULA', chat_id) : apollo.send('CUSTOM', chat_id, result.message)
@@ -89,78 +62,6 @@ bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
       })
   }
 })
-
-bot.onText(/\/help/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  bot.sendMessage(chat_id, helpCmd.text())
-})
-
-// match with /price, throw away all the blanks, match with any single char
-bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  const currency = match[2]; // the captured "whatever"
-
-  if (!currency) {
-    apollo.send('PRICE', chat_id);
-  }
-  else {
-    priceCmd.getPrice(currency)
-      .then((result) => {
-        bot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
-      })
-      .catch(reason => {
-        console.log(reason);
-        apollo.send('PRICE', chat_id);
-      })
-  }
-})
-
-bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  const currency = match[2]; // the captured "whatever"
-
-  volumeCmd.getVolume(currency)
-    .then((result) => {
-      bot.sendMessage(chat_id, result.toString(), markdown_opts);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chat_id, reason);
-    });
-});
-
-bot.onText(/\/feedback(.*)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  const username = msg.chat.username;
-  const feedback = match[1];
-
-  if (feedback == undefined || feedback.length <= 0) {
-    bot.sendMessage(chat_id, feedbackCmd.helpText);
-  }
-  else {
-    feedbackCmd.storeFeedback(chat_id, username, feedback)
-      .then((result) => {
-        bot.sendMessage(chat_id, feedbackCmd.thanksText(result.body.shortLink));
-      })
-      .catch((reason) => {
-        console.log(reason);
-        apollo.send('CUSTOM', chat_id, reason);
-      });
-  }
-})
-
-bot.onText(/\/about(.*)/, (msg, match) => {
-  const chat_id = msg.chat.id;
-
-  about.get()
-    .then((result) => {
-      bot.sendMessage(chat_id, result, nopreview_hmtl_opts);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      apollo.send('CUSTOM', chat_id, reason);
-    });
-});
 
 bot.onText(/\/settings/, (msg, match) => {
   const chat_id = msg.chat.id;
@@ -192,21 +93,6 @@ bot.onText(/\/settings/, (msg, match) => {
       apollo.send('GENERIC', chat_id);
     });
 });
-
-bot.onText(/\/select_all_signals/, (msg, match) => {
-  settingsCmd.selectAllSignals(msg.chat.id)
-    .then(() => {
-      bot.sendMessage(msg.chat.id, 'You are now subscribed to all the signals!')
-        .catch((reason) => console.log(reason))
-    })
-    .catch(() => {
-      apollo.send('SETTINGS', chat_id);
-    })
-});
-
-bot.onText(/\/wizard/, (msg, match) => {
-  wizardCtrl.cmd(msg, match)
-})
 
 bot.on('callback_query', (callback_message) => {
 
@@ -361,20 +247,23 @@ bot.on('callback_query', (callback_message) => {
   }
 })
 
-bot.onText(/\/getMe/, (msg, match) => {
+bot.onText(/\/(\w+)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
-  const userId = msg.from.id;
-  const username = msg.from.username;
+  var commandText = match[1].replace('/', '');
 
-  bot.sendMessage(chat_id, `Your chat_id is ${chat_id}, userId ${userId} and username ${username}`);
-});
+  var command = commandsManager[commandText]
+  if (!command) {
+    bot.sendMessage(chat_id,`Sorry, I don't understand command /${commandText}, please check the list of available commands with /help.`)
+    return
+  }
 
-bot.onText(/(^\/{1})[a-z]+/, (msg, match) => {
-  const chat_id = msg.chat.id;
-  var command = match[0].replace('/', '');
-  if (commandsList.indexOf(command) < 0)
-    bot.sendMessage(chat_id, `Sorry, I don't understand command /${command}, please check the list of available commands with /help.`);
-});
+  try {
+    command.cmd(msg, match.map(m =>m.trim()).splice(2))
+  }
+  catch (err) {
+    bot.sendMessage(chat_id, err)
+  }
+})
 
 var apollo = {
   send: (category, chat_id, custom_message = "") => {
@@ -406,7 +295,7 @@ var apollo = {
       message = 'You are not authorized to perform this operation.'
     }
 
-    return bot.sendMessage(chat_id, message, markdown_opts)
+    return bot.sendMessage(chat_id, message, telegram.markdown_opts)
       .catch(reason => console.log(reason));
   }
 }

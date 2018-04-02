@@ -1,4 +1,4 @@
-var api = require('../core/api').api
+var api = require('../../core/api')
 
 /**
  * use the callback data-> f:label for the current function n:label for the function to exec on callback (next)
