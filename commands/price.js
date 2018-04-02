@@ -65,19 +65,19 @@ function parse_info(price_result) {
             var price_change_sign;
 
             if (price_result.counter_currency == 0) {
-                retrieved_price = `${parseFloat(price_result['price'] / 100000000).toFixed(8)} BTC`;
+                retrieved_price = `${parseFloat(price_result['close_price'] / 100000000).toFixed(8)} BTC`;
             }
             else
-                retrieved_price = `${Number(parseFloat(price_result['price']).toFixed(2))} USD`; //!It might be not correct
+                retrieved_price = `${Number(parseFloat(price_result['close_price'] / 100000000).toFixed(2))} USD`; //!It might be not correct
 
-            if (price_result.price_change > 0)
+            if (price_result.price_change_24h > 0)
                 price_change_sign = '▲';
-            else if (price_result.price_change < 0)
+            else if (price_result.price_change_24h < 0)
                 price_change_sign = '🔻';
             else
                 price_change_sign = '►';
 
-            return `${currency_wiki}\nPrice: ${retrieved_price} (${(price_result.price_change * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${price_result.timestamp.split('.')[0]}\nSource: ${exchanges[price_result.source]}`;
+            return `${currency_wiki}\nPrice: ${retrieved_price} (${(price_result.price_change_24h * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${price_result.timestamp.split('.')[0]}\nSource: ${exchanges[price_result.source]}`;
         })
         .catch(reason => errorManager.handleException(reason));
 }

@@ -59,7 +59,7 @@ var api = {
     price: (symbol) => {
 
         var request_opts = new Options();
-        request_opts.url = `${api_url}/prices?transaction_currency=${symbol}`
+        request_opts.url = `${api_url}/resampled-prices/${symbol}`
         request_opts.headers = {
             'API-KEY': api_key
         }
