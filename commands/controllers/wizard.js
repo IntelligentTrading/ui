@@ -1,4 +1,5 @@
 var api = require('../../core/api')
+var eventEmitter = require('../../events/botEmitter')
 
 /**
  * use the callback data-> f:label for the current function n:label for the function to exec on callback (next)
@@ -14,11 +15,9 @@ module.exports = function (bot) {
 
         var callback_data = JSON.parse(callback_message.data)
 
-        store(chat_id, callback_data.data)
-            .then(() => {
-                this[callback_data.n](chat_id, message_id)
-            })
-            .catch(err => error(chat_id, err))
+        store(chat_id, callback_data.data).then(() => {
+            this[callback_data.n](chat_id, message_id)
+        }).catch(err => error(chat_id, err))
     };
     this.hrz = (chat_id) => setTraderProfile(chat_id);
     this.sigall = (chat_id, msg_id) => setTransactionCurrencies(chat_id, msg_id);
@@ -98,9 +97,9 @@ function setCrowdSentiment(chat_id, msg_id) {
         })
 }
 
-function wizardEnd(chat_id, msg_id) {
-    moduleBot.deleteMessage(chat_id, msg_id)
-        .then(() => { moduleBot.sendMessage(chat_id, 'Thanks for your help! Please keep in mind it could take a while before alerts come in!') })
+function wizardEnd(chat_id, message_id) {
+    eventEmitter.emit('closeKeyboard', chat_id, message_id)
+    moduleBot.sendMessage(chat_id, 'Thanks for your help! Please keep in mind it could take a while before alerts come in!')
 }
 
 var store = (chat_id, data) => {
@@ -118,7 +117,6 @@ var store = (chat_id, data) => {
     }
 
     return Promise.resolve()
-    //error(chat_id, '[Wizard]: wrong callback data')
 }
 
 var error = (chat_id, reason) => {

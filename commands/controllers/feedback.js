@@ -7,7 +7,7 @@ module.exports = function (bot) {
     this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
         const username = msg.chat.username
-        const feedback = params[2]
+        const feedback = params[0]
 
         if (feedback == undefined || feedback.length <= 0) {
             moduleBot.sendMessage(chat_id, helpText)

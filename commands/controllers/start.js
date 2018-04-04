@@ -1,15 +1,21 @@
+var eventEmitter = require('../../events/botEmitter')
 var moduleBot = null
+
+eventEmitter.on('eula', (msg) => {
+    if (moduleBot) sendEula(msg)
+})
 
 module.exports = function (bot) {
     moduleBot = bot
 
     this.cmd = (msg, params) => {
-        const chat_id = msg.chat.id;
-        const userId = msg.from.id;
-        const username = msg.from.username;
-
-        moduleBot.sendMessage(chat_id, getEulaText(chat_id), markdown_opts)
+        sendEula(msg)
     }
+}
+
+function sendEula(msg) {
+    const chat_id = msg.chat.id
+    moduleBot.sendMessage(chat_id, getEulaText(chat_id), markdown_opts)
 }
 
 var markdown_opts = {

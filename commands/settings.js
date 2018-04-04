@@ -1,59 +1,7 @@
-
-//! The notation for the callback_data is at max 64
-//! I decided to use a <command>.<operation>:<param> to navigate through the menu and
-//! perform operations. Example: settings.DB:<T_V> stores the value V in the table T
-
-var api = require('../core/api').api;
-var errorManager = require('../util/error').errorManager;
-var kbs = require('./keyboards/keyboards').keyboards;
-
-var current_kb = kbs.main_keyboard;
-
-
-var updateSettingsOnCallback = (user) => {
-    settings.profile = user.settings;
-    //update all the kbs at once
-    kbs.updateKeyboardsSettings(settings.profile);
-}
-
-var getUser = function (chat_id) {
-    return api.users({ telegram_chat_id: chat_id })
-        .then(response => {
-            if (response) {
-                updateSettingsOnCallback(JSON.parse(response))
-            }
-            return JSON.parse(response);
-        }).catch((reason) => {
-            console.log(reason);
-            throw new Error(errorManager.genericErrorMessage);
-        })
-}
-
-var update = function (chat_id, optionals, url_segment) {
-    return api.updateUser(chat_id, optionals, url_segment)
-        .then(response => {
-            updateSettingsOnCallback(JSON.parse(response))
-            return settings.profile;
-        })
-        .catch((reason) => {
-            console.log(reason);
-            throw new Error(errorManager.genericErrorMessage);
-        })
-}
-
-var subscribeUser = (chat_id, token) => {
-    return api.subscribeUser(chat_id, token).then(responseJSON => {
-        var responseObj = JSON.parse(responseJSON);
-        if (responseObj.success) {
-            updateSettingsOnCallback(responseObj.user)
-        }
-        return responseObj
-    }).catch((reason) => {
-        console.log(reason);
-        throw new Error(errorManager.genericErrorMessage);
-    })
-}
-
+var api = require('../core/api').api
+var errorManager = require('../util/error').errorManager
+var eventEmitter = require('../events/botEmitter')
+/*
 var keyboards = [
     {
         label: 'MAIN',
@@ -124,13 +72,9 @@ var settings = {
         }
     },
     profile: {},
-    getUser: (chat_id) => getUser(chat_id),
-    generateCodeForPlan: (plan) => api.generateToken(plan),
-    subscribe: (chat_id, token) => subscribeUser(chat_id, token),
-    subscribedMessage: "Trading signals will automatically generate. This could take a few minutes. Please hold on. In the meanwhile, you can optimize your preferences by using the command: /settings",
-    subscriptionError: "Something went wrong with the subscription, please retry or contact us!",
-    tokenError: "Your token is invalid or already in use. Please use /token your-token, contact us or [join](https://goo.gl/forms/T7fFe38AM8mNRhDO2) the waiting list.",
-    userNotSubscribed: "Please use /token your-token in order to get signals or set you preferences.",
+    generateCodeForPlan: (plan) => api.generateToken(plan)
 }
 
 exports.settings = settings;
+
+*/
