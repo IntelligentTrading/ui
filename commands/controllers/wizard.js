@@ -15,7 +15,7 @@ module.exports = function (bot) {
 
         var callback_data = JSON.parse(callback_message.data)
 
-        store(chat_id, callback_data.data).then(() => {
+        store(chat_id, callback_data.d).then(() => {
             this[callback_data.n](chat_id, message_id)
         }).catch(err => error(chat_id, err))
     };
@@ -31,15 +31,15 @@ function setTraderProfile(chat_id) {
 
     var horizon_btns = [{
         "text": "High Risk",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", data: { horizon: "short" } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", d: { horizon: "short" } })
     },
     {
         "text": "Medium Risk",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", data: { horizon: "medium" } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", d: { horizon: "medium" } })
     },
     {
         "text": "Low Risk",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", data: { horizon: "long" } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "sigall", d: { horizon: "long" } })
     }];
 
     var opts =
@@ -57,11 +57,11 @@ function setTransactionCurrencies(chat_id, msg_id) {
     var text = "💡*Enable all altcoins* (Step 2/3)\nGreat! We suggest enabling all altcoins at first. You can always change it later manually."
     var sigall_btns = [{
         "text": "Enable all",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "crowd", data: { sigall: true } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "crowd", d: { sigall: true } })
     },
     {
         "text": "No thanks",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "crowd", data: { sigall: false } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "crowd", d: { sigall: false } })
     }]
 
     moduleBot.editMessageText(text,
@@ -80,11 +80,11 @@ function setCrowdSentiment(chat_id, msg_id) {
     var text = "💡*Enable sentiment alerts* (Step 3/3)\nLast step! We offer Crowd Sentiment alerts, they tell you what's going on in the market. Would you like us to enable them?"
     var crowd_btns = [{
         "text": "Turn On",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "end", data: { crowd: true } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "end", d: { crowd: true } })
     },
     {
         "text": "Turn Off",
-        "callback_data": JSON.stringify({ cmd: "wizard", n: "end", data: { crowd: false } })
+        "callback_data": JSON.stringify({ cmd: "wizard", n: "end", d: { crowd: false } })
     }]
 
     moduleBot.editMessageText(text,

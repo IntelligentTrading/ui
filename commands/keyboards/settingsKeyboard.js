@@ -63,7 +63,7 @@ Tap below to edit your settings:`
 var getKeyboardButtons = (settings) => {
 
     var alertsCallbackData = utils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
-    var editSignalsCallbackData = utils.getButtonCallbackData('navigation', {}, null, 'Currencies')
+    var editSignalsCallbackData = utils.getButtonCallbackData('navigation', {}, null, 'Sig')
     var editTraderCallbackData = utils.getButtonCallbackData('navigation', { horizon: settings.horizon }, null, 'Trader')
 
     return [

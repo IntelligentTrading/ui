@@ -52,45 +52,4 @@ bot.on('callback_query', (callback_message) => {
       return
     }
   }
-
-  if (callback_message.data == 'IGNORE')
-    return;
-
-  var message_id = callback_message.message.message_id
-  var chat_id = callback_message.message.chat.id
-  var data_array = callback_message.data.split('.') // eg.: settings_RSK
-  var kb_data = data_array[1].split(':')[1]
-
-  var cmd = {
-    category: data_array[0],
-    operation: {
-      action: data_array[1].split(':')[0]
-    }
-  }
-
-  if (cmd.category == 'panic') { //panic.DB:BULL_${feed.id}`
-    if (cmd.operation.action == 'DB') {
-      var reaction = kb_data.split('_')[0];
-      var feedId = kb_data.split('_')[1];
-
-      api.addFeedReaction(feedId, reaction, chat_id)
-        .then(updatedFeed => {
-          var updatedText = sentimentUtil.messageTemplate(updatedFeed, callback_message.message);
-          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction saved!' })
-            .then(res => {
-              bot.editMessageText(updatedText,
-                {
-                  chat_id: chat_id,
-                  message_id: message_id,
-                  parse_mode: 'Markdown',
-                  disable_web_page_preview: true
-                });
-            })
-        })
-        .catch(err => {
-          console.log(err)
-          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction timespan expired!' })
-        })
-    }
-  }
 })

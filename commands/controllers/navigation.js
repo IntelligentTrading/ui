@@ -16,14 +16,23 @@ module.exports = function (bot) {
         const username = msg.from.username;
     }
 
-    this.callback = (callback_message) => {
+    this.callback = async (callback_message) => {
         var callback_data = JSON.parse(callback_message.data)
         if (callback_data.f)
             this[callback_data.f](callback_message)
         else if (callback_data.n) {
+            //Cur(0) -> Keyboard(page)
+            var navigateToKeyboard = callback_data.n.split('(')[0]
+            var navigateToPage = callback_data.n.split('(')[1]
+            if (navigateToPage) navigateToPage = navigateToPage.replace(')', '')
+
             var message_id = callback_message.message.message_id
             var chat_id = callback_message.message.chat.id
-            eventEmitter.emit(`Show${callback_data.n}Keyboard`, chat_id, message_id, callback_data.data)
+            var userSettings = callback_data.d
+            if (!userSettings) {
+                userSettings = await loadUserSettings(chat_id)
+            }
+            eventEmitter.emit(`Show${navigateToKeyboard}Keyboard`, chat_id, message_id, userSettings, navigateToPage)
         }
     }
 
@@ -37,12 +46,9 @@ module.exports = function (bot) {
         var message_id = callback_message.message.message_id
         var chat_id = callback_message.message.chat.id
         var callback_data = JSON.parse(callback_message.data)
-        if (!callback_data.data) {
-            api.users({ telegram_chat_id: chat_id }).then((userJSON) => {
-                var user = JSON.parse(userJSON)
-                eventEmitter.emit(`${callback_data.n}KeyboardChanged`, chat_id, message_id, user.settings)
-            })
-        }
+        loadUserSettings(chat_id).then(userSettings => {
+            eventEmitter.emit(`${callback_data.n}KeyboardChanged`, chat_id, message_id, userSettings)
+        })
     }
 }
 
@@ -55,4 +61,9 @@ function loadKeyboards(bot) {
     keyboardFiles.forEach(kf => {
         require(`../keyboards/${kf.replace('.js', '')}`)(bot)
     })
+}
+
+async function loadUserSettings(chat_id) {
+    var userJSON = await api.users({ telegram_chat_id: chat_id })
+    return JSON.parse(userJSON).settings
 }
