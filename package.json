@@ -4,7 +4,7 @@
   "description": "Intelligent Trading Tech Bot",
   "homepage": "http://intelligenttrading.org/",
   "engines": {
-    "node": "6.11.1"
+    "node": ">=8.9.0"
   },
   "main": "telegram.js",
   "scripts": {
