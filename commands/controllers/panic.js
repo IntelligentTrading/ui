@@ -14,7 +14,7 @@ module.exports = function (bot) {
 
         var callback_data = JSON.parse(callback_message.data)
 
-        api.addFeedReaction(callback_data.fid, callback_data.r, chat_id).then(updatedFeed => {
+        api.addFeedReaction(callback_data.d.fid, callback_data.d.r, chat_id).then(updatedFeed => {
             var updatedText = sentimentUtil.messageTemplate(updatedFeed, callback_message.message);
             bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Reaction saved!' })
                 .then(res => {

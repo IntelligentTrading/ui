@@ -137,7 +137,7 @@ var api = {
 
         var ittReaction = '';
 
-        switch (reaction) {
+        switch (reaction.toUpperCase()) {
             case 'BULL': ittReaction = 'ittBullish'; break;
             case 'BEAR': ittReaction = 'ittBearish'; break;
             case 'IMP': ittReaction = 'ittImportant'; break;
