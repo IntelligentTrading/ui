@@ -1,42 +1,38 @@
-const request = require('request');
-const errorManager = require('../util/error').errorManager;
-var tickers = require('./data/tickers').tickers;
-require('../util/extensions');
-var api = require('../core/api').api;
+var tickers = require('../data/tickers').tickers
+var api = require('../../core/api')
+require('../../util/extensions')
+var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
+var exchanges = ['Poloniex']
 
-var price = {
-    getPrice: (currency) => {
+var moduleBot = null
+module.exports = function (bot) {
+    moduleBot = bot
 
-        return api.price(currency)
-            .then(json => {
-                var info = JSON.parse(json)
-                if ('results' in info) {
-                    return parse_info(info.results[0]);
-                } else {
-                    return 'Currency not found';
-                }
-            })
+    this.cmd = (msg, params) => {
+        const chat_id = msg.chat.id
+        const ticker = params[0]
+        getPrice(ticker).then((result) => {
+            moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
+        }).catch(reason => {
+            console.log(reason);
+            moduleBot.sendMessage(chat_id, 'Please retry...')
+        })
     }
 }
 
-exports.price = price;
+var getPrice = (currency) => {
+    return api.price(currency)
+        .then(json => {
+            var info = JSON.parse(json)
+            if ('results' in info) {
+                return parse_info(info.results[0]);
+            } else {
+                return 'Currency not found';
+            }
+        })
+}
 
-
-/*{
-    "count": 187206,
-    "next": "https://itt-core-stage.herokuapp.com/api/v2/prices/ETH?page=2",
-    "previous": null,
-    "results": [
-      {
-        "timestamp": "2018-03-29T10:52:58.887630",
-        "source": 0,
-        "counter_currency": 0,
-        "transaction_currency": "ETH",
-        "price": 5479978
-      }
-    ]
-}*/
 function parse_info(price_result) {
 
     const wiki_url = "https://coinmarketcap.com/currencies";
@@ -79,7 +75,4 @@ function parse_info(price_result) {
 
             return `${currency_wiki}\nPrice: ${retrieved_price} (${(price_result.price_change_24h * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${price_result.timestamp.split('.')[0]}\nSource: ${exchanges[price_result.source]}`;
         })
-        .catch(reason => errorManager.handleException(reason));
 }
-
-var exchanges = ['Poloniex']

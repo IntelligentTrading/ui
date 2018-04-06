@@ -2,7 +2,7 @@ var cumulativeReaction = (ittReaction, baseReaction) => {
     return ittReaction ? ittReaction.length + baseReaction : baseReaction
 }
 
-var sentimentUtil = {
+module.exports = {
     messageTemplate: (updatedFeed, message) => {
         var messageText = message.text.substring(0, message.text.lastIndexOf('\n'))
             .replace('Read on CryptoPanic', `[Read on CryptoPanic](${updatedFeed.url})`)
@@ -10,5 +10,3 @@ var sentimentUtil = {
         return `${messageText}\n${cumulativeReaction(updatedFeed.ittBullish, updatedFeed.votes.positive)} ⇧ ${cumulativeReaction(updatedFeed.ittBearish, updatedFeed.votes.negative)} ⇩ ${cumulativeReaction(updatedFeed.ittImportant, updatedFeed.votes.important)}‼`
     }
 }
-
-exports.sentimentUtil = sentimentUtil;

@@ -1,6 +1,6 @@
 var rp = require('request-promise');
 var _ = require('lodash');
-var api = require('../../core/api').api;
+var api = require('../../core/api');
 var NodeCache = require('node-cache');
 var cache = new NodeCache({ stdTTL: 6000, checkperiod: 6000 });
 

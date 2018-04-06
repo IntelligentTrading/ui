@@ -65,6 +65,15 @@ var api = {
         }
         return rpromise(request_opts);
     },
+    volume: (symbol) => {
+
+        var request_opts = new Options();
+        request_opts.url = `${api_url}/volumes/${symbol}`
+        request_opts.headers = {
+            'API-KEY': api_key
+        }
+        return rpromise(request_opts);
+    },
     tickers: () => {
         var request_opts = {};
         request_opts.url = `${node_svc_api}/tickers/transaction_currencies`;
@@ -141,4 +150,4 @@ var api = {
     }
 }
 
-exports.api = api;
+module.exports = api
