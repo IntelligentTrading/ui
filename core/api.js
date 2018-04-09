@@ -16,15 +16,34 @@ function Options() {
 }
 
 var api = {
-    users: (options = {}) => {
+    createUser: (chat_id) => {
+        var request_opts = new Options()
+        request_opts.uri = `${node_svc_api}/users`
+        request_opts.method = 'POST'
+        request_opts.form = { telegram_chat_id: chat_id, eula: false }
+        return rpromise(request_opts)
+    },
+    getUsers: (options = {}) => {
 
         var chat_id = options.telegram_chat_id == undefined ? '' : options.telegram_chat_id;
         var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
 
         var stringified_filters = filters ? filters.join('&') : '';
 
+        var request_opts = new Options()
+        request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`
+
+        return rpromise(request_opts);
+    },
+    updateUser: (chat_id, settings, resource_url = '') => {
+        if (chat_id == null || chat_id == undefined) {
+            throw new Error('Chat id cannot be null or undefined');
+        }
+
         var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`;
+        request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`
+        request_opts.method = 'PUT'
+        request_opts.form = settings
 
         return rpromise(request_opts);
     },
@@ -34,18 +53,6 @@ var api = {
         request_opts.method = 'POST';
         request_opts.uri = `${node_svc_api}/license/subscribe`
         request_opts.form = { telegram_chat_id: chat_id, licenseCode: token }
-        return rpromise(request_opts);
-    },
-    updateUser: (chat_id, settings, resource_url = '') => {
-        if (chat_id == null || chat_id == undefined) {
-            throw new Error('Chat id cannot be null or undefined');
-        }
-
-        var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users/${chat_id}/${resource_url}`;
-        request_opts.method = 'PUT';
-        request_opts.form = settings;
-
         return rpromise(request_opts);
     },
     itt_members: () => {

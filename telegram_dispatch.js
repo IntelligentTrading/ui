@@ -52,7 +52,7 @@ function notify(message_data) {
               `transaction_currencies=${message_data.transaction_currency}`,
               `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
 
-              return api.users({ filters: filters }).then(usersJson => {
+              return api.getUsers({ filters: filters }).then(usersJson => {
 
                 var users = JSON.parse(usersJson)
                 users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
