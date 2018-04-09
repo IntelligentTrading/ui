@@ -64,6 +64,6 @@ function loadKeyboards(bot) {
 }
 
 async function loadUserSettings(chat_id) {
-    var userJSON = await api.users({ telegram_chat_id: chat_id })
+    var userJSON = await api.getUsers({ telegram_chat_id: chat_id })
     return JSON.parse(userJSON).settings
 }

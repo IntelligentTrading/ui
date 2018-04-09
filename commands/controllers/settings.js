@@ -7,7 +7,7 @@ module.exports = function (bot) {
 
     this.cmd = (msg, params) => {
 
-        api.users({ telegram_chat_id: msg.chat.id }).then((userJSON) => {
+        api.getUsers({ telegram_chat_id: msg.chat.id }).then((userJSON) => {
             var user = JSON.parse(userJSON)
             if (!user.eula) eventEmitter.emit('eula', msg)
             else eventEmitter.emit('ShowSettingsKeyboard', user)

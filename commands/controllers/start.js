@@ -1,4 +1,5 @@
 var eventEmitter = require('../../events/botEmitter')
+var api = require('../../core/api')
 var moduleBot = null
 
 eventEmitter.on('eula', (msg) => {
@@ -9,7 +10,7 @@ module.exports = function (bot) {
     moduleBot = bot
 
     this.cmd = (msg, params) => {
-        sendEula(msg)
+        api.createUser(msg.chat.id).then(() => sendEula(msg))
     }
 }
 
