@@ -1,7 +1,7 @@
 var _ = require('lodash')
 var dateHelper = require('../../util/dates')
 var eventEmitter = require('../../events/botEmitter')
-var utils = require('./utils')
+var utils = require('./keyboardUtils')
 var keyboardBot = null
 var tickers = require('../data/tickers').tickers
 
