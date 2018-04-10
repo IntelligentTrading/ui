@@ -10,7 +10,9 @@ module.exports = function (bot) {
     moduleBot = bot
 
     this.cmd = (msg, params) => {
-        api.createUser(msg.chat.id).then(() => sendEula(msg))
+        api.createUser(msg.chat.id)
+            .catch(err => { console.log(err) })
+            .finally(() => sendEula(msg))
     }
 }
 
