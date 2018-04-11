@@ -163,15 +163,6 @@ var api = {
         }
 
         return rpromise(request_opts);
-    },
-    getFreeUsers: () => {
-        var request_opts = {};
-        request_opts.url = `${node_svc_api}/users/free`
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts)
     }
 }
 

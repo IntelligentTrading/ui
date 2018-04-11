@@ -14,6 +14,8 @@ const telegram_message_options = {
 }
 
 var horizons = ['long', 'medium', 'short']
+var subscriptionTemplates = {}
+initSubscriptionTemplates()
 
 function notify(message_data) {
 
@@ -40,27 +42,44 @@ function notify(message_data) {
                         signal.trend = message_data.trend
                         signal.source = message_data.source
 
-                        var filters = [buildHorizonFilter(horizon),
-                        `transaction_currencies=${message_data.transaction_currency}`,
-                        `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
+                        var filters = [buildHorizonFilter(horizon), 'is_muted=false']
 
-                        var getFreeUsersPromise = getFreeUsers(signal, message_data)
-                        var getUsersPromise = api.getUsers({ filters: filters })
+                        api.getUsers({ filters: filters }).then(usersJson => {
+                            var users = JSON.parse(usersJson)
 
-                        Promise.all([getFreeUsersPromise, getUsersPromise]).then(fulfillments => {
+                            users = users.filter(user => user.is_ITT_team || user.eula)
 
-                            var freeUsers = fulfillments[0] ? JSON.parse(fulfillments[0]) : []
-                            var users = JSON.parse(fulfillments[1])
+                            var signalForNonno = isForNonno(signal, message_data)
+                            var signalForFree = isForFree(signal, message_data)
+                            var signalForTier = isForTier(signal, message_data)
 
-                            var mergedUsers = _.uniqBy(users.concat(freeUsers), 'telegram_chat_id')
+                            /**
+                             * User can be:
+                             * Free + Nonno + Tier
+                             * Free + Tier
+                             * Free
+                             */
 
-                            mergedUsers.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
-                                .map(subscribedUser => {
+                            var tierUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 &&
+                                user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
+                                user.settings.counter_currencies.indexOf(message_data.counter_currency) >= 0)
 
-                                    bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts).catch(err => {
-                                        console.log(`${err.message} :: chat ${subscribedUser.telegram_chat_id}`)
-                                    })
-                                })
+                            var betaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
+                                user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
+                                user.settings.counter_currencies.indexOf(message_data.counter_currency) >= 0)
+
+                            var freeUsers = users.filter(user => (
+                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
+                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
+
+                            var subscribers = tierUsers
+                            if (signalForFree) subscribers = _.intersectionWith(subscribers, freeUsers, (u1, u2) => { return u1.telegram_chat_id == u2.telegram_chat_id })
+                            if (signalForBeta) subscribers = _.intersectionWith(subscribers, betaUsers, (u1, u2) => { return u1.telegram_chat_id == u2.telegram_chat_id })
+
+                            subscribers.map(subscriber => {
+                                bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
+                                    .catch(err => { console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`) })
+                            })
                         })
                     }
                 })
@@ -68,38 +87,46 @@ function notify(message_data) {
     }
 }
 
-function getFreeUsers(signal, message_data) {
-    return isForFreeUsers(signal, message_data).then(itIs => {
-        if (itIs) return api.getFreeUsers()
-    })
+function isForFree(signal, message_data) {
+
+    var isUptrend = message_data.trend > 0
+    var isUSDT = message_data.counter_currency == 2
+
+    return IsDeliverableTo('free', signal, message_data) && isUptrend && isUSDT
 }
 
-function isForFreeUsers(signal, message_data) {
-    return api.getSubscriptionTemplate('free').then(templateJson => {
-        var template = JSON.parse(templateJson)
-        var isFreeTicker = template.tickers.indexOf(message_data.transaction_currency) >= 0
-        var isUSDT = message_data.counter_currency == 2
-        var isFreeLevel = signal.deliverTo.indexOf('free') >= 0
-        var isUptrend = message_data.trend > 0
-        var isMediumLongHorizon = horizons.indexOf(message_data.horizon) <= horizons.indexOf(template.horizon)
-        var isAllowedExchange = template.exchanges.indexOf(message_data.source.toLowerCase()) >= 0
-        return isFreeTicker && isUSDT && isFreeLevel && isUptrend && isMediumLongHorizon && isAllowedExchange
-    })
+function isForNonno(signal, message_data) {
+    return IsDeliverableTo('nonno', signal, message_data)
 }
 
-function IsSubscribed(user, signal) {
-    var isSubscribed = false
-    signal.deliverTo.forEach(level => {
-        var userLevelExpirationDate = user.settings.subscriptions[level]
-        isSubscribed = isSubscribed ||
-            (userLevelExpirationDate && dateUtil.getDaysLeftFrom(userLevelExpirationDate) > 0 &&
-                (level != 'free' || level == 'free' && signal.trend > 0 && signal.source.toLowerCase() == 'poloniex'))
-    })
-    return isSubscribed
+function isForTier(signal, message_data) {
+    return IsDeliverableTo('tier', signal, message_data)
+}
+
+function IsDeliverableTo(pricingPlan, signal, message_data) {
+
+    var template = subscriptionTemplates[pricingPlan]
+    var isSubscribedToTickers = template.tickers.length == 0 || template.tickers.indexOf(message_data.transaction_currency) >= 0
+    var canDeliverToLevel = signal.deliverTo.indexOf(pricingPlan) >= 0
+    var hasTheRightHorizon = !template.horizon || horizons.indexOf(message_data.horizon) <= horizons.indexOf(template.horizon)
+    var isAllowedExchange = !template.exchanges || template.exchanges.indexOf(message_data.source.toLowerCase()) >= 0
+    return isSubscribedToTickers && canDeliverToLevel && hasTheRightHorizon && isAllowedExchange
 }
 
 var buildHorizonFilter = (horizon) => {
     return `horizon=${horizons.slice(horizons.indexOf(horizon)).join(',')}`;
+}
+
+function initSubscriptionTemplates() {
+    var freePromise = api.getSubscriptionTemplate('free')
+    var nonnoPromise = api.getSubscriptionTemplate('nonno')
+    var tierPromise = api.getSubscriptionTemplate('tier')
+
+    Promise.all([freePromise, nonnoPromise, tierPromise]).then(templates => {
+        subscriptionTemplates.free = JSON.parse(templates[0])
+        subscriptionTemplates.nonno = JSON.parse(templates[1])
+        subscriptionTemplates.tier = JSON.parse(templates[2])
+    })
 }
 
 module.exports = { notify: notify }
