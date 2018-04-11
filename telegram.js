@@ -5,25 +5,16 @@ const fs = require('fs');
 const api = require('./core/api')
 require('./util/extensions')
 
-const tickers = require('./commands/data/tickers').tickers;
-var sentimentUtil = require('./util/sentiment').sentimentUtil;
-
+var tickers = require('./data/tickers')
 var telegram = require('./bot/telegramInstance')
 var bot = telegram.bot
 
 var commandsManager = {}
-
 var commandFiles = fs.readdirSync('./commands/controllers')
 commandFiles.forEach(cf => {
   var commandClass = require(`./commands/controllers/${cf}`)
   commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
 })
-
-console.log('[Telegram bot] initialize data...');
-tickers.get().then(() => console.log('[Telegram bot] data initialized.'))
-  .catch(reason => {
-    console.log('[Telegram bot] data not initialized.')
-  })
 
 bot.onText(/\/(\w+)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;

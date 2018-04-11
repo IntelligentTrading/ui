@@ -3,7 +3,7 @@ var dateHelper = require('../../util/dates')
 var eventEmitter = require('../../events/botEmitter')
 var utils = require('./keyboardUtils')
 var keyboardBot = null
-var tickers = require('../data/tickers').tickers
+var tickers = require('../../data/tickers')
 
 eventEmitter.on('ShowCurKeyboard', (chat_id, message_id, data, page) => { showKeyboard(chat_id, message_id, data, page) })
 eventEmitter.on('CurKeyboardChanged', (chat_id, message_id, data, page) => { showKeyboard(chat_id, message_id, data, page) })

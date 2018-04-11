@@ -19,4 +19,4 @@ var errorManager = {
 }
 
 
-exports.errorManager = errorManager;
+module.exports = errorManager
