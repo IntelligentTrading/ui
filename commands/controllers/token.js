@@ -1,4 +1,4 @@
-var tickers = require('../data/tickers').tickers
+var tickers = require('../../data/tickers')
 var api = require('../../core/api')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 var eventEmitter = require('../../events/botEmitter')

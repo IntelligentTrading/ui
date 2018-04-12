@@ -1,11 +1,13 @@
-require('../util/extensions');
-var tickers = require('./data/tickers').tickers;
-var _ = require('lodash');
+require('./extensions')
+var tickers = require('../data/tickers')
+var _ = require('lodash')
 
-var counter_currencies = [];
-tickers.counter_currencies().then(ccs => counter_currencies = ccs);
+var counter_currencies = []
+tickers.counter_currencies().then(ccs => {
+  counter_currencies = ccs
+})
 
-function parseSignal(message_data) {
+function applyTemplate(message_data) {
 
   return getBaseSignalTemplate(message_data)
     .then((bst) => {
@@ -32,8 +34,13 @@ function parseSignal(message_data) {
         telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text} (${bst.horizon_text})`;
       }
 
+      if (message_data.signal == 'ANN_Simple') {
+        var ann_simple = getAnnSimpleTemplate(message_data)
+        telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
+      }
+
       return telegram_signal_message;
-    });
+    })
 }
 
 function getSMATemplate(message_data) {
@@ -70,22 +77,22 @@ function getRSITemplate(message_data) {
 }
 
 function getRsiSmaTemplate(message_data) {
-  
-    if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
-      throw new Error('Invalid RSI value');
-  
-    var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '🆘')}`;
-    var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
-    
-    var rsi_sma = {
-      rsi_header_emoji: 'ℹ️',
-      rsi_general_trend: `General trend: *${(message_data.trend == -1 ? 'Bullish' : 'Bearish')}*`,
-      rsi_text: `RSI: *${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
-      rsi_itt_bias: `ITT Bias: Trend reversal to the *${(message_data.trend == -1 ? 'upside' : 'downside')}* is near.`,
-    }
-  
-    return rsi_sma;
+
+  if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
+    throw new Error('Invalid RSI value');
+
+  var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '🆘')}`;
+  var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
+
+  var rsi_sma = {
+    rsi_header_emoji: 'ℹ️',
+    rsi_general_trend: `General trend: *${(message_data.trend == -1 ? 'Bullish' : 'Bearish')}*`,
+    rsi_text: `RSI: *${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+    rsi_itt_bias: `ITT Bias: Trend reversal to the *${(message_data.trend == -1 ? 'upside' : 'downside')}* is near.`,
   }
+
+  return rsi_sma;
+}
 
 
 function getKumoTemplate(message_data) {
@@ -100,6 +107,17 @@ function getKumoTemplate(message_data) {
   }
 
   return ichimoku;
+}
+
+function getAnnSimpleTemplate(message_data) {
+  var probability = `Price Probability:\n🔻 ${(message_data.probability_down * 100).toFixed(1)}%\t▲ ${(message_data.probability_up * 100).toFixed(1)}%\t *=* ${(message_data.probability_same * 100).toFixed(1)}%`
+  var predicted_ahead_for = `Predicted ahead for ${message_data.predicted_ahead_for} minutes.`
+  var ann_simple = {
+    ann_simple_header_emoji: '🤖',
+    ann_simple_text: `${probability}\n\n${predicted_ahead_for}`
+  }
+
+  return ann_simple;
 }
 
 function getBaseSignalTemplate(message_data) {
@@ -155,7 +173,6 @@ function decodeMessage(message_body) {
   }
 }
 
-
 var sorted_messages_cache = [];
 
 function sortedSignalInsertion(newSignal) {
@@ -167,19 +184,18 @@ function cleanSortedCache() {
     sorted_messages_cache.pop();
 }
 
-function hasValidTimestamp(messageBody) {
+function checkTimestamp(messageBody) {
 
   return messageBody != undefined &&
     messageBody.timestamp != undefined &&
     Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
 }
 
-function isDuplicateMessage(messageId, signalId) {
+function checkDuplicates(messageId, signalId) {
 
   cleanSortedCache();
 
   if (sorted_messages_cache.filter(record => record.messageId == messageId || record.signalId == signalId).length <= 0) {
-
     sortedSignalInsertion({ messageId: messageId, signalId: signalId, timestamp: Date.now() });
     return false;
   }
@@ -188,17 +204,36 @@ function isDuplicateMessage(messageId, signalId) {
 }
 
 // If the counter and transaction currencies are the same, skip
-function isCounterCurrency(messageBody) {
-  return messageBody.transaction_currency == tickers.counter_currencies[parseInt(messageBody.counter_currency)]
+function checkCounterCurrency(messageBody) {
+  return messageBody.transaction_currency == counter_currencies[parseInt(messageBody.counter_currency)]
 }
 
-var helper = {
-  parse: (message) => parseSignal(message),
-  hasValidTimestamp: (message_body) => hasValidTimestamp(message_body),
-  isDuplicateMessage: (messageId, signalId) => isDuplicateMessage(messageId, signalId),
-  isCounterCurrency: (message_body) => isCounterCurrency(message_body),
-  sortedSignalInsertion: (signal) => sortedSignalInsertion(signal),
-  decodeMessage: (message) => decodeMessage(message),
+function checkValidity(message) {
+  var decoded_message_body = decodeMessage(message.Body)
+
+  var hasValidTimestamp = checkTimestamp(decoded_message_body)
+  var isCounterCurrency = checkCounterCurrency(decoded_message_body)
+  var isDuplicateMessage = checkDuplicates(message.MessageId, decoded_message_body.id)
+
+  var isValid = hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency
+  var validity = { isValid: isValid, reasons: '', decoded_message_body: decoded_message_body }
+
+  if (!isValid) {
+    var invalidReasonsList = [];
+    if (!hasValidTimestamp)
+      invalidReasonsList.push('is too old');
+    if (isDuplicateMessage)
+      invalidReasonsList.push('is a duplicate');
+    if (isCounterCurrency)
+      invalidReasonsList.push('is counter currency');
+
+    validity.reasons = invalidReasonsList.join(',')
+  }
+
+  return validity
 }
 
-exports.signalHelper = helper;
+module.exports = {
+  applyTemplate: (message) => applyTemplate(message),
+  checkValidity: (message) => checkValidity(message)
+}

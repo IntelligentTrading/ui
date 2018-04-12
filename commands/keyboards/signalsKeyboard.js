@@ -1,8 +1,8 @@
 var _ = require('lodash')
 var eventEmitter = require('../../events/botEmitter')
-var utils = require('./utils')
+var utils = require('.//keyboardUtils')
 var keyboardBot = null
-var tickers = require('../data/tickers').tickers
+var tickers = require('../../data/tickers')
 
 eventEmitter.on('ShowSigKeyboard', (chat_id, message_id, data) => { showKeyboard(chat_id, message_id, data) })
 eventEmitter.on('SigKeyboardChanged', (chat_id, message_id, data) => { showKeyboard(chat_id, message_id, data) })

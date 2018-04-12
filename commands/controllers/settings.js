@@ -44,7 +44,10 @@ module.exports = function (bot) {
             var navigateToPage = destination_page.split('(')[1]
             if (navigateToPage) navigateToPage = navigateToPage.replace(')', '')
             eventEmitter.emit(`${navigateToKeyboard}KeyboardChanged`, chat_id, message_id, JSON.parse(updatedUser).settings, navigateToPage)
-        }).catch(err => moduleBot.sendMessage(chat_id, err))
+        }).catch(reason => {
+            var message = reason.error ? reason.error : reason
+            moduleBot.sendMessage(chat_id, message)
+        })
     }
 }
 

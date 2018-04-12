@@ -1,89 +1,15 @@
-var errorManager = require('./util/error.js').errorManager;
-require('./util/extensions');
-var dateUtil = require('./util/dates')
-var _ = require('lodash');
-const request = require('request');
-const TelegramBot = require('node-telegram-bot-api');
-const fs = require('fs');
-const Consumer = require('sqs-consumer');
-const AWS = require('aws-sdk');
-var signalHelper = require('./commands/signal_helper').signalHelper;
-var api = require('./core/api')
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: false });
-const telegram_message_options = {
-  parse_mode: "Markdown"
-};
+const signalNotifier = require('./events/signals')
+const signalHelper = require('./util/signal-helper')
+const Consumer = require('sqs-consumer')
+const AWS = require('aws-sdk')
 
 AWS.config.update({
   region: 'us-east-1',
   accessKeyId: process.env.AWS_KEY,
   secretAccessKey: process.env.AWS_SECRET
-});
+})
 
 console.log('Starting telegram dispatching service');
-
-function notify(message_data) {
-
-  var opts =
-    {
-      "parse_mode": "Markdown",
-      "disable_web_page_preview": "true"
-    };
-
-  if (message_data != undefined) {
-    var risk = message_data.risk;
-    var horizon = message_data.horizon;
-    var signal_counter_currency
-
-    console.log(`${message_data.signal} signal`);
-
-    return signalHelper.parse(message_data)
-      .then(telegram_signal_message => {
-        if (!telegram_signal_message) throw new Error(errorManager.generic_error_message)
-
-        return api.getSignals(message_data.signal)
-          .then(signalsJson => {
-            if (signalsJson && JSON.parse(signalsJson).length > 0) {
-
-              var signal = JSON.parse(signalsJson)[0]
-              signal.trend = message_data.trend
-              var filters = [buildHorizonFilter(horizon),
-              `transaction_currencies=${message_data.transaction_currency}`,
-              `counter_currencies=${message_data.counter_currency}`, 'is_muted=false']
-
-              return api.getUsers({ filters: filters }).then(usersJson => {
-
-                var users = JSON.parse(usersJson)
-                users.filter(user => user.eula && (IsSubscribed(user, signal) || user.is_ITT_team))
-                  .map(subscribedUser => {
-                    bot.sendMessage(subscribedUser.telegram_chat_id, telegram_signal_message, opts)
-                      .catch(err => {
-                        console.log(`${err.message} :: chat ${user.telegram_chat_id}`)
-                      })
-                  })
-              })
-            }
-          })
-      })
-  }
-}
-
-function IsSubscribed(user, signal) {
-  var isSubscribed = false
-  signal.deliverTo.forEach(level => {
-    var userLevelExpirationDate = user.settings.subscriptions[level]
-
-    isSubscribed = isSubscribed || (userLevelExpirationDate && dateUtil.getDaysLeftFrom(userLevelExpirationDate) > 0)
-    //&& (level != 'free' || level == 'free' && signal.trend > 0))
-  })
-  return isSubscribed
-}
-
-var buildHorizonFilter = (horizon) => {
-  var horizons = ['long', 'medium', 'short']
-  return `horizon=${horizons.slice(horizons.indexOf(horizon)).join(',')}`;
-}
 
 var aws_queue_url = process.env.LOCAL_ENV
   ? `${process.env.AWS_SQS_LOCAL_QUEUE_URL}`
@@ -92,45 +18,24 @@ var aws_queue_url = process.env.LOCAL_ENV
 const app = Consumer.create({
   queueUrl: aws_queue_url,
   handleMessage: (message, done) => {
+    var signalValidity = signalHelper.checkValidity(message)
 
-    var decoded_message_body = signalHelper.decodeMessage(message.Body);
-    var hasValidTimestamp = signalHelper.hasValidTimestamp(decoded_message_body);
-    var isCounterCurrency = signalHelper.isCounterCurrency(decoded_message_body);
-    var isDuplicateMessage = signalHelper.isDuplicateMessage(message.MessageId, decoded_message_body.id);
-
-    if (hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency) {
-      notify(decoded_message_body)
-        .then((msg) => {
-          console.log(`[Notified] Message ${message.MessageId}`);
-        })
-        .catch((reason) => {
-          console.log(`[Not notified] Message ${message.MessageId}`);
-          console.log(reason);
-        })
+    if (signalValidity.isValid) {
+      signalNotifier.notify(signalValidity.decoded_message_body).then((msg) => {
+        console.log(`[Notified] Message ${message.MessageId}`)
+      }).catch((reason) => {
+        console.log(`[Not notified] Message ${message.MessageId}`)
+      })
+    } else {
+      console.log(`[Invalid] SQS message ${message.MessageId} for signal ${signalValidity.decoded_message_body.id} ${signalValidity.reasons}`)
     }
-    else {
-
-      var invalidReasonsList = [];
-      if (!hasValidTimestamp)
-        invalidReasonsList.push('is too old');
-      if (isDuplicateMessage)
-        invalidReasonsList.push('is a duplicate');
-      if (isCounterCurrency)
-        invalidReasonsList.push('is counter currency');
-
-      var reasons = invalidReasonsList.join(',');
-
-      console.log(`[Invalid] SQS message ${message.MessageId} for signal ${decoded_message_body.id} ${reasons}`);
-    }
-    done();
+    done()
   },
   sqs: new AWS.SQS()
 })
 
 app.on('message_received', (msg) => {
-
   console.log(`[Received] Message ${msg.MessageId}`);
-
   app.handleMessage(msg, function (err) {
     if (err) console.log(err);
   })
@@ -149,7 +54,3 @@ app.on('error', (err) => {
 })
 
 app.start()
-
-
-module.exports.notify = notify
-
