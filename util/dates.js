@@ -9,11 +9,11 @@ var dateUtil = {
 
         return ((utc2 - utc1) / _MS_PER_DAY).toFixed(2)
     },
-    hasValidSubscription: (user) => {
+    hasValidSubscription: (settings) => {
         
-        return dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 ||
-        dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 ||
-            user.settings.is_ITT_team
+        return dateUtil.getDaysLeftFrom(settings.subscriptions.paid) > 0 ||
+        dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
+            settings.is_ITT_team
     }
 }
 

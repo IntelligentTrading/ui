@@ -4,7 +4,7 @@ var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null;
 
-eventEmitter.on('ShowSettingsKeyboard', (user) => { showKeyboard(user) })
+eventEmitter.on('ShowSettingsKeyboard', (user) => { showKeyboard(user.telegram_chat_id, user.settings) })
 eventEmitter.on('SettingsKeyboardChanged', (chat_id, message_id, settings) => { updateKeyboard(chat_id, message_id, settings) })
 
 module.exports = function (bot) {
@@ -25,10 +25,10 @@ var updateKeyboard = (chat_id, message_id, settings) => {
     })
 }
 
-var showKeyboard = (user) => {
-    var keyboardObject = getKeyboardObject(user)
+var showKeyboard = (telegram_chat_id, settings) => {
+    var keyboardObject = getKeyboardObject(settings)
 
-    var hasValidSubscription = subscriptionUtils.hasValidSubscription(user)
+    var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
 
     var options = { parse_mode: "Markdown" }
@@ -38,26 +38,26 @@ var showKeyboard = (user) => {
         }
     }
 
-    keyboardBot.sendMessage(user.telegram_chat_id, keyboardText, options)
+    keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
 }
 
-var getKeyboardObject = (user) => {
+var getKeyboardObject = (settings) => {
     return {
-        text: getKeyboardText(user),
-        buttons: getKeyboardButtons(user)
+        text: getKeyboardText(settings),
+        buttons: getKeyboardButtons(settings)
     }
 }
 
-var getKeyboardText = (user) => {
-    var isMuted = user.settings.is_muted
-    var hasValidSubscription = subscriptionUtils.hasValidSubscription(user)
-    var subscriptionExpirationDate = user.settings.subscriptions.paid
+var getKeyboardText = (settings) => {
+    var isMuted = settings.is_muted
+    var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
+    var subscriptionExpirationDate = settings.subscriptions.paid
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
-    var msg = `Your profile is set on *${user.settings.horizon}* horizon.
+    var msg = `Your profile is set on *${settings.horizon}* horizon.
 You will receive paid signals until ${subscriptionExpirationDate.split('T')[0]} (Days left: ${daysLeft}).
 Send 1 ITT for each additional day, using the following address as receiver:
 
-*${user.settings.ittWalletReceiverAddress}*
+*${settings.ittWalletReceiverAddress}*
 
 You will be notified as soon as the transaction is confirmed.
 
@@ -65,9 +65,8 @@ ${hasValidSubscription ? 'Tap below to edit your settings:' : 'You cannot edit y
     return msg
 }
 
-var getKeyboardButtons = (user) => {
+var getKeyboardButtons = (settings) => {
 
-    var settings = user.settings
     var alertsCallbackData = keyboardUtils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
     var editSignalsCallbackData = keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Sig')
     var editTraderCallbackData = keyboardUtils.getButtonCallbackData('navigation', { horizon: settings.horizon }, null, 'Trader')
