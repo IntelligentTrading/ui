@@ -53,28 +53,29 @@ function notify(message_data) {
                             var signalForFree = isForFree(signal, message_data)
                             var signalForTier = isForTier(signal, message_data)
 
-                            /**
-                             * User can be:
-                             * Free + Nonno + Tier
-                             * Free + Tier
-                             * Free
-                             */
-
-                            var tierUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 &&
+                            var matchingTierUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(message_data.counter_currency) >= 0)
+                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0)
 
-                            var betaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
+                            var matchingBetaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(message_data.counter_currency) >= 0)
+                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0)
 
-                            var freeUsers = users.filter(user => (
+                            var freeOnlyUsers = users.filter(user => (
                                 dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
                                 dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
 
-                            var subscribers = tierUsers
-                            if (signalForFree) subscribers = _.intersectionWith(subscribers, freeUsers, (u1, u2) => { return u1.telegram_chat_id == u2.telegram_chat_id })
-                            if (signalForBeta) subscribers = _.intersectionWith(subscribers, betaUsers, (u1, u2) => { return u1.telegram_chat_id == u2.telegram_chat_id })
+                            var subscribers = []
+
+                            if (signalForFree) {
+                                subscribers = freeOnlyUsers
+                                subscribers = subscribers.concat(matchingBetaUsers)
+                            }
+                            else if (signalForNonno) {
+                                subscribers = subscribers.concat(matchingBetaUsers)
+                            }
+
+                            subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
 
                             subscribers.map(subscriber => {
                                 bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
@@ -96,11 +97,11 @@ function isForFree(signal, message_data) {
 }
 
 function isForNonno(signal, message_data) {
-    return IsDeliverableTo('nonno', signal, message_data)
+    return IsDeliverableTo('beta', signal, message_data)
 }
 
 function isForTier(signal, message_data) {
-    return IsDeliverableTo('tier', signal, message_data)
+    return IsDeliverableTo('paid', signal, message_data)
 }
 
 function IsDeliverableTo(pricingPlan, signal, message_data) {
@@ -119,13 +120,13 @@ var buildHorizonFilter = (horizon) => {
 
 function initSubscriptionTemplates() {
     var freePromise = api.getSubscriptionTemplate('free')
-    var nonnoPromise = api.getSubscriptionTemplate('nonno')
-    var tierPromise = api.getSubscriptionTemplate('tier')
+    var nonnoPromise = api.getSubscriptionTemplate('beta')
+    var tierPromise = api.getSubscriptionTemplate('paid')
 
     Promise.all([freePromise, nonnoPromise, tierPromise]).then(templates => {
         subscriptionTemplates.free = JSON.parse(templates[0])
-        subscriptionTemplates.nonno = JSON.parse(templates[1])
-        subscriptionTemplates.tier = JSON.parse(templates[2])
+        subscriptionTemplates.beta = JSON.parse(templates[1])
+        subscriptionTemplates.paid = JSON.parse(templates[2])
     })
 }
 
