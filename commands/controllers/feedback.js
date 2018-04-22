@@ -13,8 +13,8 @@ module.exports = function (bot) {
             moduleBot.sendMessage(chat_id, helpText)
         }
         else {
-            api.storeFeedback(chat_id, username, feedback).then((result) => {
-                moduleBot.sendMessage(chat_id, thanksText(result.body.shortLink))
+            return api.storeFeedback(chat_id, username, feedback).then((result) => {
+                moduleBot.sendMessage(chat_id, thanksText(result.shortLink))
             })
         }
     }
