@@ -166,7 +166,7 @@ var api = {
     },
     getITT: () => {
         var request_opts = {}
-        request_opts.url = `${node_svc_api}/itt`
+        request_opts.url = `${node_svc_api}/tickers/transaction_currencies/ITT`
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
