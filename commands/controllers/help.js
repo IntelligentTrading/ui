@@ -5,7 +5,7 @@ module.exports = function (bot) {
     this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
 
-        var command_list = `/start - Start ITT Bot, subscribe to new alerts
+        var command_list = `/start - Start ITF Bot, subscribe to new alerts
         /help - Get a list of all commands
         /settings - Manage your preferences and profile
         /feedback - Help us improve the Bot with your own ideas
