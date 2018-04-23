@@ -156,13 +156,22 @@ var api = {
         return rpromise(request_opts);
     },
     getSubscriptionTemplate: (plan) => {
-        var request_opts = {};
-        request_opts.url = `${node_svc_api}/users/template/${plan}`;
+        var request_opts = {}
+        request_opts.url = `${node_svc_api}/users/template/${plan}`
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
 
-        return rpromise(request_opts);
+        return rpromise(request_opts)
+    },
+    getITT: () => {
+        var request_opts = {}
+        request_opts.url = `${node_svc_api}/itt`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
     }
 }
 
