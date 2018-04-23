@@ -39,6 +39,8 @@ function applyTemplate(message_data) {
         telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
       }
 
+      telegram_signal_message = telegram_signal_message + '\n' + bst.source
+
       return telegram_signal_message;
     })
 }
@@ -153,7 +155,8 @@ function getBaseSignalTemplate(message_data) {
         price_text: price == undefined ? "" : `price: ${currency_symbol} ${price}`,
         currency_symbol: currency_symbol,
         price: price,
-        wiki_header: `[${message_data.transaction_currency}](${wiki_url})`
+        wiki_header: `[${message_data.transaction_currency}](${wiki_url})`,
+        source: message_data.source ? `Source: ${message_data.source.toSentenceCase()}` : ''
       }
 
       return base_template;
