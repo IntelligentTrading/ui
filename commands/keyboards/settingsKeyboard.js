@@ -4,18 +4,18 @@ var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 var api = require('../../core/api')
-var counter_currencies = ['BTC', '', 'USDT']
+var counter_currencies = await api.counterCurrencies()
 
 eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
-eventEmitter.on('SettingsKeyboardChanged', (chat_id, message_id, settings) => { updateKeyboard(chat_id, message_id, settings) })
+eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
 
 module.exports = function (bot) {
     keyboardBot = bot
 }
 
-var updateKeyboard = (chat_id, message_id, settings) => {
+var updateKeyboard = async (chat_id, message_id, settings) => {
 
-    var keyboardObject = getKeyboardObject(settings)
+    var keyboardObject = await getKeyboardObject(settings)
 
     keyboardBot.editMessageText(keyboardObject.text, {
         chat_id: chat_id,
@@ -54,6 +54,7 @@ var getKeyboardText = async (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
+    //! from HERE
     var tradingPairs = settings.counter_currencies.map(cc => `alt/${counter_currencies[parseInt(cc)]}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var paidSignalsMsg = daysLeft > 0 ? `You will receive paid signals until *${subscriptionExpirationDate.split('T')[0]}* (Days left: ${daysLeft}).` : 'You are not subscribed to any paid signal.'
