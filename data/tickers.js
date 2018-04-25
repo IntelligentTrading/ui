@@ -18,8 +18,8 @@ var tickers = {
     init: () => {
         return tickers.get().then(() => {
             return tickers.counter_currencies()
-                .catch(err => console.log(err))
-        }).catch(err => console.log(err))
+                .catch(err => console.log('4'+err))
+        }).catch(err => console.log('3 '+err))
     }
 }
 
@@ -31,7 +31,7 @@ var loadCounterCurrencies = () => {
         cache.set('counter_currencies', ccs)
         console.log('Counter currencies cache set.')
         return ccs
-    }).catch(err => console.log(err))
+    }).catch(err => console.log('5 '+err))
 }
 
 var loadTickers = () => {
@@ -40,5 +40,5 @@ var loadTickers = () => {
         cache.set('tickers', tickers)
         console.log('Transaction currencies cache set')
         return tickers
-    }).catch(err => console.log(err))
+    }).catch(err => console.log('6 '+err))
 }

@@ -66,13 +66,13 @@ var api = {
         var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/transaction_currencies`
         console.log(`Requesting ${request_opts.url}`)
-        return rpromise(request_opts).catch(err => console.log(err))
+        return rpromise(request_opts).catch(err => console.log('1:'+err))
     },
     counterCurrencies: () => {
         var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/counter_currencies`
         console.log(`Requesting ${request_opts.url}`)
-        return rpromise(request_opts)
+        return rpromise(request_opts).catch(err => console.log('2:'+err))
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
