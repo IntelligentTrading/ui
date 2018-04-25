@@ -8,17 +8,22 @@ var bot = telegram.bot
 
 var commandsManager = {}
 const tickers = require('./data/tickers')
+
 console.log('Loading tickers...')
-tickers.init().then(() => {
-  console.log('Tickers cache loaded.')
-  console.log('Loading command controllers...')
-  var commandFiles = fs.readdirSync('./commands/controllers')
-  commandFiles.forEach(cf => {
-    var commandClass = require(`./commands/controllers/${cf}`)
-    commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
-  })
-  console.log('Command controllers loaded.')
-})
+try {
+  tickers.init().then(() => {
+    console.log('Tickers cache loaded.')
+    console.log('Loading command controllers...')
+    var commandFiles = fs.readdirSync('./commands/controllers')
+    commandFiles.forEach(cf => {
+      var commandClass = require(`./commands/controllers/${cf}`)
+      commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
+    })
+    console.log('Command controllers loaded.')
+  }).catch(err => console.log(err))
+} catch (err) {
+  console.log(err)
+}
 
 bot.onText(/\/(\w+)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
