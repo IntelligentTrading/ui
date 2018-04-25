@@ -8,7 +8,6 @@ module.exports = {
         if (partial_url[0] == '/') partial_url = partial_url.slice(1)
 
         var request_url = `${core_api_url}/${partial_url}`
-        console.log('DBG 2')
         return rpromise(request_url, { headers: { 'API-KEY': core_api_key } })
     }
 }

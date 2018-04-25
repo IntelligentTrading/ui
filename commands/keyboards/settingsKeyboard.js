@@ -3,6 +3,7 @@ var eventEmitter = require('../../events/botEmitter')
 var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
+var tickers = require('../../data/tickers')
 var api = require('../../core/api')
 
 eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
@@ -11,8 +12,7 @@ eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings)
 var counter_currencies = []
 module.exports = async (bot) => {
     keyboardBot = bot
-    var counter_currencies_json = await api.counterCurrencies()
-    counter_currencies = JSON.parse(counter_currencies_json)
+    counter_currencies = await tickers.counter_currencies()
 }
 
 var updateKeyboard = async (chat_id, message_id, settings) => {

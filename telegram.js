@@ -4,15 +4,21 @@ const app = express();
 const fs = require('fs');
 const api = require('./core/api')
 require('./util/extensions')
-
 var telegram = require('./bot/telegramInstance')
 var bot = telegram.bot
 
 var commandsManager = {}
-var commandFiles = fs.readdirSync('./commands/controllers')
-commandFiles.forEach(cf => {
-  var commandClass = require(`./commands/controllers/${cf}`)
-  commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
+const tickers = require('./data/tickers')
+console.log('Loading tickers...')
+tickers.init().then(() => {
+  console.log('Tickers cache loaded.')
+  console.log('Loading command controllers...')
+  var commandFiles = fs.readdirSync('./commands/controllers')
+  commandFiles.forEach(cf => {
+    var commandClass = require(`./commands/controllers/${cf}`)
+    commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
+  })
+  console.log('Command controllers loaded.')
 })
 
 bot.onText(/\/(\w+)(.*)/, (msg, match) => {
