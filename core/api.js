@@ -63,21 +63,17 @@ var api = {
         return backend.get(`/volumes/${symbol}`)
     },
     tickers: () => {
-        var request_opts = {};
+        var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/transaction_currencies`;
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
         return rpromise(request_opts)
     },
     counterCurrencies: () => {
-        var request_opts = {};
+        var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/counter_currencies`;
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-        return rpromise(request_opts)
+        return rpromise(request_opts).then(result => {
+            console.log('DBG')
+            return result
+        }).catch(err => console.log(err))
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
