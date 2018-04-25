@@ -40,7 +40,6 @@ var tickers = {
     init: () => {
         Promise.all([tickers.get(), tickers.counter_currencies()])
             .then(() => console.log('[Telegram bot] data initialized.'))
-            .catch(reason => { console.log('[Telegram bot] data not initialized.') })
     }
 }
 
