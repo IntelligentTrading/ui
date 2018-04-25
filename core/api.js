@@ -68,15 +68,8 @@ var api = {
         return rpromise(request_opts)
     },
     counterCurrencies: () => {
-        var request_opts = new Options()
-        request_opts.url = `${node_svc_api}/tickers/counter_currencies`;
-        return rpromise(request_opts).then(result => {
-            console.log('DBG OK')
-            return result
-        }).catch(err => {
-            console.log('DBG KO')
-            console.log(err)
-        })
+        console.log('DBG OK')
+        return backend.get('tickers/counter-currencies')
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
