@@ -4,13 +4,15 @@ var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 var api = require('../../core/api')
-var counter_currencies = await api.counterCurrencies()
 
 eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
 eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
 
-module.exports = function (bot) {
+var counter_currencies = []
+module.exports = async (bot) => {
     keyboardBot = bot
+    var counter_currencies_json = await api.counterCurrencies()
+    counter_currencies = JSON.parse(counter_currencies_json)
 }
 
 var updateKeyboard = async (chat_id, message_id, settings) => {
@@ -54,8 +56,7 @@ var getKeyboardText = async (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
-    //! from HERE
-    var tradingPairs = settings.counter_currencies.map(cc => `alt/${counter_currencies[parseInt(cc)]}`).join(', ')
+    var tradingPairs = settings.counter_currencies.map(scc => `alt/${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var paidSignalsMsg = daysLeft > 0 ? `You will receive paid signals until *${subscriptionExpirationDate.split('T')[0]}* (Days left: ${daysLeft}).` : 'You are not subscribed to any paid signal.'
     var tradingProfileMsg = `TRADING PROFILE
@@ -65,7 +66,7 @@ var getKeyboardText = async (settings) => {
 
     var itt_json = await api.getITT()
     var itt = JSON.parse(itt_json)
-    var itt_usd_rate = parseFloat(itt.price_usd).toFixed(2)
+    var itt_usd_rate = parseFloat(itt.close).toFixed(3)
     var subscriptionMessage = `SUBSCRIPTION DETAILS
 ${paidSignalsMsg}
 To get or extend your paid subscription time send ITT, you will be notified as soon as the transaction is confirmed:

@@ -50,11 +50,9 @@ var getKeyboardButtons = (userSettings) => {
     }
 
     counter_currencies.forEach(counter_currency => {
-        var counter_currency_index = counter_currencies.indexOf(counter_currency);
-
-        counter_currency.followed = userSettings.counter_currencies.indexOf(counter_currency_index) >= 0;
-        if (counter_currency.enabled) {
-            var currencyCallbackData = utils.getButtonCallbackData('settings', { idx: counter_currency_index, in: !counter_currency.followed }, null, 'Sig')
+        counter_currency.followed = userSettings.counter_currencies.indexOf(counter_currency.index) >= 0;
+        if (counter_currency.enabled == true) {
+            var currencyCallbackData = utils.getButtonCallbackData('settings', { idx: counter_currency.index, in: !counter_currency.followed }, null, 'Sig')
             counter_currency_buttons.push({ text: `${counter_currency.followed ? '✓ ' : ''} alt/${counter_currency.symbol}`, callback_data: currencyCallbackData })
         }
     });
