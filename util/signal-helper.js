@@ -3,10 +3,12 @@ var tickers = require('../data/tickers')
 var _ = require('lodash')
 
 console.log('Init signal helper')
-var counter_currencies = []
-tickers.counter_currencies().then(ccs => {
-  counter_currencies = ccs
-})
+
+var counter_currencies = undefined
+
+async function loadCounterCurrencies() {
+  counter_currencies = await tickers.counter_currencies()
+}
 
 function applyTemplate(message_data) {
 
@@ -132,7 +134,6 @@ function getBaseSignalTemplate(message_data) {
   // Let's round to the appropriate digits according to each counter currency
   var rounding_digits = [8, 5, 5, 5]
   var price = (message_data.price / 100000000).toFixed(rounding_digits[counter_currency_index]);
-
   var currency_symbol = counter_currencies.filter(cc => cc.index == counter_currency_index)[0].symbol;
   var price_change = message_data.price_change;
 
@@ -238,6 +239,7 @@ function checkValidity(message) {
 }
 
 module.exports = {
+  init: () => loadCounterCurrencies(),
   applyTemplate: (message) => applyTemplate(message),
   checkValidity: (message) => checkValidity(message)
 }

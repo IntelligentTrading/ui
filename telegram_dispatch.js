@@ -53,4 +53,4 @@ app.on('error', (err) => {
   console.log(err.message);
 })
 
-app.start()
+signalHelper.init().then(() => app.start())
