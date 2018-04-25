@@ -1,11 +1,8 @@
-var request = require('request');
-var rpromise = require('request-promise');
-
-var api_version = 'v2'
-var api_url = `https://${process.env.ITT_API_HOST}/${api_version}`;
-var api_key = process.env.ITT_API_KEY;
-var node_svc_api = `${process.env.ITT_NODE_SERVICES}/api`;
-var node_svc_api_key = process.env.NODE_SVC_API_KEY;
+var request = require('request')
+var rpromise = require('request-promise')
+var backend = require('./backend')
+var node_svc_api = `${process.env.ITT_NODE_SERVICES}/api`
+var node_svc_api_key = process.env.NODE_SVC_API_KEY
 
 function Options() {
     return {
@@ -64,22 +61,10 @@ var api = {
         return rpromise(request_opts);
     },
     price: (symbol) => {
-
-        var request_opts = new Options();
-        request_opts.url = `${api_url}/resampled-prices/${symbol}`
-        request_opts.headers = {
-            'API-KEY': api_key
-        }
-        return rpromise(request_opts);
+        return backend.get(`/resampled-prices/${symbol}`)
     },
     volume: (symbol) => {
-
-        var request_opts = new Options();
-        request_opts.url = `${api_url}/volumes/${symbol}`
-        request_opts.headers = {
-            'API-KEY': api_key
-        }
-        return rpromise(request_opts);
+        return backend.get(`/volumes/${symbol}`)
     },
     tickers: () => {
         var request_opts = {};
@@ -97,7 +82,7 @@ var api = {
             'NSVC-API-KEY': node_svc_api_key
         }
 
-        return rpromise(request_opts);
+        return rpromise(request_opts)
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
@@ -165,13 +150,7 @@ var api = {
         return rpromise(request_opts)
     },
     getITT: () => {
-        var request_opts = {}
-        request_opts.url = `${node_svc_api}/itt`
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts)
+        return backend.get('/itt')
     }
 }
 

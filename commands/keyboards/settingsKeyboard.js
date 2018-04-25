@@ -3,19 +3,21 @@ var eventEmitter = require('../../events/botEmitter')
 var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
+var api = require('../../core/api')
 
-var counter_currencies = ['BTC', '', 'USDT']
+eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
+eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
 
-eventEmitter.on('ShowSettingsKeyboard', (user) => { showKeyboard(user.telegram_chat_id, user.settings) })
-eventEmitter.on('SettingsKeyboardChanged', (chat_id, message_id, settings) => { updateKeyboard(chat_id, message_id, settings) })
-
-module.exports = function (bot) {
+var counter_currencies = []
+module.exports = async (bot) => {
     keyboardBot = bot
+    var counter_currencies_json = await api.counterCurrencies()
+    counter_currencies = JSON.parse(counter_currencies_json)
 }
 
-var updateKeyboard = (chat_id, message_id, settings) => {
+var updateKeyboard = async (chat_id, message_id, settings) => {
 
-    var keyboardObject = getKeyboardObject(settings)
+    var keyboardObject = await getKeyboardObject(settings)
 
     keyboardBot.editMessageText(keyboardObject.text, {
         chat_id: chat_id,
@@ -27,8 +29,8 @@ var updateKeyboard = (chat_id, message_id, settings) => {
     })
 }
 
-var showKeyboard = (telegram_chat_id, settings) => {
-    var keyboardObject = getKeyboardObject(settings)
+var showKeyboard = async (telegram_chat_id, settings) => {
+    var keyboardObject = await getKeyboardObject(settings)
 
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
@@ -43,35 +45,39 @@ var showKeyboard = (telegram_chat_id, settings) => {
     keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
 }
 
-var getKeyboardObject = (settings) => {
+var getKeyboardObject = async (settings) => {
     return {
-        text: getKeyboardText(settings),
+        text: await getKeyboardText(settings),
         buttons: getKeyboardButtons(settings)
     }
 }
 
-var getKeyboardText = (settings) => {
+var getKeyboardText = async (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
-    var tradingPairs = settings.counter_currencies.map(cc => `alt/${counter_currencies[parseInt(cc)]}`).join(', ')
+    var tradingPairs = settings.counter_currencies.map(scc => `alt/${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var paidSignalsMsg = daysLeft > 0 ? `You will receive paid signals until *${subscriptionExpirationDate.split('T')[0]}* (Days left: ${daysLeft}).` : 'You are not subscribed to any paid signal.'
-    var msg = `TRADING PROFILE
+    var tradingProfileMsg = `TRADING PROFILE
 ‣ Your profile is set on *${settings.horizon}* horizon.
 ‣ You are notified about *${hasValidSubscription ? tradingPairs : 'alt/USDT'}* signals.
-‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
+‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.`
 
-SUBSCRIPTION DETAILS
+    var itt_json = await api.getITT()
+    var itt = JSON.parse(itt_json)
+    var itt_usd_rate = parseFloat(itt.close).toFixed(3)
+    var subscriptionMessage = `SUBSCRIPTION DETAILS
 ${paidSignalsMsg}
-Send 1 ITT for each additional day, using the following address as receiver:
+To get or extend your paid subscription time send ITT, you will be notified as soon as the transaction is confirmed:
 
-*${settings.ittWalletReceiverAddress}*
-
-You will be notified as soon as the transaction is confirmed.
-
+‣ Receiver address: *${settings.ittWalletReceiverAddress}*
+‣ ITT/USDT rate: *${itt_usd_rate}*
+        
 ${hasValidSubscription ? 'Tap below to edit your settings:' : 'Note: you cannot edit your settings with the free plan'}`
-    return msg
+
+    return tradingProfileMsg + '\n\n' + subscriptionMessage
+
 }
 
 var getKeyboardButtons = (settings) => {

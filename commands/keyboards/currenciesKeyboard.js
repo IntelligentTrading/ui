@@ -99,7 +99,10 @@ var loadKeyboardRows = (userSettings) => {
     }
 
     var kb_rows = []
-    currencies.forEach(currency => {
+
+    var poloniex_only = dateHelper.getDaysLeftFrom(userSettings.subscriptions.paid) <= 0
+
+    currencies.filter(ccs => poloniex_only ? ccs.sources.indexOf('poloniex') >= 0 : true).forEach(currency => {
         currency.followed = userSettings.transaction_currencies.indexOf(currency.symbol) >= 0;
         kb_rows.push({ text: `${currency.followed ? '✓ ' : ''}${currency.symbol}`, currency_data: { sym: currency.symbol, in: !currency.followed } })
     })

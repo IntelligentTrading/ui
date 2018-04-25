@@ -132,7 +132,7 @@ function getBaseSignalTemplate(message_data) {
   var rounding_digits = [8, 5, 5, 5]
   var price = (message_data.price / 100000000).toFixed(rounding_digits[counter_currency_index]);
 
-  var currency_symbol = counter_currencies[counter_currency_index].symbol;
+  var currency_symbol = counter_currencies.filter(cc => cc.index == counter_currency_index)[0].symbol;
   var price_change = message_data.price_change;
 
   return tickers.get()
@@ -208,7 +208,7 @@ function checkDuplicates(messageId, signalId) {
 
 // If the counter and transaction currencies are the same, skip
 function checkCounterCurrency(messageBody) {
-  return messageBody.transaction_currency == counter_currencies[parseInt(messageBody.counter_currency)]
+  return messageBody.transaction_currency == counter_currencies.filter(cc => cc.index == parseInt(messageBody.counter_currency))[0].symbol
 }
 
 function checkValidity(message) {
