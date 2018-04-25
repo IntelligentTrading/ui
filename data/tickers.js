@@ -30,6 +30,7 @@ var tickers = {
         console.log('Initialize counter currencies...')*/
 
         return api.counterCurrencies().then(json_ccs => {
+            console.log('DBG X')
             var ccs = JSON.parse(json_ccs)
             //cache.set('counter_currencies', ccs)
             //console.log('Counter currencies initialized.')

@@ -77,7 +77,6 @@ var api = {
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
-        console.log('DBG 1')
         return rpromise(request_opts)
     },
     selectAllSignals: (chat_id) => {
