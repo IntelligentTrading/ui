@@ -68,7 +68,6 @@ var api = {
         return rpromise(request_opts)
     },
     counterCurrencies: () => {
-        console.log('DBG OK')
         return backend.get('tickers/counter-currencies')
     },
     selectAllSignals: (chat_id) => {
