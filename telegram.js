@@ -5,7 +5,6 @@ const fs = require('fs');
 const api = require('./core/api')
 require('./util/extensions')
 
-var tickers = require('./data/tickers')
 var telegram = require('./bot/telegramInstance')
 var bot = telegram.bot
 
