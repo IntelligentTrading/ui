@@ -1,4 +1,3 @@
-var rp = require('request-promise')
 var _ = require('lodash')
 var api = require('../core/api')
 var NodeCache = require('node-cache')
@@ -35,6 +34,6 @@ var loadTickers = async () => {
     var json_tickers = await api.tickers()
     var tickers = JSON.parse(json_tickers)
     cache.set('tickers', tickers)
-    console.log('Tickers cache set')
+    console.log('Transaction currencies cache set')
     return tickers
 }

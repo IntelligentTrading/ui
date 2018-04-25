@@ -3,7 +3,6 @@ var api = require('../core/api')
 var errorManager = require('../util/error')
 var dateUtil = require('../util/dates')
 var _ = require('lodash')
-const request = require('request')
 var signalHelper = require('../util/signal-helper')
 
 const TelegramBot = require('node-telegram-bot-api')
