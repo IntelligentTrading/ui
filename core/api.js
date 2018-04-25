@@ -1,4 +1,3 @@
-var request = require('request')
 var rpromise = require('request-promise')
 var backend = require('./backend')
 var node_svc_api = `${process.env.ITT_NODE_SERVICES}/api`
@@ -53,12 +52,9 @@ var api = {
         return rpromise(request_opts);
     },
     itt_members: () => {
-
-        var request_opts = new Options();
-        request_opts.uri = `${node_svc_api}/users?is_ITT_team=true`;
-
-        //! returns the list already
-        return rpromise(request_opts);
+        var request_opts = new Options()
+        request_opts.uri = `${node_svc_api}/users?is_ITT_team=true`
+        return rpromise(request_opts)
     },
     price: (symbol) => {
         return backend.get(`/resampled-prices/${symbol}`)
@@ -73,7 +69,7 @@ var api = {
             'NSVC-API-KEY': node_svc_api_key
         }
 
-        return rpromise(request_opts);
+        return rpromise(request_opts)
     },
     counterCurrencies: () => {
         var request_opts = {};
@@ -86,8 +82,8 @@ var api = {
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
-        request_opts.url = `${node_svc_api}/users/${chat_id}/select_all_signals`;
-        request_opts.method = 'PUT';
+        request_opts.url = `${node_svc_api}/users/${chat_id}/select_all_signals`
+        request_opts.method = 'PUT'
         request_opts.headers = {
             'NSVC-API-KEY': node_svc_api_key
         }
