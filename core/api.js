@@ -66,7 +66,7 @@ var api = {
         var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/transaction_currencies`
         console.log(`Requesting ${request_opts.url}`)
-        return rpromise(request_opts)
+        return rpromise(request_opts).catch(err => console.log(err))
     },
     counterCurrencies: () => {
         var request_opts = new Options()
