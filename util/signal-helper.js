@@ -5,7 +5,6 @@ var _ = require('lodash')
 console.log('Init signal helper')
 var counter_currencies = []
 tickers.counter_currencies().then(ccs => {
-  console.log('Init counter currencies for signal dispatching...')
   counter_currencies = ccs
 })
 
