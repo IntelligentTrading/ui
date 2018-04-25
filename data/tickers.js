@@ -17,23 +17,27 @@ var tickers = {
     },
     init: () => {
         return Promise.all([tickers.get(), tickers.counter_currencies()])
+        .then(() => console.log('OK'))
+        .catch(err => console.log(err))
     }
 }
 
 module.exports = tickers
 
-var loadCounterCurrencies = async () => {
-    var json_ccs = await api.counterCurrencies()
-    var ccs = JSON.parse(json_ccs)
-    cache.set('counter_currencies', ccs)
-    console.log('Counter currencies cache set.')
-    return ccs
+var loadCounterCurrencies = () => {
+    return api.counterCurrencies().then(json_ccs => {
+        var ccs = JSON.parse(json_ccs)
+        cache.set('counter_currencies', ccs)
+        console.log('Counter currencies cache set.')
+        return ccs
+    }).catch(err => console.log(err))
 }
 
-var loadTickers = async () => {
-    var json_tickers = await api.tickers()
-    var tickers = JSON.parse(json_tickers)
-    cache.set('tickers', tickers)
-    console.log('Transaction currencies cache set')
-    return tickers
+var loadTickers = () => {
+    return api.tickers().then(json_tickers => {
+        var tickers = JSON.parse(json_tickers)
+        cache.set('tickers', tickers)
+        console.log('Transaction currencies cache set')
+        return tickers
+    }).catch(err => console.log(err))
 }
