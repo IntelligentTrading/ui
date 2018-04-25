@@ -37,15 +37,13 @@ var tickers = {
             return ccs;
         });
     },
-    init: () => {
+    init: async () => {
         console.log('[Telegram bot] initialize tickers...')
         await tickers.get()
         console.log('[Telegram bot] initialize counter currencies...')
         await tickers.counter_currencies()
-        console.log('[Telegram bot] tickers data initialized.')
     }
 }
 
-tickers.init()
-
+tickers.init().then(() => console.log('[Telegram bot] tickers data initialized.'))
 module.exports = tickers
