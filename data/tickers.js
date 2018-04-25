@@ -38,12 +38,14 @@ var tickers = {
         });
     },
     init: () => {
-        Promise.all([tickers.get(), tickers.counter_currencies()])
-            .then(() => console.log('[Telegram bot] data initialized.'))
+        console.log('[Telegram bot] initialize tickers...')
+        await tickers.get()
+        console.log('[Telegram bot] initialize counter currencies...')
+        await tickers.counter_currencies()
+        console.log('[Telegram bot] tickers data initialized.')
     }
 }
 
-console.log('[Telegram bot] initialize data...')
 tickers.init()
 
 module.exports = tickers

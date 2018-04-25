@@ -44,7 +44,3 @@ bot.on('callback_query', (callback_message) => {
     }
   }
 })
-
-process.on('uncaughtException', function (err) {
-  console.log(err)
-})
