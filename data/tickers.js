@@ -27,6 +27,7 @@ var loadCounterCurrencies = async () => {
     var json_ccs = await api.counterCurrencies()
     var ccs = JSON.parse(json_ccs)
     cache.set('counter_currencies', ccs)
+    console.log('Counter currencies cache set.')
     return ccs
 }
 
@@ -34,5 +35,6 @@ var loadTickers = async () => {
     var json_tickers = await api.tickers()
     var tickers = JSON.parse(json_tickers)
     cache.set('tickers', tickers)
+    console.log('Tickers cache set')
     return tickers
 }
