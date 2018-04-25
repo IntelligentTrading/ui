@@ -16,9 +16,10 @@ var tickers = {
 
     },
     init: () => {
-        return Promise.all([tickers.get(), tickers.counter_currencies()])
-        .then(() => console.log('OK'))
-        .catch(err => console.log(err))
+        return tickers.get().then(() => {
+            return tickers.counter_currencies()
+                .catch(err => console.log(err))
+        }).catch(err => console.log(err))
     }
 }
 
