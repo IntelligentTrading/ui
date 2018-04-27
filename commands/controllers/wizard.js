@@ -1,4 +1,5 @@
 var api = require('../../core/api')
+var util = require('../../util/dates')
 var eventEmitter = require('../../events/botEmitter')
 
 /**
@@ -8,7 +9,17 @@ var moduleBot = null
 module.exports = function (bot) {
     moduleBot = bot
 
-    this.cmd = (msg, params) => { setTraderProfile(msg.chat.id) };
+    this.cmd = (msg, params) => {
+        return api.getUsers({ telegram_chat_id: msg.chat.id }).then(user => {
+            var user = JSON.parse(user)
+            if (util.hasValidSubscription(user.settings)){
+                setTraderProfile(msg.chat.id)
+            }
+            else{
+                moduleBot.sendMessage(msg.chat.id, 'Sorry, you cannot execute this command with the FREE plan.');
+            }
+        })
+    }
     this.callback = (callback_message) => {
         var message_id = callback_message.message.message_id
         var chat_id = callback_message.message.chat.id
