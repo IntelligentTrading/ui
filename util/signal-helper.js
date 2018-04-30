@@ -63,13 +63,13 @@ function getSMATemplate(message_data) {
   return sma_template;
 }
 
-function getRSITemplate(message_data) {
+/*function getRSITemplate(message_data) {
 
   if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
     throw new Error('Invalid RSI value');
 
-  var rsi_emoji = `${(message_data.trend == -1 ? '✅' : '⛔')}`;
-  var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
+  var rsi_emoji = `${(message_data.trend == 1 ? '✅' : '⛔')}`;
+  var rsi_trend = ['Overbought', 'Neutral', 'Oversold'];
   var rsi_strength_values = ['', 'Very', 'Extremely'];
   var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
 
@@ -79,21 +79,22 @@ function getRSITemplate(message_data) {
   }
 
   return rsi;
-}
+}*/
 
 function getRsiSmaTemplate(message_data) {
 
   if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
     throw new Error('Invalid RSI value');
 
-  var rsi_emoji = `${(message_data.trend == -1 ? '⚠️' : '🆘')}`;
-  var rsi_trend = ['Oversold', 'Neutral', 'Overbought'];
+  var rsi_emoji = `${(message_data.trend == 1 ? '⚠️' : '🆘')}`;
+  var rsi_strength_values = ['', 'Very', 'Extremely']
+  var rsi_trend = ['Overbought', 'Neutral', 'Oversold'];
 
   var rsi_sma = {
     rsi_header_emoji: 'ℹ️',
-    rsi_general_trend: `General trend: *${(message_data.trend == -1 ? 'Bullish' : 'Bearish')}*`,
-    rsi_text: `RSI: *${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
-    rsi_itt_bias: `ITF Bias: Trend reversal to the *${(message_data.trend == -1 ? 'upside' : 'downside')}* is near.`,
+    rsi_general_trend: `General trend: *${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}*`,
+    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value)-1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+    rsi_itt_bias: `ITF Bias: Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
   }
 
   return rsi_sma;
