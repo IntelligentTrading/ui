@@ -20,7 +20,7 @@ var getCurrentStatusMessage = (settings, itt_usd_rate) => {
     var paidDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.paid)
     var currentPlan = paidDaysLeft > 0 ? 'Starter' : (betaDaysLeft > 0 ? 'FREE+' : 'FREE')
 
-    return `You are currently subscribed to the *${currentPlan}* plan. View all available subscription plans [here](intelligenttrading.org/pricing).
+    return `You are currently subscribed to the *${currentPlan}* plan. [View all available subscription plans](intelligenttrading.org/pricing).
 
 ${paidDaysLeft <= 0 ? upgradeToStarter : extendYourSubscription(paidDaysLeft)} ITT tokens to the address below. You will be notified as soon as the transaction is confirmed.
 

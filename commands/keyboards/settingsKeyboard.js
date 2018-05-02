@@ -60,14 +60,14 @@ var getKeyboardText = async (settings) => {
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var currentPlan = daysLeft > 0 ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
-    return `Trading Profile - ${currentPlan} plan
+    return `Trading Profile - *${currentPlan}* plan
 
 ‣ Your profile is set on *${settings.horizon}* horizon.
 ‣ You are notified about *${hasValidSubscription ? tradingPairs : 'alt/USDT'}* signals.${!hasValidSubscription ? '\n‣ Limited number of coins.\n‣ You are receiving upside alerts only.' : ''}
 ‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
 
 Tap or type /subscribe to extend or upgrade your plan.        
-${hasValidSubscription ? 'Tap below to edit your settings:' : 'Note: you cannot edit your settings with the free plan!'}`
+${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
 }
 
 var getKeyboardButtons = (settings) => {
