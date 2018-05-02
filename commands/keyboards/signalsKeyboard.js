@@ -63,7 +63,7 @@ var getKeyboardButtons = (userSettings) => {
         counter_currency_buttons,
         [{ text: "Edit Coin Watchlist", callback_data: utils.getButtonCallbackData('navigation', {}, null, 'Cur(0)') }],
         [{ text: `Turn Crowd Sentiment ${userSettings.is_crowd_enabled ? 'OFF' : 'ON'}`, callback_data: crowdSentimentCallbackData }],
-        [{ text: `Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
+        [{ text: `← Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
     ]
     return btns
 }

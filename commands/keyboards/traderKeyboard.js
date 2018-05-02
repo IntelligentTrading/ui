@@ -20,6 +20,7 @@ var showKeyboard = (chat_id, message_id, userSettings) => {
         chat_id: chat_id,
         message_id: message_id,
         parse_mode: 'Markdown',
+        disable_web_page_preview: "true",
         reply_markup: {
             inline_keyboard: keyboardObject.buttons
         }
@@ -34,7 +35,10 @@ var getKeyboardObject = (horizon) => {
 }
 
 var getKeyboardText = () => {
-    return "Please select which trader profile suits you best.\nI will adjust your signals accordingly."
+    return `Risk Setting
+    
+A higher risk setting will show signals more often, for higher frequency traders.
+Learn more in the [User Guide](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7)`
 }
 
 var getKeyboardButtons = (horizon) => {
@@ -44,10 +48,10 @@ var getKeyboardButtons = (horizon) => {
     var day_callback = utils.getButtonCallbackData('settings', { horizon: horizons[2] }, null, 'Trader')
 
     var btns = [
-        [{ text: `${horizon == horizons[0] ? '✓ ' : ''}Investor: Long term trade signals. Exit and entry points for HODL. (Low risk)`, callback_data: investor_callback }],
-        [{ text: `${horizon == horizons[1] ? '✓ ' : ''}Swingtrader: Short/near term trade signals. Profit from volatility. (Medium risk)`, callback_data: swing_callback }],
-        [{ text: `${horizon == horizons[2] ? '✓ ' : ''}Daytrader: Very short term trade signals. Getting in and out trades. (High risk)`, callback_data: day_callback }],
-        [{ text: `Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
+        [{ text: `${horizon == horizons[0] ? '✓ ' : ''}Low risk`, callback_data: investor_callback }],
+        [{ text: `${horizon == horizons[1] ? '✓ ' : ''}Medium risk`, callback_data: swing_callback }],
+        [{ text: `${horizon == horizons[2] ? '✓ ' : ''}High risk`, callback_data: day_callback }],
+        [{ text: `← Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
     ]
 
     return btns

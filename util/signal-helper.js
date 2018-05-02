@@ -24,12 +24,12 @@ function applyTemplate(message_data) {
 
       if (message_data.signal == 'RSI') {
         var rsi = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\n${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
+        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\nITF Bias: ${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
       }
 
       if (message_data.signal == 'RSI_Cumulative') {
         var rsi_sma = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi_sma.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi_sma.rsi_general_trend}\n${rsi_sma.rsi_text}\n${rsi_sma.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
+        telegram_signal_message = `${rsi_sma.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi_sma.premium}\nITF Bias: *${rsi_sma.rsi_general_trend}* - ${rsi_sma.rsi_itt_bias}\n(${message_data.horizon.toSentenceCase()} horizon)`;
       }
 
       if (message_data.signal == 'kumo_breakout') {
@@ -92,9 +92,10 @@ function getRsiSmaTemplate(message_data) {
 
   var rsi_sma = {
     rsi_header_emoji: 'ℹ️',
-    rsi_general_trend: `General trend: *${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}*`,
-    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value)-1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
-    rsi_itt_bias: `ITF Bias: Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
+    premium: 'Premium Cumulative Signal',
+    rsi_general_trend: `${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}`,
+    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value) - 1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+    rsi_itt_bias: `Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
   }
 
   return rsi_sma;

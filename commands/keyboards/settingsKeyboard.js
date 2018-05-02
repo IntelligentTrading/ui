@@ -23,6 +23,7 @@ var updateKeyboard = async (chat_id, message_id, settings) => {
         chat_id: chat_id,
         message_id: message_id,
         parse_mode: 'Markdown',
+        disable_web_page_preview: "true",
         reply_markup: {
             inline_keyboard: keyboardObject.buttons
         }
@@ -35,7 +36,7 @@ var showKeyboard = async (telegram_chat_id, settings) => {
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
 
-    var options = { parse_mode: "Markdown" }
+    var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
     if (hasValidSubscription) {
         options.reply_markup = {
             inline_keyboard: keyboardObject.buttons
@@ -56,15 +57,16 @@ var getKeyboardText = async (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
-    var tradingPairs = settings.counter_currencies.map(scc => `alt/${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
+    var tradingPairs = settings.counter_currencies.map(scc => `${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var currentPlan = daysLeft > 0 ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
-    return `Trading Profile - *${currentPlan}* plan
+    return `User Settings | *${currentPlan}* plan
 
-‣ Your profile is set on *${settings.horizon}* horizon.
-‣ You are notified about *${hasValidSubscription ? tradingPairs : 'alt/USDT'}* signals.${!hasValidSubscription ? '\n‣ Limited number of coins.\n‣ You are receiving upside alerts only.' : ''}
-‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
+‣ Risk: *${horizonToRisk(settings.horizon)}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
+‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*.
+‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
+${!hasValidSubscription ? '‣ Limited number of coins. (Upgrade for more)\n‣ Upside alerts only. (Upgrade for more)' : ''}
 
 Tap or type /subscribe to extend or upgrade your plan.        
 ${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
@@ -79,7 +81,13 @@ var getKeyboardButtons = (settings) => {
     return [
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
         [{ text: "Edit Signals", callback_data: editSignalsCallbackData }],
-        [{ text: "Edit Trader Profile", callback_data: editTraderCallbackData }],
+        [{ text: "Edit Risk", callback_data: editTraderCallbackData }],
         [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
     ]
+}
+
+var horizonToRisk = (horizon) => {
+    var risks = ['low', 'medium', 'high']
+    var horizons = ['short', 'medium', 'long']
+    return risks[horizons.indexOf(horizon)]
 }
