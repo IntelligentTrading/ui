@@ -16,6 +16,8 @@ function applyTemplate(message_data) {
     .then((bst) => {
 
       var telegram_signal_message;
+      var footer = ''
+
       if (message_data.signal == 'SMA' || message_data.signal == 'EMA') {
 
         var sma = getSMATemplate(message_data);
@@ -24,12 +26,13 @@ function applyTemplate(message_data) {
 
       if (message_data.signal == 'RSI') {
         var rsi = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\n${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
+        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\nITF Bias: ${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
       }
 
       if (message_data.signal == 'RSI_Cumulative') {
         var rsi_sma = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi_sma.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi_sma.rsi_general_trend}\n${rsi_sma.rsi_text}\n${rsi_sma.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
+        telegram_signal_message = `${rsi_sma.rsi_header_emoji_pro} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\nITF Bias: *${rsi_sma.rsi_general_trend}* - ${rsi_sma.rsi_itt_bias}\n(${message_data.horizon.toSentenceCase()} horizon)`;
+        footer = ` | ${rsi_sma.premium}`
       }
 
       if (message_data.signal == 'kumo_breakout') {
@@ -42,7 +45,7 @@ function applyTemplate(message_data) {
         telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
       }
 
-      telegram_signal_message = telegram_signal_message + '\n' + bst.source
+      telegram_signal_message = telegram_signal_message + '\n' + bst.source + footer
 
       return telegram_signal_message;
     })
@@ -63,24 +66,6 @@ function getSMATemplate(message_data) {
   return sma_template;
 }
 
-/*function getRSITemplate(message_data) {
-
-  if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
-    throw new Error('Invalid RSI value');
-
-  var rsi_emoji = `${(message_data.trend == 1 ? '✅' : '⛔')}`;
-  var rsi_trend = ['Overbought', 'Neutral', 'Oversold'];
-  var rsi_strength_values = ['', 'Very', 'Extremely'];
-  var rsi_strength = rsi_strength_values[message_data.strength_value - 1];
-
-  var rsi = {
-    rsi_header_emoji: '📣',
-    rsi_text: `${rsi_emoji} RSI ${parseInt(message_data.rsi_value).toFixed(1)} - ${rsi_strength} ${rsi_trend[parseInt(message_data.trend) + 1]} ${message_data.strength_value == 3 ? '⚠️' : ''}`,
-  }
-
-  return rsi;
-}*/
-
 function getRsiSmaTemplate(message_data) {
 
   if (message_data.rsi_value < 1 || message_data.rsi_value > 100)
@@ -92,9 +77,11 @@ function getRsiSmaTemplate(message_data) {
 
   var rsi_sma = {
     rsi_header_emoji: 'ℹ️',
-    rsi_general_trend: `General trend: *${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}*`,
-    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value)-1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
-    rsi_itt_bias: `ITF Bias: Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
+    rsi_header_emoji_pro: '🔰',
+    premium: 'ITF Proprietary Alert',
+    rsi_general_trend: `${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}`,
+    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value) - 1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+    rsi_itt_bias: `Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
   }
 
   return rsi_sma;

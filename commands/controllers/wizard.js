@@ -38,7 +38,7 @@ module.exports = function (bot) {
 }
 
 function setTraderProfile(chat_id) {
-    var text = "💡*Pick your profile* (Step 1/3)\nFirst, let's set up your trading profile. These profiles use 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
+    var text = "💡*Pick your profile* (Step 1/3)\nFirst, risk settings with 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
 
     var horizon_btns = [{
         "text": "High Risk",

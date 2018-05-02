@@ -3,7 +3,7 @@ var api = require('../../core/api')
 require('../../util/extensions')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
-var exchanges = ['Poloniex']
+var exchanges = ['Poloniex','Binance','Bittrex']
 
 var moduleBot = null
 module.exports = function (bot) {
