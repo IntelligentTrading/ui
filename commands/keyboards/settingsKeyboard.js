@@ -58,26 +58,16 @@ var getKeyboardText = async (settings) => {
     var subscriptionExpirationDate = settings.subscriptions.paid
     var tradingPairs = settings.counter_currencies.map(scc => `alt/${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
-    var paidSignalsMsg = daysLeft > 0 ? `You will receive paid signals until *${subscriptionExpirationDate.split('T')[0]}* (Days left: ${daysLeft}).` : 'You are not subscribed to any paid signal.'
-    var tradingProfileMsg = `TRADING PROFILE
+    var currentPlan = daysLeft > 0 ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
+
+    return `Trading Profile - *${currentPlan}* plan
+
 ‣ Your profile is set on *${settings.horizon}* horizon.
-‣ You are notified about *${hasValidSubscription ? tradingPairs : 'alt/USDT'}* signals.
-‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.`
+‣ You are notified about *${hasValidSubscription ? tradingPairs : 'alt/USDT'}* signals.${!hasValidSubscription ? '\n‣ Limited number of coins.\n‣ You are receiving upside alerts only.' : ''}
+‣ Your crowd sentiment feed is *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
 
-    var itt_json = await api.getITT()
-    var itt = JSON.parse(itt_json)
-    var itt_usd_rate = parseFloat(itt.close).toFixed(3)
-    var subscriptionMessage = `SUBSCRIPTION DETAILS
-${paidSignalsMsg}
-To get or extend your paid subscription time send ITT, you will be notified as soon as the transaction is confirmed:
-
-‣ Receiver address: *${settings.ittWalletReceiverAddress}*
-‣ ITT/USDT rate: *${itt_usd_rate}*
-        
-${hasValidSubscription ? 'Tap below to edit your settings:' : 'Note: you cannot edit your settings with the free plan'}`
-
-    return tradingProfileMsg + '\n\n' + subscriptionMessage
-
+Tap or type /subscribe to extend or upgrade your plan.        
+${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
 }
 
 var getKeyboardButtons = (settings) => {
