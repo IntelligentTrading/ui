@@ -52,7 +52,7 @@ function notify(message_data) {
                             var signalForFree = isForFree(signal, message_data)
                             var signalForTier = isForTier(signal, message_data)
 
-                            var matchingTierUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 &&
+                            var matchingTierUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0) &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
                                 user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0)
 

@@ -101,7 +101,7 @@ var loadKeyboardRows = (userSettings) => {
 
     var kb_rows = []
 
-    poloniex_only = dateHelper.getDaysLeftFrom(userSettings.subscriptions.paid) <= 0
+    poloniex_only = dateHelper.getDaysLeftFrom(userSettings.subscriptions.paid) <= 0 && !userSettings.is_ITT_team
 
     currencies.filter(ccs => poloniex_only ? ccs.sources.indexOf('poloniex') >= 0 : true).forEach(currency => {
         currency.followed = userSettings.transaction_currencies.indexOf(currency.symbol) >= 0;
