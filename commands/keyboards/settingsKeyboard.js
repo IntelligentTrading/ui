@@ -37,7 +37,7 @@ var showKeyboard = async (telegram_chat_id, settings) => {
     var keyboardText = keyboardObject.text
 
     var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
-    if (hasValidSubscription) {
+    if (hasValidSubscription || settings.is_ITT_team) {
         options.reply_markup = {
             inline_keyboard: keyboardObject.buttons
         }
@@ -59,7 +59,7 @@ var getKeyboardText = async (settings) => {
     var subscriptionExpirationDate = settings.subscriptions.paid
     var tradingPairs = settings.counter_currencies.map(scc => `${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
-    var currentPlan = daysLeft > 0 ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
+    var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
     return `User Settings | *${currentPlan}* plan
 
@@ -87,7 +87,7 @@ var getKeyboardButtons = (settings) => {
 }
 
 var horizonToRisk = (horizon) => {
-    var risks = ['low', 'medium', 'high']
+    var risks = ['high', 'medium', 'low']
     var horizons = ['short', 'medium', 'long']
     return risks[horizons.indexOf(horizon)]
 }
