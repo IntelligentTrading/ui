@@ -5,16 +5,16 @@ var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_ma
 
 var moduleBot = null
 var upgradeToStarter = 'Upgrade to the Starter plan by sending'
-var extendYourSubscription = (daysLeft) => { return `Your subscription will expire in ${daysLeft} days.\nTo extend your subscription send` }
+var extendYourSubscription = (daysLeft) => { return `Your subscription will expire in ${Math.max(daysLeft, 0)} days.\nTo extend your subscription send` }
 
 var getCurrentStatusMessage = (settings, itt_usd_rate) => {
     var betaDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.beta)
     var paidDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.paid)
-    var currentPlan = paidDaysLeft > 0 ? 'Starter' : (betaDaysLeft > 0 ? 'FREE+' : 'FREE')
+    var currentPlan = paidDaysLeft > 0 || settings.is_ITT_team ? 'Starter' : (betaDaysLeft > 0 ? 'FREE+' : 'FREE')
 
     return `Subscription | *${currentPlan}* plan\n[View all available subscription plans](intelligenttrading.org/pricing).
 
-${paidDaysLeft <= 0 ? upgradeToStarter : extendYourSubscription(paidDaysLeft)} ITT tokens to the address below. You will be notified as soon as the transaction is confirmed.
+${paidDaysLeft <= 0 && !settings.is_ITT_team ? upgradeToStarter : extendYourSubscription(paidDaysLeft)} ITT tokens to the address below. You will be notified as soon as the transaction is confirmed.
 
 ‣ Receiver address: ${settings.ittWalletReceiverAddress}
 ‣ ITT token price: $${itt_usd_rate} USDT
