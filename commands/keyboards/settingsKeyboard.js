@@ -81,8 +81,8 @@ var getKeyboardButtons = (settings) => {
 
     return [
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
-        [{ text: "Edit Signals", callback_data: editSignalsCallbackData }],
-        [{ text: "Edit Risk", callback_data: editTraderCallbackData }],
+        [{ text: "Signals setting", callback_data: editSignalsCallbackData }],
+        [{ text: "Risk setting", callback_data: editTraderCallbackData }],
         [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
     ]
 }
