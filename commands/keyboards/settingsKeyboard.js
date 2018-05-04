@@ -5,6 +5,7 @@ var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 var tickers = require('../../data/tickers')
 var api = require('../../core/api')
+var ext = require('../../util/extensions')
 
 eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
 eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
@@ -61,14 +62,14 @@ var getKeyboardText = async (settings) => {
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
-    return `User Settings | *${currentPlan}* plan
+    return `Settings | *${currentPlan}* plan
 
-‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon) : 'High'}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
-‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*.
-‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
-${!hasValidSubscription ? '‣ Limited number of coins. (Upgrade for more)\n‣ Upside alerts only. (Upgrade for more)' : ''}
+‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
+‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
+‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
+${!hasValidSubscription ? '‣ Limited number of coins (Upgrade for more)\n‣ Upside alerts only (Upgrade for more)' : ''}
 
-Tap or type /subscribe to extend or upgrade your plan.        
+Tap or type /subscribe to extend or upgrade your plan.       
 ${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
 }
 
