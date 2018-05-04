@@ -35,7 +35,7 @@ var getKeyboardObject = (userSettings) => {
 }
 
 var getKeyboardText = () => {
-    return "Here you can set up your signal preferences."
+    return "Signals setting\n\nHere you can set up your signal preferences."
 }
 
 var getKeyboardButtons = (userSettings) => {
