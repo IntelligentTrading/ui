@@ -63,7 +63,7 @@ var getKeyboardText = async (settings) => {
 
     return `User Settings | *${currentPlan}* plan
 
-‣ Risk: *${horizonToRisk(settings.horizon)}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
+‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon) : 'High'}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*.
 ‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*.
 ${!hasValidSubscription ? '‣ Limited number of coins. (Upgrade for more)\n‣ Upside alerts only. (Upgrade for more)' : ''}
