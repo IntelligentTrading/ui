@@ -147,6 +147,7 @@ var api = {
             method: 'POST',
             body: {
                 signalId: talert.signal_id,
+                awsSQSId: talert.SQSId,
                 rejections: talert.rejections,
                 reasons: talert.reasons
             },

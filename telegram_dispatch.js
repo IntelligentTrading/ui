@@ -23,6 +23,7 @@ const app = Consumer.create({
 
     if (signalValidity.isValid) {
       signalNotifier.notify(signalValidity.decoded_message_body).then((result) => {
+        result.SQSId = message.MessageId
         api.saveTradingAlerts(result).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
       }).catch((reason) => {
         console.log(`[Not notified] Message ${message.MessageId}`)
