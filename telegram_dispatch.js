@@ -26,6 +26,7 @@ const app = Consumer.create({
         result.SQSId = message.MessageId
         api.saveTradingAlerts(result).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
       }).catch((reason) => {
+        console.log(reason)
         console.log(`[Not notified] Message ${message.MessageId}`)
       })
     } else {
