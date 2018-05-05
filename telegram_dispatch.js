@@ -2,6 +2,7 @@ const signalNotifier = require('./events/signals')
 const signalHelper = require('./util/signal-helper')
 const Consumer = require('sqs-consumer')
 const AWS = require('aws-sdk')
+const api = require('./core/api')
 
 AWS.config.update({
   region: 'us-east-1',
@@ -21,12 +22,13 @@ const app = Consumer.create({
     var signalValidity = signalHelper.checkValidity(message)
 
     if (signalValidity.isValid) {
-      signalNotifier.notify(signalValidity.decoded_message_body).then((msg) => {
-        console.log(`[Notified] Message ${message.MessageId}`)
+      signalNotifier.notify(signalValidity.decoded_message_body).then((result) => {
+        api.saveTradingAlerts(result).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
       }).catch((reason) => {
         console.log(`[Not notified] Message ${message.MessageId}`)
       })
     } else {
+      api.saveTradingAlerts({ signal_id: signalValidity.decoded_message_body.id, reasons: signalValidity.reasons.split(',') }).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
       console.log(`[Invalid] SQS message ${message.MessageId} for signal ${signalValidity.decoded_message_body.id} ${signalValidity.reasons}`)
     }
     done()
