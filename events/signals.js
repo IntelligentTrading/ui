@@ -41,9 +41,9 @@ function notify(message_data) {
                         signal.trend = message_data.trend
                         signal.source = message_data.source
 
-                        var filters = [buildHorizonFilter(horizon), 'is_muted=false']
+                        var filters = [buildHorizonFilter(horizon)]
 
-                        api.getUsers({ filters: filters }).then(usersJson => {
+                        return api.getUsers({ filters: filters }).then(usersJson => {
                             var users = JSON.parse(usersJson)
 
                             users = users.filter(user => user.is_ITT_team || user.eula)
@@ -54,13 +54,18 @@ function notify(message_data) {
 
                             var matchingTierUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0) &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0)
+                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
+                                !user.settings.is_muted
+                            )
 
                             var matchingBetaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0)
+                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
+                                !user.settings.is_muted
+                            )
 
                             var freeOnlyUsers = users.filter(user => (
+                                !user.settings.is_ITT_team &&
                                 dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
                                 dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
 
@@ -76,10 +81,23 @@ function notify(message_data) {
 
                             subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
 
+                            var rejections = []
+                            var notificationPromises = []
+
                             subscribers.map(subscriber => {
-                                bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
-                                    .catch(err => { console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`) })
+                                var notificationPromise = bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
+                                    .catch(err => {
+                                        rejections.push(subscriber.telegram_chat_id)
+                                        console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`)
+                                    })
+
+                                notificationPromises.push(notificationPromise)
                             })
+
+                            return Promise.all(notificationPromises)
+                                .then(() => {
+                                    return { signal_id: message_data.id, rejections: rejections }
+                                })
                         })
                     }
                 })

@@ -66,13 +66,13 @@ var api = {
         var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/transaction_currencies`
         console.log(`Requesting ${request_opts.url}`)
-        return rpromise(request_opts).catch(err => console.log('1:'+err))
+        return rpromise(request_opts).catch(err => console.log('1:' + err))
     },
     counterCurrencies: () => {
         var request_opts = new Options()
         request_opts.url = `${node_svc_api}/tickers/counter_currencies`
         console.log(`Requesting ${request_opts.url}`)
-        return rpromise(request_opts).catch(err => console.log('2:'+err))
+        return rpromise(request_opts).catch(err => console.log('2:' + err))
     },
     selectAllSignals: (chat_id) => {
         var request_opts = {};
@@ -141,6 +141,23 @@ var api = {
     },
     getITT: () => {
         return backend.get('/itt')
+    },
+    saveTradingAlerts: (talert) => {
+        var request_opts = {
+            method: 'POST',
+            body: {
+                signalId: talert.signal_id,
+                rejections: talert.rejections,
+                reasons: talert.reasons
+            },
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/alerts`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
     }
 }
 
