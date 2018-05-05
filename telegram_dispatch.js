@@ -29,7 +29,7 @@ const app = Consumer.create({
         console.log(`[Not notified] Message ${message.MessageId}`)
       })
     } else {
-      api.saveTradingAlerts({ signal_id: signalValidity.decoded_message_body.id, reasons: signalValidity.reasons.split(',') }).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
+      api.saveTradingAlerts({ signal_id: signalValidity.decoded_message_body.id, reasons: signalValidity.reasons.split(','), SQSId: message.MessageId }).then(() => { console.log(`[Notified] Message ${message.MessageId}`) })
       console.log(`[Invalid] SQS message ${message.MessageId} for signal ${signalValidity.decoded_message_body.id} ${signalValidity.reasons}`)
     }
     done()
