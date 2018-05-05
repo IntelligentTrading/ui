@@ -67,10 +67,19 @@ var getKeyboardText = async (settings) => {
 ‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
 ‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
-${!hasValidSubscription ? '‣ Limited number of coins (Upgrade for more)\n‣ Upside alerts only (Upgrade for more)\n‣ RSI and Ichimoku signals (Upgrade for more)\n‣ Poloniex exchange (Upgrade for more)' : ''}
+${getDescriptionForPlan(currentPlan)}
 
 Tap or type /subscribe to extend or upgrade your plan.       
 ${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
+}
+
+var getDescriptionForPlan = (plan) => {
+    switch (plan) {
+        case 'Starter': return '‣ Upside and Downside RSI and Ichimoku signals\n‣ RSI proprietary signals\n‣ Poloniex, Binance, Bittrex ';
+        case 'FREE+': return '‣ Upside and Downside RSI and Ichimoku signals (upgrade for more)\n‣ Poloniex exchange (upgrade for more)';
+        case 'FREE': return '‣ Limited number of coins (Upgrade for more)\n‣ Upside alerts only (Upgrade for more)\n‣ RSI and Ichimoku signals (Upgrade for more)\n‣ Poloniex exchange (Upgrade for more)';
+        default: ;
+    }
 }
 
 var getKeyboardButtons = (settings) => {
