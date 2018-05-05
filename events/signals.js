@@ -127,7 +127,7 @@ function IsDeliverableTo(pricingPlan, signal, message_data) {
     var isSubscribedToTickers = template.tickers.length == 0 || template.tickers.indexOf(message_data.transaction_currency) >= 0
     var canDeliverToLevel = signal.deliverTo.indexOf(pricingPlan) >= 0
     var hasTheRightHorizon = !template.horizon || horizons.indexOf(message_data.horizon) <= horizons.indexOf(template.horizon)
-    var isAllowedExchange = !template.exchanges || template.exchanges.indexOf(message_data.source.toLowerCase()) >= 0
+    var isAllowedExchange = !template.exchanges || template.exchanges.length <= 0 || template.exchanges.indexOf(message_data.source.toLowerCase()) >= 0
     return isSubscribedToTickers && canDeliverToLevel && hasTheRightHorizon && isAllowedExchange
 }
 
