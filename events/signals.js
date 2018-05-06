@@ -79,7 +79,8 @@ function notify(message_data) {
                                 subscribers = subscribers.concat(matchingBetaUsers)
                             }
 
-                            subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
+                            if (signalForTier)
+                                subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
 
                             var rejections = []
                             var notificationPromises = []
