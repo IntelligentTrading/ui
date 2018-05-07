@@ -181,7 +181,7 @@ function checkTimestamp(messageBody) {
 
   return messageBody != undefined &&
     messageBody.timestamp != undefined &&
-    Date.now() - Date.parse(messageBody.timestamp) < 15 * 60000; // 15 minutes 
+    Date.now() - Date.parse(messageBody.timestamp) < 20 * 60000; // 15 minutes 
 }
 
 function checkDuplicates(messageId, signalId) {
