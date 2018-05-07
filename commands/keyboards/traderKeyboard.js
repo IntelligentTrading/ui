@@ -38,7 +38,7 @@ var getKeyboardText = () => {
     return `Risk Setting
     
 A higher risk setting will show signals more often, for higher frequency traders.
-Learn more in the [User Guide](https://blog.intelligenttrading.org/intelligent-trading-beta-bot-user-guide-2f597c66efa7)`
+Learn more in the [User Guide](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon)`
 }
 
 var getKeyboardButtons = (horizon) => {
