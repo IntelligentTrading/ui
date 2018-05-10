@@ -36,18 +36,24 @@ module.exports = function (bot) {
             url = callback_data.d.sym ? 'currencies/transaction' : 'currencies/counter'
         }
 
-        api.updateUser(chat_id, data, url).then(updatedUser => {
-            return moduleBot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved!' })
-                .then(() => { return updatedUser })
-        }).then((updatedUser) => {
-            var navigateToKeyboard = destination_page.split('(')[0]
-            var navigateToPage = destination_page.split('(')[1]
-            if (navigateToPage) navigateToPage = navigateToPage.replace(')', '')
-            eventEmitter.emit(`${navigateToKeyboard}KeyboardChanged`, chat_id, message_id, JSON.parse(updatedUser).settings, navigateToPage)
-        }).catch(reason => {
-            var message = reason.error ? reason.error : reason
-            moduleBot.sendMessage(chat_id, message)
-        })
+        var actionToExecute = callback_data.d.reset ?
+            api.resetSignals(chat_id) : api.updateUser(chat_id, data, url)
+
+        actionToExecute
+            .then(updatedUser => {
+                return moduleBot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved!' })
+                    .then(() => {
+                        return updatedUser
+                    })
+            }).then((updatedUser) => {
+                var navigateToKeyboard = destination_page.split('(')[0]
+                var navigateToPage = destination_page.split('(')[1]
+                if (navigateToPage) navigateToPage = navigateToPage.replace(')', '')
+                eventEmitter.emit(`${navigateToKeyboard}KeyboardChanged`, chat_id, message_id, JSON.parse(updatedUser).settings, navigateToPage)
+            }).catch(reason => {
+                var message = reason.error ? reason.error : reason
+                moduleBot.sendMessage(chat_id, message)
+            })
     }
 }
 
