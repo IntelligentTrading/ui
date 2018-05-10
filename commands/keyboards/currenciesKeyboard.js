@@ -65,7 +65,8 @@ var getKeyboardButtons = (keyboard_rows) => {
 
     var arrows = [{ text: "<<", callback_data: prev_arrow_callback }, { text: ">>", callback_data: next_arrow_callback }]
 
-    var back = [{ text: `Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
+    var resetToDefault = [{ text: `Reset to default`, callback_data: utils.getButtonCallbackData('settings', { reset: true }, null, 'Cur(0)') }]
+    var back = [{ text: `← Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
 
     //get PAGE_SIZE elements for each page (25)
     var page_buttons = keyboard_rows.slice(current_page * PAGE_SIZE, current_page * PAGE_SIZE + PAGE_SIZE);
@@ -79,6 +80,7 @@ var getKeyboardButtons = (keyboard_rows) => {
         buttons.push(page_buttons_row);
     }
     buttons.push(arrows)
+    buttons.push(resetToDefault)
     buttons.push(back)
     return buttons;
 }

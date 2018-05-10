@@ -84,6 +84,16 @@ var api = {
 
         return rpromise(request_opts);
     },
+    resetSignals: (chat_id) => {
+        var request_opts = {};
+        request_opts.url = `${node_svc_api}/users/${chat_id}/resetSignals`
+        request_opts.method = 'PUT'
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts);
+    },
     getSignals: (signal) => {
         var request_opts = {};
         request_opts.url = `${node_svc_api}/signals/${signal}`;
