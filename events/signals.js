@@ -83,12 +83,14 @@ function notify(message_data) {
                                 subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
 
                             var rejections = []
+                            var reasons = []
                             var notificationPromises = []
 
                             subscribers.map(subscriber => {
                                 var notificationPromise = bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
                                     .catch(err => {
                                         rejections.push(subscriber.telegram_chat_id)
+                                        reasons.push(`${subscriber.telegram_chat_id} :: ${err.message.includes('400') ? 'Not Existing' : err.message.includes('403') ? 'Blocked' : err.message}`)
                                         console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`)
                                     })
 
@@ -97,7 +99,7 @@ function notify(message_data) {
 
                             return Promise.all(notificationPromises)
                                 .then(() => {
-                                    return { signal_id: message_data.id, rejections: rejections }
+                                    return { signal_id: message_data.id, rejections: rejections, reasons: reasons }
                                 })
                         })
                     }
