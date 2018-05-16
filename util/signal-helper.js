@@ -180,8 +180,8 @@ function cleanSortedCache() {
 function checkTimestamp(messageBody) {
 
   return messageBody != undefined &&
-    messageBody.timestamp != undefined &&
-    Date.now() - Date.parse(messageBody.timestamp) < 20 * 60000; // 15 minutes 
+    messageBody.sent_at != undefined &&
+    Date.now() - messageBody.sent_at < 20 * 60000; // 15 minutes 
 }
 
 function checkDuplicates(messageId, signalId) {
