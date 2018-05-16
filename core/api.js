@@ -159,7 +159,8 @@ var api = {
                 signalId: talert.signal_id,
                 awsSQSId: talert.SQSId,
                 rejections: talert.rejections,
-                reasons: talert.reasons
+                reasons: talert.reasons,
+                sent_at: talert.sent_at
             },
             json: true
         }
