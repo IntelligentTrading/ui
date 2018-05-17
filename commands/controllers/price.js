@@ -25,10 +25,10 @@ var getPrice = (currency) => {
     return api.price(currency)
         .then(json => {
             var info = JSON.parse(json)
-            if ('results' in info) {
+            if ('results' in info && info.results.length > 0) {
                 return parse_info(info.results[0]);
             } else {
-                return 'Currency not found';
+                return 'Currency not listed';
             }
         })
 }
