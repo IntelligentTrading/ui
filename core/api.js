@@ -152,6 +152,22 @@ var api = {
     getITT: () => {
         return backend.get('/itt')
     },
+    lastDispatchedSignal: (subscribersIds, signalId) => {
+        var request_opts = {
+            method: 'POST',
+            body: {
+                signalId: signalId,
+                subscribersIds: subscribersIds
+            },
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/users/notified`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
+    },
     saveTradingAlerts: (talert) => {
         var request_opts = {
             method: 'POST',
