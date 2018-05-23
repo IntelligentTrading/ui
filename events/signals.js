@@ -85,9 +85,13 @@ function notify(message_data) {
                             var rejections = []
                             var reasons = []
                             var notificationPromises = []
+                            var subscribersIds = []
 
                             subscribers.map(subscriber => {
                                 var notificationPromise = bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
+                                    .then(() => {
+                                        subscribersIds.push(subscriber.telegram_chat_id)
+                                    })
                                     .catch(err => {
                                         rejections.push(subscriber.telegram_chat_id)
                                         reasons.push(`${subscriber.telegram_chat_id} :: ${err.message.includes('400') ? 'Not Existing' : err.message.includes('403') ? 'Blocked' : err.message}`)
@@ -99,7 +103,9 @@ function notify(message_data) {
 
                             return Promise.all(notificationPromises)
                                 .then(() => {
-                                    return { signal_id: message_data.id, rejections: rejections, reasons: reasons, sent_at: new Date(message_data.sent_at * 1000) }
+                                    return api.lastDispatchedSignal(subscribersIds, message_data.id).then(() => {
+                                        return { signal_id: message_data.id, rejections: rejections, reasons: reasons, sent_at: new Date(message_data.sent_at * 1000) }
+                                    })
                                 })
                         })
                     }
