@@ -9,7 +9,7 @@ module.exports = function (bot) {
         const username = msg.chat.username
         const feedback = params[0]
 
-        if (feedback == undefined || feedback.length <= 0) {
+        if (!feedback || feedback.length <= 0) {
             moduleBot.sendMessage(chat_id, helpText)
         }
         else {

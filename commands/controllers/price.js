@@ -41,14 +41,14 @@ function parse_info(price_result) {
         .then((tkrs) => {
 
             var currency_wiki;
-            if (tkrs == undefined || tkrs.length <= 0) {
+            if (!tkrs || tkrs.length <= 0) {
                 currency_wiki = `*[${currency_wiki_data.symbol}](${wiki_url}})*`
             }
             else {
                 var matching_tkrs = tkrs.filter(t => t.symbol == price_result.transaction_currency);
                 var currency_wiki_data = matching_tkrs[0];
 
-                if (currency_wiki_data == undefined) {
+                if (!currency_wiki_data) {
                     console.log(`Wiki not found for ${price_result.transaction_currency}!`);
                     currency_wiki_data.symbol = price_result.transaction_currency;
                     currency_wiki_data.name = '';

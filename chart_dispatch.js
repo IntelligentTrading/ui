@@ -53,13 +53,13 @@ function populate_trace(data) {
 function get_traces() {
     var traces = [];
 
-    for (i = 0; i < 100; i++) {
+    for (var i = 0; i < 100; i++) {
 
         var values = [];
         values.push(Math.random() * 100);
 
 
-        for (y = 1; y < 5; y++) {
+        for (var y = 1; y < 5; y++) {
             values.push(values[y - 1] + Math.random() * 10 + 5);
         }
 
