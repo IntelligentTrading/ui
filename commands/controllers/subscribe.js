@@ -12,12 +12,16 @@ var getCurrentStatusMessage = (settings, itt_usd_rate) => {
     var paidDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.paid)
     var currentPlan = paidDaysLeft > 0 || settings.is_ITT_team ? 'Starter' : (betaDaysLeft > 0 ? 'FREE+' : 'FREE')
 
+    var usdPricePerSecond = 20 * 12 / 365.25 / 24 / 3600
+    var oneMonthInSeconds = 2629746
+
     return `Subscription | *${currentPlan}* plan\n[View all available subscription plans](intelligenttrading.org/pricing).
 
 ${paidDaysLeft <= 0 && !settings.is_ITT_team ? upgradeToStarter : extendYourSubscription(paidDaysLeft)} ITT tokens to the address below. You will be notified as soon as the transaction is confirmed.
 
 ‣ Receiver address: ${settings.ittWalletReceiverAddress}
 ‣ ITT token price: $${itt_usd_rate} USDT
+‣ Tokens required for 1 month: ${Math.ceil(oneMonthInSeconds * usdPricePerSecond / itt_usd_rate)}
 ‣ ITT available on the following exchanges: Coss.io, [Mercatox](https://mercatox.com/), [Idex](https://idex.market/), [ForkDelta](https://forkdelta.github.io/)`
 }
 

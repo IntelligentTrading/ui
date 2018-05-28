@@ -6,6 +6,23 @@ const api = require('../../core/api')
 var keyboards = {}
 eventEmitter.on('closeKeyboard', (chat_id, message_id) => closeKeyboard(chat_id, message_id))
 
+function closeKeyboard(chat_id, message_id) {
+    return moduleBot.deleteMessage(chat_id, message_id)
+}
+
+function loadKeyboards(bot) {
+    var keyboardFiles = fs.readdirSync('./commands/keyboards').filter(kf => kf.endsWith('Keyboard.js'))
+    keyboardFiles.forEach(kf => {
+        require(`../keyboards/${kf.replace('.js', '')}`)(bot)
+    })
+}
+
+async function loadUserSettings(chat_id) {
+    var userJSON = await api.getUsers({ telegram_chat_id: chat_id })
+    return JSON.parse(userJSON).settings
+}
+
+
 module.exports = function (bot) {
     moduleBot = bot
     loadKeyboards(moduleBot)
@@ -50,20 +67,4 @@ module.exports = function (bot) {
             eventEmitter.emit(`${callback_data.n}KeyboardChanged`, chat_id, message_id, userSettings)
         })
     }
-}
-
-function closeKeyboard(chat_id, message_id) {
-    return moduleBot.deleteMessage(chat_id, message_id)
-}
-
-function loadKeyboards(bot) {
-    var keyboardFiles = fs.readdirSync('./commands/keyboards').filter(kf => kf.endsWith('Keyboard.js'))
-    keyboardFiles.forEach(kf => {
-        require(`../keyboards/${kf.replace('.js', '')}`)(bot)
-    })
-}
-
-async function loadUserSettings(chat_id) {
-    var userJSON = await api.getUsers({ telegram_chat_id: chat_id })
-    return JSON.parse(userJSON).settings
 }
