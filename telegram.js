@@ -33,6 +33,7 @@ bot.onText(/\/(\w+)(.*)/, (msg, match) => {
   if (command)
     try {
       command.cmd(msg, match.map(m => m.trim()).splice(2))
+      api.updateUser(chat_id).catch(err => console.log(err))
     }
     catch (err) {
       bot.sendMessage(chat_id, err)
