@@ -42,10 +42,10 @@ var getKeyboardButtons = (userSettings) => {
 
     var counter_currency_buttons = []
 
-    if (userSettings == undefined)
+    if (!userSettings)
         userSettings = {};
 
-    if (userSettings.counter_currencies == undefined) {
+    if (!userSettings.counter_currencies) {
         userSettings.counter_currencies = []
     }
 

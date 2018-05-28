@@ -6,36 +6,6 @@ var eventEmitter = require('../../events/botEmitter')
  * use the callback data-> f:label for the current function n:label for the function to exec on callback (next)
  */
 var moduleBot = null
-module.exports = function (bot) {
-    moduleBot = bot
-
-    this.cmd = (msg, params) => {
-        return api.getUsers({ telegram_chat_id: msg.chat.id }).then(user => {
-            var user = JSON.parse(user)
-            if (util.hasValidSubscription(user.settings)){
-                setTraderProfile(msg.chat.id)
-            }
-            else{
-                moduleBot.sendMessage(msg.chat.id, 'Sorry, you cannot execute this command with the FREE plan.');
-            }
-        })
-    }
-    this.callback = (callback_message) => {
-        var message_id = callback_message.message.message_id
-        var chat_id = callback_message.message.chat.id
-
-        var callback_data = JSON.parse(callback_message.data)
-
-        store(chat_id, callback_data.d).then(() => {
-            this[callback_data.n](chat_id, message_id)
-        }).catch(err => error(chat_id, err))
-    };
-    this.hrz = (chat_id) => setTraderProfile(chat_id);
-    this.sigall = (chat_id, msg_id) => setTransactionCurrencies(chat_id, msg_id);
-    this.crowd = (chat_id, msg_id) => setCrowdSentiment(chat_id, msg_id);
-    this.end = (chat_id, msg_id) => wizardEnd(chat_id, msg_id);
-    this.nevermind = (chat_id) => moduleBot.sendMessage(chat_id, 'Okay! You can always configure your /settings later! Signals will come soon!')
-}
 
 function setTraderProfile(chat_id) {
     var text = "💡*Pick your profile* (Step 1/3)\nFirst, risk settings with 1hr, 4hr & 1D periods respectively. High risk means lots of alerts!"
@@ -133,4 +103,35 @@ var store = (chat_id, data) => {
 var error = (chat_id, reason) => {
     console.log(reason)
     return moduleBot.sendMessage(chat_id, 'Something went wrong with the wizard');
+}
+
+module.exports = function (bot) {
+    moduleBot = bot
+
+    this.cmd = (msg, params) => {
+        return api.getUsers({ telegram_chat_id: msg.chat.id }).then(user => {
+            user = JSON.parse(user)
+            if (util.hasValidSubscription(user.settings)) {
+                setTraderProfile(msg.chat.id)
+            }
+            else {
+                moduleBot.sendMessage(msg.chat.id, 'Sorry, you cannot execute this command with the FREE plan.');
+            }
+        })
+    }
+    this.callback = (callback_message) => {
+        var message_id = callback_message.message.message_id
+        var chat_id = callback_message.message.chat.id
+
+        var callback_data = JSON.parse(callback_message.data)
+
+        store(chat_id, callback_data.d).then(() => {
+            this[callback_data.n](chat_id, message_id)
+        }).catch(err => error(chat_id, err))
+    };
+    this.hrz = (chat_id) => setTraderProfile(chat_id);
+    this.sigall = (chat_id, msg_id) => setTransactionCurrencies(chat_id, msg_id);
+    this.crowd = (chat_id, msg_id) => setCrowdSentiment(chat_id, msg_id);
+    this.end = (chat_id, msg_id) => wizardEnd(chat_id, msg_id);
+    this.nevermind = (chat_id) => moduleBot.sendMessage(chat_id, 'Okay! You can always configure your /settings later! Signals will come soon!')
 }

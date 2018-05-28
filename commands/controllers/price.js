@@ -3,23 +3,9 @@ var api = require('../../core/api')
 require('../../util/extensions')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
-var exchanges = ['Poloniex','Binance','Bittrex']
+var exchanges = ['Poloniex', 'Binance', 'Bittrex']
 
 var moduleBot = null
-module.exports = function (bot) {
-    moduleBot = bot
-
-    this.cmd = (msg, params) => {
-        const chat_id = msg.chat.id
-        const ticker = params[0]
-        getPrice(ticker).then((result) => {
-            moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
-        }).catch(reason => {
-            console.log(reason);
-            moduleBot.sendMessage(chat_id, 'Please retry...')
-        })
-    }
-}
 
 var getPrice = (currency) => {
     return api.price(currency)
@@ -41,14 +27,14 @@ function parse_info(price_result) {
         .then((tkrs) => {
 
             var currency_wiki;
-            if (tkrs == undefined || tkrs.length <= 0) {
+            if (!tkrs || tkrs.length <= 0) {
                 currency_wiki = `*[${currency_wiki_data.symbol}](${wiki_url}})*`
             }
             else {
-                var matching_tkrs = tkrs.filter(t => t.symbol == price_result.transaction_currency);
+                var matching_tkrs = tkrs.filter(t => t.symbol === price_result.transaction_currency);
                 var currency_wiki_data = matching_tkrs[0];
 
-                if (currency_wiki_data == undefined) {
+                if (!currency_wiki_data) {
                     console.log(`Wiki not found for ${price_result.transaction_currency}!`);
                     currency_wiki_data.symbol = price_result.transaction_currency;
                     currency_wiki_data.name = '';
@@ -75,4 +61,19 @@ function parse_info(price_result) {
 
             return `${currency_wiki}\nPrice: ${retrieved_price} (${(price_result.price_change_24h * 100).toFixed(2)}% ${price_change_sign})\nLast update: ${price_result.timestamp.split('.')[0]}\nSource: ${exchanges[price_result.source]}`;
         })
+}
+
+module.exports = function (bot) {
+    moduleBot = bot
+
+    this.cmd = (msg, params) => {
+        const chat_id = msg.chat.id
+        const ticker = params[0]
+        getPrice(ticker).then((result) => {
+            moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
+        }).catch(reason => {
+            console.log(reason);
+            moduleBot.sendMessage(chat_id, 'Please retry...')
+        })
+    }
 }
