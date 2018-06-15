@@ -1,5 +1,6 @@
 var tickers = require('../../data/tickers')
 var api = require('../../core/api')
+var _ = require('lodash')
 require('../../util/extensions')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
@@ -14,7 +15,9 @@ var getPrice = (currency) => {
             if ('results' in info && info.results.length > 0) {
                 return parse_info(info.results[0]);
             } else {
-                return 'Currency not listed';
+                return tickers.get().then((tkrs) => {
+                    return `Sorry, I can't find *${currency}*.\nTry BTC, ETH, XRP, BCH or other coins we support.`;
+                })
             }
         })
 }
