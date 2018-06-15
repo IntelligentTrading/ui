@@ -17,7 +17,7 @@ module.exports = function (bot) {
         }
         else {
             return api.storeFeedback(chat_id, username, feedback).then((result) => {
-                moduleBot.sendMessage(chat_id, thanksText(result.shortLink))
+                moduleBot.sendMessage(chat_id, thanksText(result.id))
             })
         }
     }
