@@ -1,9 +1,10 @@
 var tickers = require('../../data/tickers')
 var api = require('../../core/api')
+var _ = require('lodash')
 require('../../util/extensions')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
-var exchanges = ['Poloniex']
+var exchanges = ['Poloniex', 'Binance', 'Bittrex']
 
 var moduleBot = null
 module.exports = function (bot) {
@@ -25,10 +26,12 @@ var getVolume = (currency) => {
     return api.volume(currency)
         .then(json => {
             var info = JSON.parse(json)
-            if ('results' in info) {
+            if ('results' in info && info.results.length > 0) {
                 return parse_info(info.results[0]);
             } else {
-                return 'Currency not found';
+                return tickers.get().then((tkrs) => {
+                    return `Sorry, I can't find *${currency}*.\nTry BTC, ETH, XRP, BCH or other coins we support.`;
+                })
             }
         })
 }
