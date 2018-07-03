@@ -39,6 +39,8 @@ var showKeyboard = async (telegram_chat_id, settings) => {
 
     var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
     if (hasValidSubscription || settings.is_ITT_team) {
+        keyboardObject.buttons.push([{ text: "Open in web app", url: `https://itf-settings-stage.herokuapp.com/#/Main/${telegram_chat_id}` }])
+
         options.reply_markup = {
             inline_keyboard: keyboardObject.buttons
         }
