@@ -44,12 +44,27 @@ function applyTemplate(message_data) {
         var ann_simple = getAnnSimpleTemplate(message_data)
         telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
       }
+      
+      if (message_data.signal == 'VBI') {
+        var vbi = getVBITemplate(message_data)
+        telegram_signal_message = `${vbi.header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${vbi.vbi_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
+      }
 
       telegram_signal_message = telegram_signal_message + '\n' + bst.source + footer
 
       return telegram_signal_message;
     })
 }
+
+
+function getVBITemplate(message_data) {
+  
+    var vbi = {
+      header_emoji: 'ℹ️',
+      vbi_text:`VBI - bullish trend `,
+    }
+    return vbi;
+  }
 
 function getSMATemplate(message_data) {
 
