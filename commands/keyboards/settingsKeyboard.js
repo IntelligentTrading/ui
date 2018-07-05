@@ -6,6 +6,7 @@ var keyboardBot = null
 var tickers = require('../../data/tickers')
 var api = require('../../core/api')
 var ext = require('../../util/extensions')
+var moment = require('moment')
 
 eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
 eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
@@ -16,12 +17,12 @@ module.exports = async (bot) => {
     counter_currencies = await tickers.counter_currencies()
 }
 
-var updateKeyboard = async (chat_id, message_id, settings) => {
+var updateKeyboard = async (telegram_chat_id, message_id, settings) => {
 
-    var keyboardObject = await getKeyboardObject(settings)
+    var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
 
     keyboardBot.editMessageText(keyboardObject.text, {
-        chat_id: chat_id,
+        chat_id: telegram_chat_id,
         message_id: message_id,
         parse_mode: 'Markdown',
         disable_web_page_preview: "true",
@@ -32,14 +33,13 @@ var updateKeyboard = async (chat_id, message_id, settings) => {
 }
 
 var showKeyboard = async (telegram_chat_id, settings) => {
-    var keyboardObject = await getKeyboardObject(settings)
+    var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
 
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
 
     var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
     if (hasValidSubscription || settings.is_ITT_team) {
-        keyboardObject.buttons.push([{ text: "Open in web app", url: `https://itf-settings-stage.herokuapp.com/#/Main/${telegram_chat_id}` }])
 
         options.reply_markup = {
             inline_keyboard: keyboardObject.buttons
@@ -49,10 +49,10 @@ var showKeyboard = async (telegram_chat_id, settings) => {
     keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
 }
 
-var getKeyboardObject = async (settings) => {
+var getKeyboardObject = async (telegram_chat_id, settings) => {
     return {
         text: await getKeyboardText(settings),
-        buttons: getKeyboardButtons(settings)
+        buttons: getKeyboardButtons(telegram_chat_id, settings)
     }
 }
 
@@ -84,7 +84,7 @@ var getDescriptionForPlan = (plan) => {
     }
 }
 
-var getKeyboardButtons = (settings) => {
+var getKeyboardButtons = (telegram_chat_id, settings) => {
 
     var alertsCallbackData = keyboardUtils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
     var editSignalsCallbackData = keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Sig')
@@ -94,6 +94,7 @@ var getKeyboardButtons = (settings) => {
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
         [{ text: "Signals setting", callback_data: editSignalsCallbackData }],
         [{ text: "Risk setting", callback_data: editTraderCallbackData }],
+        [{ text: "Open in web app", url: createMagicLink(telegram_chat_id) }],
         [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
     ]
 }
@@ -102,4 +103,18 @@ var horizonToRisk = (horizon) => {
     var risks = ['high', 'medium', 'low']
     var horizons = ['short', 'medium', 'long']
     return risks[horizons.indexOf(horizon)]
+}
+
+var createMagicLink = (telegram_chat_id) => {
+
+    var token = {
+        telegram_chat_id: telegram_chat_id,
+        exp: moment().add(10, 'days')
+    }
+
+    var tokenString = Buffer.from(JSON.stringify(token)).toString('base64')
+    var magicLink = `https://itf-settings-stage.herokuapp.com/#/me/${tokenString}`
+    console.log(magicLink)
+
+    return magicLink
 }
