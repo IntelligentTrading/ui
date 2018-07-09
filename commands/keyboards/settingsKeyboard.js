@@ -89,7 +89,7 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
     var alertsCallbackData = keyboardUtils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
     var editSignalsCallbackData = keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Sig')
     var editTraderCallbackData = keyboardUtils.getButtonCallbackData('navigation', { horizon: settings.horizon }, null, 'Trader')
-
+    
     return [
         [{ text: "Open in web app", url: createMagicLink(telegram_chat_id) }],
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
