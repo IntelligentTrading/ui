@@ -60,7 +60,7 @@ function applyTemplate(message_data) {
 function getVBITemplate(message_data) {
   
     var vbi = {
-      header_emoji: 'ℹ️',
+      header_emoji: '📶',
       vbi_text:`VBI - bullish trend `,
     }
     return vbi;
