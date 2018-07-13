@@ -46,7 +46,11 @@ function notify(message_data) {
                         return api.getUsers({ filters: filters }).then(usersJson => {
                             var users = JSON.parse(usersJson)
 
-                            users = users.filter(user => (user.is_ITT_team || user.eula)&& user.settings.indicators.find(ind => ind.name==signal.label).enabled)
+                            users = users.filter(user => (user.is_ITT_team || user.eula))
+                            users = users.filter(user => {
+                                var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
+                                return matchingIndicator && matchingIndicator.enabled
+                            })
 
                             var signalForNonno = isForNonno(signal, message_data)
                             var signalForFree = isForFree(signal, message_data)
