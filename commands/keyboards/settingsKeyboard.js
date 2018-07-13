@@ -113,7 +113,7 @@ var createMagicLink = (telegram_chat_id) => {
     }
 
     var tokenString = Buffer.from(JSON.stringify(token)).toString('base64')
-    var magicLink = `https://itf-settings-stage.herokuapp.com/#/me/${tokenString}`
+    var magicLink = `https://itf-settings-${process.env.NODE_ENV}.herokuapp.com/#/me/${tokenString}`
     console.log(magicLink)
 
     return magicLink
