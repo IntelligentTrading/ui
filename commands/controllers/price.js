@@ -72,11 +72,16 @@ module.exports = function (bot) {
     this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
         const ticker = params[0]
-        getPrice(ticker).then((result) => {
-            moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
-        }).catch(reason => {
-            console.log(reason);
-            moduleBot.sendMessage(chat_id, 'Please retry...')
-        })
+
+        if (!ticker)
+            moduleBot.sendMessage(chat_id, 'Please, provide a coin symbol! Example: /price DOGE')
+        else {
+            return getPrice(ticker.toUpperCase()).then((result) => {
+                moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
+            }).catch(reason => {
+                console.log(reason);
+                moduleBot.sendMessage(chat_id, 'Please retry...')
+            })
+        }
     }
 }

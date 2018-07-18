@@ -5,6 +5,7 @@ require('../../util/extensions')
 var nopreview_markdown_opts = require('../../bot/telegramInstance').nopreview_markdown_opts
 
 var exchanges = ['Poloniex', 'Binance', 'Bittrex']
+var counter_currencies = ['BTC', 'ETH', 'USDT', 'XMR']
 
 var moduleBot = null
 module.exports = function (bot) {
@@ -13,12 +14,18 @@ module.exports = function (bot) {
     this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
         const ticker = params[0]
-        getVolume(ticker).then((result) => {
-            moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
-        }).catch(reason => {
-            console.log(reason);
-            moduleBot.sendMessage(chat_id, 'Please retry...')
-        })
+
+        if (!ticker)
+            moduleBot.sendMessage(chat_id, 'Please, provide a coin symbol! Example: /volume DOGE')
+        else {
+
+            return getVolume(ticker.toUpperCase()).then((result) => {
+                moduleBot.sendMessage(chat_id, result.toString(), nopreview_markdown_opts)
+            }).catch(reason => {
+                console.log(reason);
+                moduleBot.sendMessage(chat_id, 'Please retry...')
+            })
+        }
     }
 }
 
@@ -60,10 +67,11 @@ function parse_info(volume_result) {
                         currency_wiki_data.name = '';
                         currency_wiki_data.rank = '?'
                     }
-                    currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*, Rank #${currency_wiki_data.rank}*`
+                    
+                    currency_wiki = `*${currency_wiki_data.name}, *[${currency_wiki_data.symbol}](${wiki_url}/${currency_wiki_data.name})*/${counter_currencies[volume_result.counter_currency]}, Rank #${currency_wiki_data.rank}*`
                 }
 
-                return `${currency_wiki}\n24h Volume: ${retrievedVolume} BTC\nLast update: ${volume_result.timestamp.split('.')[0]}`
+                return `${currency_wiki}\n24h Volume: ${retrievedVolume} ${currency_wiki_data.symbol}\nLast update: ${volume_result.timestamp.split('.')[0]}`
             })
     }
 }
