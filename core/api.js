@@ -60,7 +60,8 @@ var api = {
         return backend.get(`/resampled-prices/${symbol}`)
     },
     volume: (symbol) => {
-        return backend.get(`/volumes/${symbol}`)
+        var counter_currency = symbol == 'BTC' ? 2 : 0
+        return backend.get(`/history-prices/?source=0&transaction_currency=${symbol}&counter_currency=${counter_currency}&page_size=1`)
     },
     tickers: () => {
         var request_opts = new Options()
