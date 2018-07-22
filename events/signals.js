@@ -52,6 +52,11 @@ function notify(message_data) {
                                 return matchingIndicator && matchingIndicator.enabled
                             })
 
+                            users = users.filter(user => {
+                                var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
+                                return matchingExchange && matchingExchange.enabled
+                            })
+
                             var signalForNonno = isForNonno(signal, message_data)
                             var signalForFree = isForFree(signal, message_data)
                             var signalForTier = isForTier(signal, message_data)
