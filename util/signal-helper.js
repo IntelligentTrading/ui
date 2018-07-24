@@ -44,7 +44,7 @@ function applyTemplate(message_data) {
         var ann_simple = getAnnSimpleTemplate(message_data)
         telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
       }
-      
+
       if (message_data.signal == 'VBI') {
         var vbi = getVBITemplate(message_data)
         telegram_signal_message = `${vbi.header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${vbi.vbi_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
@@ -58,13 +58,13 @@ function applyTemplate(message_data) {
 
 
 function getVBITemplate(message_data) {
-  
-    var vbi = {
-      header_emoji: '📶',
-      vbi_text:`VBI - bullish trend `,
-    }
-    return vbi;
+
+  var vbi = {
+    header_emoji: '📶',
+    vbi_text: `VBI - bullish trend `,
   }
+  return vbi;
+}
 
 function getSMATemplate(message_data) {
 
@@ -118,11 +118,11 @@ function getKumoTemplate(message_data) {
 }
 
 function getAnnSimpleTemplate(message_data) {
-  var probability = `Price Probability:\n🔻 ${(message_data.probability_down * 100).toFixed(1)}%\t▲ ${(message_data.probability_up * 100).toFixed(1)}%\t *=* ${(message_data.probability_same * 100).toFixed(1)}%`
-  var predicted_ahead_for = `Predicted ahead for ${message_data.predicted_ahead_for} minutes.`
+  var probability = `${message_data.probability_up > message_data.probability_down ? '*' : ''} ▲ ${(message_data.probability_up * 100).toFixed(1)}%${message_data.probability_up > message_data.probability_down ? '*' : ''}\t${message_data.probability_up < message_data.probability_down ? '*' : ''}▾ ${(message_data.probability_down * 100).toFixed(1)}%${message_data.probability_up < message_data.probability_down ? '*' : ''}`
+  var predicted_ahead_for = `AI: new price trend prediction for next 6 hours.`
   var ann_simple = {
     ann_simple_header_emoji: '🤖',
-    ann_simple_text: `${probability}\n\n${predicted_ahead_for}`
+    ann_simple_text: `${predicted_ahead_for}\n${probability}`
   }
 
   return ann_simple;
@@ -196,7 +196,7 @@ function checkTimestamp(messageBody) {
 
   return messageBody != undefined &&
     messageBody.sent_at != undefined &&
-    Date.now() - Date.parse(messageBody.sent) < 20 * 60000; 
+    Date.now() - Date.parse(messageBody.sent) < 20 * 60000;
 }
 
 function checkDuplicates(messageId, signalId) {
