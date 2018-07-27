@@ -5,6 +5,8 @@ const api = require('./core/api')
 require('./util/extensions')
 var telegram = require('./bot/telegramInstance')
 var bot = telegram.bot
+var ua = require('universal-analytics')
+var botVisitor = ua(process.env.UA_CODE)
 
 var commandsManager = {}
 const tickers = require('./data/tickers')
@@ -27,11 +29,16 @@ try {
 
 bot.onText(/\/(\w+)(.*)/, (msg, match) => {
   const chat_id = msg.chat.id;
+  botVisitor.set('userId', chat_id)
+
   var commandText = match[1].replace('/', '');
 
   var command = commandsManager[commandText]
   if (command)
     try {
+      botVisitor.event('Bot Command', commandText, 'Main', (err) => {
+        if (err) console.log(err)
+      }).send()
       command.cmd(msg, match.map(m => m.trim()).splice(2))
       api.updateUser(chat_id).catch(err => console.log(err))
     }
@@ -43,9 +50,16 @@ bot.onText(/\/(\w+)(.*)/, (msg, match) => {
 })
 
 bot.on('callback_query', (callback_message) => {
+  botVisitor.set('userId', callback_message.from.id)
+
 
   if (callback_message.data.isJSON()) {
     var callback_data = JSON.parse(callback_message.data)
+
+    // so far settings is the only view with a callback
+    botVisitor.event('Bot Callback', 'settings', !callback_data.n || callback_data.n == 'Settings' ? 'Main' : callback_data.n, (err) => {
+      if (err) console.log(err)
+    }).send()
 
     var commandController = commandsManager[callback_data.cmd]
     if (commandController) {
