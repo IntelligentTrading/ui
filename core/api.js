@@ -57,11 +57,12 @@ var api = {
         return rpromise(request_opts)
     },
     price: (symbol) => {
-        return backend.get(`/resampled-prices/${symbol}`)
+        return backend.get(`/resampled-prices/${symbol}`).catch(err => console.log(err))
     },
     volume: (symbol) => {
         var counter_currency = symbol == 'BTC' ? 2 : 0
         return backend.get(`/history-prices/?source=0&transaction_currency=${symbol}&counter_currency=${counter_currency}&page_size=1`)
+            .catch(err => console.log(err))
     },
     tickers: () => {
         var request_opts = new Options()
@@ -151,7 +152,7 @@ var api = {
         return rpromise(request_opts)
     },
     getITT: () => {
-        return backend.get('/itt')
+        return backend.get('/itt').catch(err => console.log(err))
     },
     lastDispatchedSignal: (subscribersIds, signalId) => {
         var request_opts = {
