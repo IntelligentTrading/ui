@@ -47,15 +47,6 @@ function notify(message_data) {
                             var users = JSON.parse(usersJson)
 
                             users = users.filter(user => (user.is_ITT_team || user.eula))
-                            users = users.filter(user => {
-                                var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
-                                return matchingIndicator && matchingIndicator.enabled
-                            })
-
-                            users = users.filter(user => {
-                                var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
-                                return matchingExchange && matchingExchange.enabled
-                            })
 
                             var signalForNonno = isForNonno(signal, message_data)
                             var signalForFree = isForFree(signal, message_data)
@@ -66,6 +57,16 @@ function notify(message_data) {
                                 user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
                                 !user.settings.is_muted
                             )
+
+                            matchingTierUsers = matchingTierUsers.filter(user => {
+                                var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
+                                return matchingIndicator && matchingIndicator.enabled
+                            })
+
+                            matchingTierUsers = matchingTierUsers.filter(user => {
+                                var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
+                                return matchingExchange && matchingExchange.enabled
+                            })
 
                             var matchingBetaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
