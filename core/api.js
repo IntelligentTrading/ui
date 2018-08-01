@@ -188,6 +188,22 @@ var api = {
         }
 
         return rpromise(request_opts)
+    },
+    referral: (telegram_chat_id, code) => {
+        var request_opts = {
+            method: 'POST',
+            body: {
+                telegram_chat_id: telegram_chat_id,
+                code: code
+            },
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/users/referral`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
     }
 }
 
