@@ -56,6 +56,7 @@ var getKeyboardObject = async (telegram_chat_id, settings) => {
     }
 }
 
+
 var getKeyboardText = async (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
@@ -65,6 +66,8 @@ var getKeyboardText = async (settings) => {
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
     return `Settings | *${currentPlan}* plan
+
+Referral Code: ${settings.referral}
 
 ‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
