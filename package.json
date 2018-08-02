@@ -1,7 +1,7 @@
 {
-  "name": "itt-bot",
+  "name": "itf-bot",
   "version": "0.0.1",
-  "description": "Intelligent Trading Tech Bot",
+  "description": "Intelligent Trading Foundation Bot",
   "homepage": "http://intelligenttrading.org/",
   "engines": {
     "node": "9.4.0"
