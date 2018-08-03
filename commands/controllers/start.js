@@ -38,7 +38,7 @@ function getEulaText(chat_id) {
         rhash = '38e694f259517c';
     }
     else {
-        rhash = '69471435748184'
+        rhash = '5c2b438a5803ac'
     }
 
     return `Hi! I'm the ITF Trading Bot. Before you activate your account [you MUST accept the End User Licensing Agreement.](https://t.me/iv?url=https%3A%2F%2F${eula_endpoint}%2Feula%3Fu%3D${chat_id}&rhash=${rhash}).`
