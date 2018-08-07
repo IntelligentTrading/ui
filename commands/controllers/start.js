@@ -32,7 +32,7 @@ function getEulaText(chat_id) {
     var rhash;
 
     if (eula_endpoint.indexOf('prod') >= 0) {
-        rhash = '47f5ff678046c3';
+        rhash = 'ab3fccf4149007';
     }
     else if (eula_endpoint.indexOf('beta') >= 0) {
         rhash = '38e694f259517c';
