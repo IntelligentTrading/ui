@@ -204,6 +204,50 @@ var api = {
         }
 
         return rpromise(request_opts)
+    },
+    addStakeHolderWalletAddress: (telegram_chat_id, walletAddres) => {
+        var request_opts = {
+            method: 'POST',
+            body: {
+                telegram_chat_id: telegram_chat_id,
+                wallet: walletAddres
+            },
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/staking/wallet`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
+    },
+    verifySignature: (telegram_chat_id, signature) => {
+        var request_opts = {
+            method: 'POST',
+            body: {
+                telegram_chat_id: telegram_chat_id,
+                signature: signature
+            },
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/staking/verify`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
+    },
+    checkStakeholdersStatus: (telegram_chat_id) => {
+        var request_opts = {
+            method: 'GET',
+            json: true
+        }
+        request_opts.url = `${node_svc_api}/staking/forceRefresh${telegram_chat_id ? '/' + telegram_chat_id : ''}`
+        request_opts.headers = {
+            'NSVC-API-KEY': node_svc_api_key
+        }
+
+        return rpromise(request_opts)
     }
 }
 
