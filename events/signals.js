@@ -50,20 +50,22 @@ function notify(message_data) {
 
                             var signalForNonno = isForNonno(signal, message_data)
                             var signalForFree = isForFree(signal, message_data)
-                            var signalForTier = isForTier(signal, message_data)
+                            var signalForStarter = isForStarter(signal, message_data)
+                            var signalForPro = isForPro(signal, message_data)
+                            var signalForAdvanced = isForAdvanced(signal, message_data)
 
-                            var matchingTierUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0) &&
+                            var matchingStarterUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 || (user.settings.staking && user.settings.staking.diecimila)) &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
                                 user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
                                 !user.settings.is_muted
                             )
 
-                            matchingTierUsers = matchingTierUsers.filter(user => {
+                            matchingStarterUsers = matchingStarterUsers.filter(user => {
                                 var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
                                 return matchingIndicator && matchingIndicator.enabled
                             })
 
-                            matchingTierUsers = matchingTierUsers.filter(user => {
+                            matchingStarterUsers = matchingStarterUsers.filter(user => {
                                 var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
                                 return matchingExchange && matchingExchange.enabled
                             })
@@ -89,8 +91,14 @@ function notify(message_data) {
                                 subscribers = subscribers.concat(matchingBetaUsers)
                             }
 
-                            if (signalForTier)
-                                subscribers = _.unionBy(subscribers, matchingTierUsers, 'telegram_chat_id')
+                            if (signalForStarter)
+                                subscribers = _.unionBy(subscribers, matchingStarterUsers, 'telegram_chat_id')
+
+                            if (signalForPro)
+                                subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.diecimila), 'telegram_chat_id')
+
+                            if (signalForAdvanced)
+                                subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.centomila), 'telegram_chat_id')
 
                             var rejections = []
                             var reasons = []
@@ -136,8 +144,16 @@ function isForNonno(signal, message_data) {
     return IsDeliverableTo('beta', signal, message_data)
 }
 
-function isForTier(signal, message_data) {
+function isForStarter(signal, message_data) {
     return IsDeliverableTo('paid', signal, message_data)
+}
+
+function isForPro(signal, message_data) {
+    return IsDeliverableTo('diecimila', signal, message_data)
+}
+
+function isForAdvanced(signal, message_data) {
+    return IsDeliverableTo('centomila', signal, message_data)
 }
 
 function IsDeliverableTo(pricingPlan, signal, message_data) {

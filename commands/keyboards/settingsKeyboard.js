@@ -63,9 +63,10 @@ var getKeyboardText = async (settings) => {
     var subscriptionExpirationDate = settings.subscriptions.paid
     var tradingPairs = settings.counter_currencies.map(scc => `${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
+    var stakeholderStatus = settings.staking ? (settings.staking.centomila ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
-    return `Settings | *${currentPlan}* plan
+    return `Settings | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan
 
 ‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
@@ -90,7 +91,7 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
     var alertsCallbackData = keyboardUtils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
     var editSignalsCallbackData = keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Sig')
     var editTraderCallbackData = keyboardUtils.getButtonCallbackData('navigation', { horizon: settings.horizon }, null, 'Trader')
-    
+
     return [
         [{ text: "Open in web app", url: createMagicLink(telegram_chat_id) }],
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
