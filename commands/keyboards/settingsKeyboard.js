@@ -67,8 +67,6 @@ var getKeyboardText = async (settings) => {
 
     return `Settings | *${currentPlan}* plan
 
-Referral Code: ${settings.referral}
-
 ‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
 ‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
