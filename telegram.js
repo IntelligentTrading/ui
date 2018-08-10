@@ -76,3 +76,34 @@ bot.onText(/ITF/, (msg, match) => {
       bot.sendMessage(msg.chat.id, error.error)
     })
 })
+
+bot.onText(/0x/, (msg, match) => {
+  // it's an address!
+  if (msg.text.length == 42) {
+    return api.addStakeHolderWalletAddress(msg.chat.id, msg.text).then(messageToSign => {
+      bot.sendMessage(msg.chat.id, `Your stakeholder wallet address has been added.\nIn order to verify the ownership, please [sign](https://mycrypto.com/sign-and-verify-message/sign) from the same address the message *${messageToSign}* and paste the signature hash below.`, telegram.nopreview_markdown_opts)
+    })
+  }
+  // it's a signature!
+  else if (msg.text.length == 132) {
+    return api.verifySignature(msg.chat.id, msg.text).then(verificationResult => {
+      if (verificationResult.verified) {
+        return bot.sendMessage(msg.chat.id, 'Yay! Your signature is verified! Give us a moment to verify your stake!').then(() => {
+          return api.checkStakeholdersStatus(msg.chat.id).then(stakeholder => {
+            var stakeMessage = 'Stake 10K or 100K ITT tokens in order to get the *Stake Holder* status!'
+            if (stakeholder.settings.staking.diecimila || stakeholder.settings.staking.diecimila) {
+              stakeMessage = 'You are a stake holder!\nPlease remember that reductions in the stake may result in the loss of the current status.'
+            }
+            bot.sendMessage(msg.chat.id, stakeMessage, telegram.nopreview_markdown_opts)
+          })
+        })
+      }
+      else {
+        bot.sendMessage(msg.chat.id, `Your signature is invalid! Please check the spelling, copy paste the full hash or for contact us in case nothing works.`)
+      }
+    })
+  }
+  else {
+    bot.sendMessage(msg.chat.id, 'Are you trying to paste your address or verify a signature? Check the spelling and the text length.')
+  }
+})
