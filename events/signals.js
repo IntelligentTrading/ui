@@ -173,12 +173,16 @@ var buildHorizonFilter = (horizon) => {
 function initSubscriptionTemplates() {
     var freePromise = api.getSubscriptionTemplate('free')
     var nonnoPromise = api.getSubscriptionTemplate('beta')
-    var tierPromise = api.getSubscriptionTemplate('paid')
+    var starterPromise = api.getSubscriptionTemplate('paid')
+    var diecimilaPromise = api.getSubscriptionTemplate('diecimila')
+    var centomilaPromise = api.getSubscriptionTemplate('centomila')
 
-    Promise.all([freePromise, nonnoPromise, tierPromise]).then(templates => {
+    Promise.all([freePromise, nonnoPromise, starterPromise, diecimilaPromise, centomilaPromise]).then(templates => {
         subscriptionTemplates.free = JSON.parse(templates[0])
         subscriptionTemplates.beta = JSON.parse(templates[1])
         subscriptionTemplates.paid = JSON.parse(templates[2])
+        subscriptionTemplates.diecimila = JSON.parse(templates[3])
+        subscriptionTemplates.centomila = JSON.parse(templates[4])
     })
 }
 
