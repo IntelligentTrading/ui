@@ -70,6 +70,8 @@ bot.on('callback_query', (callback_message) => {
 })
 
 bot.onText(/ITF/, (msg, match) => {
+  if (!msg.text.startsWith('ITF')) return
+
   return api.referral(msg.chat.id, msg.text)
     .then(result => bot.sendMessage(msg.chat.id, result))
     .catch(error => {

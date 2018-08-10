@@ -66,6 +66,8 @@ var getKeyboardText = async (settings) => {
     var stakeholderStatus = settings.staking ? (settings.staking.centomila ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
+    var referral_link = `https://t.me/${process.env.TELEGRAM_BOT_NAME.replace('@','')}?start=refcode_${settings.referral}`
+
     return `Settings | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan
 
 ‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
