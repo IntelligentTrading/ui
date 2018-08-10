@@ -11,15 +11,29 @@ module.exports = function (bot) {
 
     this.cmd = (msg, params) => {
         api.createUser(msg.chat.id)
-            .catch(err => { console.log(err) })
-            .finally(() => sendEula(msg))
+            .catch(err => {
+                console.log(err)
+            })
+            .finally(() => {
+                sendEula(msg)
+
+                var referral = params.filter(p => p.startsWith('refcode_'))
+                if (referral.length > 0) {
+                    referral = referral[0].split('_')[1]
+                    return api.referral(msg.chat.id, referral).then(result => {
+                        moduleBot.sendMessage(msg.chat.id, result)
+                    }).catch(err => {
+                        moduleBot.sendMessage(msg.chat.id, err.error)
+                    })
+                }
+            })
     }
 }
 
 function sendEula(msg) {
     const chat_id = msg.chat.id
-    moduleBot.sendMessage(chat_id, getEulaText(chat_id), markdown_opts).then(()=>{
-        moduleBot.sendMessage(chat_id,'Note: read the EULA to the bottom and click on the link to accept.')
+    moduleBot.sendMessage(chat_id, getEulaText(chat_id), markdown_opts).then(() => {
+        moduleBot.sendMessage(chat_id, 'Note: read the EULA to the bottom and click on the link to accept.')
     })
 }
 
