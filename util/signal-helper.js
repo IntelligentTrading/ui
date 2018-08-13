@@ -211,6 +211,15 @@ function checkDuplicates(messageId, signalId) {
   return true;
 }
 
+function checkSignalValues(decoded_message_body) {
+  var signalCheckResult = { hasMeaning: false, rejectionMessage: 'Generic message' }
+  if (decoded_message_body.signal == 'ANN_Simple') {
+    signalCheckResult.hasMeaning = Math.abs(parseFloat(decoded_message_body.probability_up) - parseFloat(decoded_message_body.probability_down)) > 0.02
+    signalCheckResult.rejectionMessage = signalCheckResult.hasMeaning ? '' : 'AI probabilities difference lower than 2%'
+  }
+  return signalCheckResult
+}
+
 // If the counter and transaction currencies are the same, skip
 function checkCounterCurrency(messageBody) {
   return messageBody.transaction_currency == counter_currencies.filter(cc => cc.index == parseInt(messageBody.counter_currency))[0].symbol
@@ -222,6 +231,7 @@ function checkValidity(message) {
   var hasValidTimestamp = checkTimestamp(decoded_message_body)
   var isCounterCurrency = checkCounterCurrency(decoded_message_body)
   var isDuplicateMessage = checkDuplicates(message.MessageId, decoded_message_body.id)
+  var signalPayload = checkSignalValues(decoded_message_body)
 
   var isValid = hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency
   var validity = { isValid: isValid, reasons: '', decoded_message_body: decoded_message_body }
@@ -234,6 +244,8 @@ function checkValidity(message) {
       invalidReasonsList.push('is a duplicate');
     if (isCounterCurrency)
       invalidReasonsList.push('is counter currency');
+    if (!signalPayload.hasMeaning)
+      invalidReasonsList.push(signalPayload.rejectionMessage)
 
     validity.reasons = invalidReasonsList.join(',')
   }
