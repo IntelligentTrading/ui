@@ -212,11 +212,12 @@ function checkDuplicates(messageId, signalId) {
 }
 
 function checkSignalValues(decoded_message_body) {
-  var signalCheckResult = { hasMeaning: false, rejectionMessage: 'Generic message' }
+  var signalCheckResult = { hasMeaning: true, rejectionMessage: '' }
   if (decoded_message_body.signal == 'ANN_Simple') {
     signalCheckResult.hasMeaning = Math.abs(parseFloat(decoded_message_body.probability_up) - parseFloat(decoded_message_body.probability_down)) > 0.02
     signalCheckResult.rejectionMessage = signalCheckResult.hasMeaning ? '' : 'AI probabilities difference lower than 2%'
   }
+
   return signalCheckResult
 }
 
@@ -233,7 +234,7 @@ function checkValidity(message) {
   var isDuplicateMessage = checkDuplicates(message.MessageId, decoded_message_body.id)
   var signalPayload = checkSignalValues(decoded_message_body)
 
-  var isValid = hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency
+  var isValid = hasValidTimestamp && !isDuplicateMessage && !isCounterCurrency && signalPayload.hasMeaning
   var validity = { isValid: isValid, reasons: '', decoded_message_body: decoded_message_body }
 
   if (!isValid) {
