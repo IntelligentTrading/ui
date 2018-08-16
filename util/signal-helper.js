@@ -214,8 +214,8 @@ function checkDuplicates(messageId, signalId) {
 function checkSignalValues(decoded_message_body) {
   var signalCheckResult = { hasMeaning: true, rejectionMessage: '' }
   if (decoded_message_body.signal == 'ANN_Simple') {
-    signalCheckResult.hasMeaning = Math.abs(parseFloat(decoded_message_body.probability_up) - parseFloat(decoded_message_body.probability_down)) > 0.02
-    signalCheckResult.rejectionMessage = signalCheckResult.hasMeaning ? '' : 'AI probabilities difference lower than 2%'
+    signalCheckResult.hasMeaning = Math.abs(parseFloat(decoded_message_body.probability_up) - parseFloat(decoded_message_body.probability_down)) > 0.035
+    signalCheckResult.rejectionMessage = signalCheckResult.hasMeaning ? '' : 'AI probabilities difference lower than 3.5%'
   }
 
   return signalCheckResult
