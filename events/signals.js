@@ -70,7 +70,10 @@ function notify(message_data) {
                                 return matchingExchange && matchingExchange.enabled
                             })
 
-                            var matchingBetaUsers = users.filter(user => dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
+                            var matchingBetaUsers = users.filter(user =>
+                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
+                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
+                                !user.settings.is_ITT_team &&
                                 user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
                                 user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
                                 !user.settings.is_muted
