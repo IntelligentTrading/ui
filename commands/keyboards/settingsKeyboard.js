@@ -60,7 +60,7 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
 
     return [
         [{ text: "All Settings", url: createMagicLink(telegram_chat_id) }],
-        [{ text: "Basic Settings", url: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }],
+        [{ text: "Basic Settings", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }],
         [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
     ]
 }
@@ -73,17 +73,22 @@ var getKeyboardText = (settings) => {
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var stakeholderStatus = settings.staking ? (settings.staking.centomila ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
-
+    var freeText = `‣ Alert Validity: *1hr* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
+‣ Trade currencies: *USDT* only
+‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*`
     var referral_link = `https://t.me/${process.env.TELEGRAM_BOT_NAME.replace('@', '')}?start=refcode_${settings.referral}`
 
-    return `Settings | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan
+    return `Settings | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan${!hasValidSubscription ? '\n\n' + freeText : ''}
 
-‣ Alert Validity: *${hasValidSubscription ? horizonToValidity(settings.horizon).toSentenceCase() : '1hr'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
-‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
-‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
-
-Tap or type /subscribe to ${hasValidSubscription ? 'extend' : 'upgrade'} your plan.` // [View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'})`
+Tap or type /subscribe to ${hasValidSubscription ? 'extend' : 'upgrade'} your plan. ([View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'}))`
 }
+
+
+/*
+‣ Alert Validity: *${hasValidSubscription ? horizonToValidity(settings.horizon).toSentenceCase() : '1hr'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
+‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT only'}*
+‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
+*/
 
 var createMagicLink = (telegram_chat_id) => {
 

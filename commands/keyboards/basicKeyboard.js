@@ -4,7 +4,9 @@ var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 
-eventEmitter.on('ShowBasicKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
+eventEmitter.on('ShowBasicKeyboard', async (chat_id, message_id, settings) => {
+    await updateKeyboard(chat_id, message_id, settings)
+})
 eventEmitter.on('BasicKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
 
 module.exports = (bot) => {
@@ -26,7 +28,7 @@ var updateKeyboard = async (telegram_chat_id, message_id, settings) => {
     })
 }
 
-var showKeyboard = async (telegram_chat_id, settings) => {
+/*var showKeyboard = async (telegram_chat_id, settings) => {
     var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
 
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
@@ -41,7 +43,7 @@ var showKeyboard = async (telegram_chat_id, settings) => {
     }
 
     keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
-}
+}*/
 
 var getKeyboardObject = (telegram_chat_id, settings) => {
     return {
@@ -64,6 +66,6 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
         [{ text: "Signals setting", callback_data: editSignalsCallbackData }],
         [{ text: "Risk setting", callback_data: editTraderCallbackData }],
-        [{ text: `← Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
+        [{ text: `← Back`, callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
     ]
 }
