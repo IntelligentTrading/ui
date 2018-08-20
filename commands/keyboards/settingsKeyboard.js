@@ -8,8 +8,8 @@ var api = require('../../core/api')
 var ext = require('../../util/extensions')
 var moment = require('moment')
 
-eventEmitter.on('ShowSettingsKeyboard', async (user) => { await showKeyboard(user.telegram_chat_id, user.settings) })
-eventEmitter.on('SettingsKeyboardChanged', async (chat_id, message_id, settings) => { await updateKeyboard(chat_id, message_id, settings) })
+eventEmitter.on('ShowSettingsKeyboard', (user) => { showKeyboard(user.telegram_chat_id, user.settings) })
+eventEmitter.on('SettingsKeyboardChanged', (chat_id, message_id, settings) => { updateKeyboard(chat_id, message_id, settings) })
 
 var counter_currencies = []
 module.exports = async (bot) => {
@@ -17,9 +17,9 @@ module.exports = async (bot) => {
     counter_currencies = await tickers.counter_currencies()
 }
 
-var updateKeyboard = async (telegram_chat_id, message_id, settings) => {
+var updateKeyboard = (telegram_chat_id, message_id, settings) => {
 
-    var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
+    var keyboardObject = getKeyboardObject(telegram_chat_id, settings)
 
     keyboardBot.editMessageText(keyboardObject.text, {
         chat_id: telegram_chat_id,
@@ -32,8 +32,8 @@ var updateKeyboard = async (telegram_chat_id, message_id, settings) => {
     })
 }
 
-var showKeyboard = async (telegram_chat_id, settings) => {
-    var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
+var showKeyboard = (telegram_chat_id, settings) => {
+    var keyboardObject = getKeyboardObject(telegram_chat_id, settings)
 
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
@@ -46,18 +46,26 @@ var showKeyboard = async (telegram_chat_id, settings) => {
         }
     }
 
-    keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
+    keyboardBot.sendMessage(telegram_chat_id, keyboardText, options).catch(err => console.log(err))
 }
 
-var getKeyboardObject = async (telegram_chat_id, settings) => {
+var getKeyboardObject = (telegram_chat_id, settings) => {
     return {
-        text: await getKeyboardText(settings),
+        text: getKeyboardText(settings),
         buttons: getKeyboardButtons(telegram_chat_id, settings)
     }
 }
 
+var getKeyboardButtons = (telegram_chat_id, settings) => {
 
-var getKeyboardText = async (settings) => {
+    return [
+        [{ text: "All Settings", url: createMagicLink(telegram_chat_id) }],
+        [{ text: "Basic Settings", url: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }],
+        [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
+    ]
+}
+
+var getKeyboardText = (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
@@ -66,47 +74,15 @@ var getKeyboardText = async (settings) => {
     var stakeholderStatus = settings.staking ? (settings.staking.centomila ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
 
-    var referral_link = `https://t.me/${process.env.TELEGRAM_BOT_NAME.replace('@','')}?start=refcode_${settings.referral}`
+    var referral_link = `https://t.me/${process.env.TELEGRAM_BOT_NAME.replace('@', '')}?start=refcode_${settings.referral}`
 
     return `Settings | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan
 
-‣ Risk: *${hasValidSubscription ? horizonToRisk(settings.horizon).toSentenceCase() : 'High'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
+‣ Alert Validity: *${hasValidSubscription ? horizonToValidity(settings.horizon).toSentenceCase() : '1hr'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
 ‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT'}*
 ‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
-${getDescriptionForPlan(currentPlan)}
 
-Tap or type /subscribe to extend or upgrade your plan.       
-${hasValidSubscription ? 'Tap below to edit your settings or run the /wizard:' : 'Note: you cannot edit your settings with the free plan!'}`
-}
-
-var getDescriptionForPlan = (plan) => {
-    switch (plan) {
-        case 'Starter': return '‣ Upside and Downside RSI and Ichimoku signals\n‣ RSI proprietary signals\n‣ Poloniex, Binance, Bittrex ';
-        case 'FREE+': return '‣ Upside and Downside RSI and Ichimoku signals (upgrade for more)\n‣ Poloniex exchange (upgrade for more)';
-        case 'FREE': return '‣ Limited number of coins (Upgrade for more)\n‣ Upside alerts only (Upgrade for more)\n‣ RSI and Ichimoku signals (Upgrade for more)\n‣ Poloniex exchange (Upgrade for more)';
-        default: ;
-    }
-}
-
-var getKeyboardButtons = (telegram_chat_id, settings) => {
-
-    var alertsCallbackData = keyboardUtils.getButtonCallbackData('settings', { is_muted: !settings.is_muted }, null, 'Settings')
-    var editSignalsCallbackData = keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Sig')
-    var editTraderCallbackData = keyboardUtils.getButtonCallbackData('navigation', { horizon: settings.horizon }, null, 'Trader')
-
-    return [
-        [{ text: "Open in web app", url: createMagicLink(telegram_chat_id) }],
-        [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
-        [{ text: "Signals setting", callback_data: editSignalsCallbackData }],
-        [{ text: "Risk setting", callback_data: editTraderCallbackData }],
-        [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
-    ]
-}
-
-var horizonToRisk = (horizon) => {
-    var risks = ['high', 'medium', 'low']
-    var horizons = ['short', 'medium', 'long']
-    return risks[horizons.indexOf(horizon)]
+Tap or type /subscribe to ${hasValidSubscription ? 'extend' : 'upgrade'} your plan.` // [View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'})`
 }
 
 var createMagicLink = (telegram_chat_id) => {
@@ -122,3 +98,10 @@ var createMagicLink = (telegram_chat_id) => {
 
     return magicLink
 }
+
+var horizonToValidity = (horizon) => {
+    var validityDuration = ['1hr', '4hr', '12hr']
+    var horizons = ['short', 'medium', 'long']
+    return validityDuration[horizons.indexOf(horizon)]
+}
+
