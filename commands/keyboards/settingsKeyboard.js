@@ -71,7 +71,7 @@ var getKeyboardText = (settings) => {
     var subscriptionExpirationDate = settings.subscriptions.paid
     var tradingPairs = settings.counter_currencies.map(scc => `${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
-    var stakeholderStatus = settings.staking ? (settings.staking.centomila ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
+    var stakeholderStatus = settings.staking ? (settings.staking.centomila || settings.is_ITT_team ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')
     var freeText = `‣ Alert Validity: *1hr* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
 ‣ Trade currencies: *USDT* only
