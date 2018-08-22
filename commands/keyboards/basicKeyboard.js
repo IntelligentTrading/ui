@@ -53,7 +53,7 @@ var getKeyboardObject = (telegram_chat_id, settings) => {
 }
 
 var getKeyboardText = (settings) => {
-    return 'Basic Settings'
+    return '*Basic Settings*'
 }
 
 var getKeyboardButtons = (telegram_chat_id, settings) => {

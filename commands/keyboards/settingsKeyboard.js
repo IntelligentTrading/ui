@@ -83,13 +83,6 @@ var getKeyboardText = (settings) => {
 Tap or type /subscribe to ${hasValidSubscription ? 'extend' : 'upgrade'} your plan. ([View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'}))`
 }
 
-
-/*
-‣ Alert Validity: *${hasValidSubscription ? horizonToValidity(settings.horizon).toSentenceCase() : '1hr'}* ([Learn more](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon))
-‣ Trade currencies: *${hasValidSubscription ? tradingPairs : 'USDT only'}*
-‣ Sentiment alerts: *${settings.is_crowd_enabled ? 'On' : 'Off'}*
-*/
-
 var createMagicLink = (telegram_chat_id) => {
 
     var token = {
