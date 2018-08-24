@@ -28,23 +28,6 @@ var updateKeyboard = async (telegram_chat_id, message_id, settings) => {
     })
 }
 
-/*var showKeyboard = async (telegram_chat_id, settings) => {
-    var keyboardObject = await getKeyboardObject(telegram_chat_id, settings)
-
-    var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
-    var keyboardText = keyboardObject.text
-
-    var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
-    if (hasValidSubscription || settings.is_ITT_team) {
-
-        options.reply_markup = {
-            inline_keyboard: keyboardObject.buttons
-        }
-    }
-
-    keyboardBot.sendMessage(telegram_chat_id, keyboardText, options)
-}*/
-
 var getKeyboardObject = (telegram_chat_id, settings) => {
     return {
         text: getKeyboardText(settings),

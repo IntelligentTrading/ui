@@ -111,13 +111,6 @@ function getKumoTemplate(message_data) {
   return ichimoku;
 }
 
-
-/*
-🤖$ZRX 0.00013685 BTC
-#AI: new price trend prediction
-▼28.5% ▴ 25.5%
-#Bearish on #Poloniex - valid for #24hr
-*/
 function getAnnSimpleTemplate(message_data) {
   var formatted_up = '*' + (message_data.probability_up * 100).toFixed(1) + '%* ▲'
   var formatted_down = '*' + (message_data.probability_down * 100).toFixed(1) + '%* 🔻'
@@ -168,7 +161,7 @@ function getBaseSignalTemplate(message_data) {
         price_text: price == undefined ? "" : `${price} ${currency_symbol}`,
         currency_symbol: currency_symbol,
         price: price,
-        wiki_header: `$[${message_data.transaction_currency}](${wiki_url})`,
+        wiki_header: `[$${message_data.transaction_currency}](${wiki_url})`,
         source: message_data.source ? `on #${message_data.source.toSentenceCase()}` : '',
         trend: `${(message_data.trend == -1 ? '#Bearish' : '#Bullish')} ${message_data.source ? 'on #' + message_data.source.toSentenceCase() : ''}`
       }
