@@ -26,31 +26,28 @@ function applyTemplate(message_data) {
 
       if (message_data.signal == 'RSI') {
         var rsi = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${rsi.rsi_text}\nITF Bias: ${rsi.rsi_itt_bias} (${message_data.horizon.toSentenceCase()} horizon)`;
+        telegram_signal_message = `${rsi.rsi_header_emoji} ${bst.wiki_header} ${bst.price_text}\n${rsi.rsi_text}\n${bst.trend} - ${bst.horizon_text}`;
       }
 
       if (message_data.signal == 'RSI_Cumulative') {
         var rsi_sma = getRsiSmaTemplate(message_data);
-        telegram_signal_message = `${rsi_sma.rsi_header_emoji_pro} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\nITF Bias: *${rsi_sma.rsi_general_trend}* - ${rsi_sma.rsi_itt_bias}\n(${message_data.horizon.toSentenceCase()} horizon)`;
-        footer = ` | ${rsi_sma.premium}`
+        telegram_signal_message = `${rsi_sma.rsi_header_emoji_pro} ${bst.wiki_header} ${bst.price_text}\n${rsi_sma.premium}\n${bst.trend} - ${bst.horizon_text}`;
       }
 
       if (message_data.signal == 'kumo_breakout') {
         var kumo = getKumoTemplate(message_data);
-        telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text} (${bst.horizon_text})`;
+        telegram_signal_message = `${kumo.ichimoku_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${kumo.ichimoku_text}${bst.trend} - ${bst.horizon_text}`;
       }
 
       if (message_data.signal == 'ANN_Simple') {
         var ann_simple = getAnnSimpleTemplate(message_data)
-        telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
+        telegram_signal_message = `${ann_simple.ann_simple_header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${ann_simple.ann_simple_text}\n${bst.trend} - ${bst.horizon_text}`;
       }
 
       if (message_data.signal == 'VBI') {
         var vbi = getVBITemplate(message_data)
-        telegram_signal_message = `${vbi.header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${vbi.vbi_text}\n(${message_data.horizon.toSentenceCase()} horizon)`
+        telegram_signal_message = `${vbi.header_emoji} ${bst.wiki_header} ${bst.price} ${bst.currency_symbol}\n${vbi.vbi_text}\n${bst.trend} - ${bst.horizon_text}`;
       }
-
-      telegram_signal_message = telegram_signal_message + '\n' + bst.source + footer
 
       return telegram_signal_message;
     })
@@ -61,7 +58,7 @@ function getVBITemplate(message_data) {
 
   var vbi = {
     header_emoji: '📶',
-    vbi_text: `VBI - bullish trend `,
+    vbi_text: `#Volume Alert`,
   }
   return vbi;
 }
@@ -93,36 +90,43 @@ function getRsiSmaTemplate(message_data) {
   var rsi_sma = {
     rsi_header_emoji: 'ℹ️',
     rsi_header_emoji_pro: '🔰',
-    premium: 'ITF Proprietary Alert',
-    rsi_general_trend: `${(message_data.trend == 1 ? 'Bullish' : 'Bearish')}`,
-    rsi_text: `RSI: *${rsi_strength_values[parseInt(message_data.strength_value) - 1]} ${rsi_trend[parseInt(message_data.trend) + 1]}* (${parseInt(message_data.rsi_value)}) ${rsi_emoji}`,
+    premium: '#Proprietary-1 (RSI + SMA)',
+    rsi_text: `#RSI = *${parseInt(message_data.rsi_value)}* ${rsi_strength_values[parseInt(message_data.strength_value) - 1]} ${rsi_trend[parseInt(message_data.trend) + 1]} ${rsi_emoji}`,
     rsi_itt_bias: `Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
   }
 
   return rsi_sma;
 }
 
-
 function getKumoTemplate(message_data) {
 
   var ichi_emoji = `${(message_data.trend == -1 ? '🆘' : '✅')}`;
   var ichi_breakout = `${(message_data.trend == -1 ? 'Negative' : 'Positive')}`;
-  var ichi_bias = `${(message_data.trend == -1 ? 'Bear' : 'Bull')}`;
 
   var ichimoku = {
     ichimoku_header_emoji: 'ℹ️',
-    ichimoku_text: `Ichimoku: ${ichi_breakout} Cloud Breakout ${ichi_emoji}\nITF Bias: ${ichi_bias} trend continuation likely.`
+    ichimoku_text: `#Ichimoku: ${ichi_breakout} Cloud Breakout ${ichi_emoji}\n`,
   }
 
   return ichimoku;
 }
 
+
+/*
+🤖$ZRX 0.00013685 BTC
+#AI: new price trend prediction
+▼28.5% ▴ 25.5%
+#Bearish on #Poloniex - valid for #24hr
+*/
 function getAnnSimpleTemplate(message_data) {
-  var probability = `${message_data.probability_up > message_data.probability_down ? '*' : ''} ▲ ${(message_data.probability_up * 100).toFixed(1)}%${message_data.probability_up > message_data.probability_down ? '*' : ''}\t${message_data.probability_up < message_data.probability_down ? '*' : ''}▾ ${(message_data.probability_down * 100).toFixed(1)}%${message_data.probability_up < message_data.probability_down ? '*' : ''}`
-  var predicted_ahead_for = `AI: new price trend prediction for next 6 hours.`
+  var formatted_up = '*' + (message_data.probability_up * 100).toFixed(1) + '%* ▲'
+  var formatted_down = '*' + (message_data.probability_down * 100).toFixed(1) + '%* 🔻'
+
+  var probability = `${message_data.probability_up > message_data.probability_down ? formatted_up : formatted_down}`
+  var description = `#AI: new price trend prediction`
   var ann_simple = {
     ann_simple_header_emoji: '🤖',
-    ann_simple_text: `${predicted_ahead_for}\n${probability}`
+    ann_simple_text: `${description}\n${probability}`
   }
 
   return ann_simple;
@@ -153,15 +157,20 @@ function getBaseSignalTemplate(message_data) {
       return `${coinmarketcap_url}${currency_wiki_data.name}`;
 
     }).then((wiki_url) => {
+
+      var validities = ['1hr', '4hr', '24hr']
+      var horizons = ['short', 'medium', 'long']
+
       var base_template = {
-        horizon_text: message_data.horizon ? `${message_data.horizon.toSentenceCase()} horizon` : message_data.horizon,
+        horizon_text: message_data.horizon ? `valid for #${validities[horizons.indexOf(message_data.horizon)]}` : message_data.horizon,
         header: `[${message_data.transaction_currency}](${wiki_url}) on *${message_data.timestamp.toString().split('.')[0]} UTC*`,
         price_change_text: `*${price_change >= 0 ? '+' : ''}${(price_change * 100).toFixed(2)}%*`,
-        price_text: price == undefined ? "" : `price: ${currency_symbol} ${price}`,
+        price_text: price == undefined ? "" : `${price} ${currency_symbol}`,
         currency_symbol: currency_symbol,
         price: price,
-        wiki_header: `[${message_data.transaction_currency}](${wiki_url})`,
-        source: message_data.source ? `Source: ${message_data.source.toSentenceCase()}` : ''
+        wiki_header: `$[${message_data.transaction_currency}](${wiki_url})`,
+        source: message_data.source ? `on #${message_data.source.toSentenceCase()}` : '',
+        trend: `${(message_data.trend == -1 ? '#Bearish' : '#Bullish')} ${message_data.source ? 'on #' + message_data.source.toSentenceCase() : ''}`
       }
 
       return base_template;

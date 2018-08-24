@@ -65,7 +65,7 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
     return [
         [{ text: `Turn alerts ${settings.is_muted ? 'ON' : 'OFF'}`, callback_data: alertsCallbackData }],
         [{ text: "Signals setting", callback_data: editSignalsCallbackData }],
-        [{ text: "Risk setting", callback_data: editTraderCallbackData }],
+        [{ text: "Validity setting", callback_data: editTraderCallbackData }],
         [{ text: `← Back`, callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
     ]
 }

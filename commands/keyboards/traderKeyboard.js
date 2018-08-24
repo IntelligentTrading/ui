@@ -35,10 +35,7 @@ var getKeyboardObject = (horizon) => {
 }
 
 var getKeyboardText = () => {
-    return `Risk Setting
-    
-A higher risk setting will show signals more often, for higher frequency traders.
-Learn more in the [User Guide](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon)`
+    return `Validity Setting\n\nA shorter validity setting will show signals more often. 1hr validity signals are for high risk and higher frequency traders.\nLearn more in the [User Guide](http://intelligenttrading.org/guides/bot-user-guide/#profile-customization-risk-level--trading-horizon)`
 }
 
 var getKeyboardButtons = (horizon) => {
@@ -48,9 +45,9 @@ var getKeyboardButtons = (horizon) => {
     var day_callback = utils.getButtonCallbackData('settings', { horizon: horizons[2] }, null, 'Trader')
 
     var btns = [
-        [{ text: `${horizon == horizons[0] ? '✓ ' : ''}Low risk`, callback_data: investor_callback }],
-        [{ text: `${horizon == horizons[1] ? '✓ ' : ''}Medium risk`, callback_data: swing_callback }],
-        [{ text: `${horizon == horizons[2] ? '✓ ' : ''}High risk`, callback_data: day_callback }],
+        [{ text: `${horizon == horizons[0] ? '✓ ' : ''}24hr`, callback_data: investor_callback }],
+        [{ text: `${horizon == horizons[1] ? '✓ ' : ''}4hr`, callback_data: swing_callback }],
+        [{ text: `${horizon == horizons[2] ? '✓ ' : ''}1hr`, callback_data: day_callback }],
         [{ text: `← Back`, callback_data: utils.getButtonCallbackData('navigation', {}, 'back', 'Settings') }]
     ]
 
