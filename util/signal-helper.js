@@ -90,7 +90,7 @@ function getRsiSmaTemplate(message_data) {
   var rsi_sma = {
     rsi_header_emoji: 'ℹ️',
     rsi_header_emoji_pro: '🔰',
-    premium: '#Proprietary-1 (RSI + SMA)',
+    premium: '#Proprietary1 (RSI + SMA)',
     rsi_text: `#RSI = *${parseInt(message_data.rsi_value)}* ${rsi_strength_values[parseInt(message_data.strength_value) - 1]} ${rsi_trend[parseInt(message_data.trend) + 1]} ${rsi_emoji}`,
     rsi_itt_bias: `Trend reversal to the *${(message_data.trend == 1 ? 'upside' : 'downside')}* is near.`,
   }
@@ -161,7 +161,7 @@ function getBaseSignalTemplate(message_data) {
         price_text: price == undefined ? "" : `${price} ${currency_symbol}`,
         currency_symbol: currency_symbol,
         price: price,
-        wiki_header: `[$${message_data.transaction_currency}](${wiki_url})`,
+        wiki_header: `$${message_data.transaction_currency}`,//`[$${message_data.transaction_currency}](${wiki_url})`,
         source: message_data.source ? `on #${message_data.source.toSentenceCase()}` : '',
         trend: `${(message_data.trend == -1 ? '#Bearish' : '#Bullish')} ${message_data.source ? 'on #' + message_data.source.toSentenceCase() : ''}`
       }

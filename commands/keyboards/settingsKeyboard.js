@@ -69,7 +69,10 @@ var getKeyboardText = (settings) => {
     var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
-    var tradingPairs = settings.counter_currencies.map(scc => `${_.find(counter_currencies, cc => cc.index == scc).symbol}`).join(', ')
+    var tradingPairs = settings.counter_currencies.map(scc => {
+        var matchingCC = _.find(counter_currencies, cc => cc.index == scc)
+        return matchingCC ? matchingCC.symbol : ''
+    }).filter(el => el != '').join(', ')
     var daysLeft = Math.max(0, parseFloat(subscriptionUtils.getDaysLeftFrom(subscriptionExpirationDate)))
     var stakeholderStatus = settings.staking ? (settings.staking.centomila || settings.is_ITT_team ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var currentPlan = (daysLeft > 0 || settings.is_ITT_team) ? 'Starter' : (hasValidSubscription ? 'FREE+' : 'FREE')

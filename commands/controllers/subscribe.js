@@ -11,11 +11,11 @@ var getCurrentStatusMessage = (settings, itt_usd_rate) => {
     var betaDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.beta)
     var paidDaysLeft = dateUtils.getDaysLeftFrom(settings.subscriptions.paid)
     var currentPlan = paidDaysLeft > 0 || settings.is_ITT_team ? 'Starter' : (betaDaysLeft > 0 ? 'FREE+' : 'FREE')
-
+    var stakeholderStatus = settings.staking ? (settings.staking.centomila || settings.is_ITT_team ? 'Advanced' : (settings.staking.diecimila ? 'Pro' : '')) : ''
     var usdPricePerSecond = 20 * 12 / 365.25 / 24 / 3600
     var oneMonthInSeconds = 2629746
 
-    return `Subscription | *${currentPlan}* plan\n[View all available subscription plans](intelligenttrading.org/pricing).
+    return `Subscription | *${stakeholderStatus != '' ? stakeholderStatus : currentPlan}* plan\n[View all available subscription plans](intelligenttrading.org/pricing).
 
 ${paidDaysLeft <= 0 && !settings.is_ITT_team ? upgradeToStarter : extendYourSubscription(paidDaysLeft)} ITT tokens to the address below. You will be notified as soon as the transaction is confirmed.
 
