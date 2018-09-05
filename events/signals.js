@@ -5,6 +5,10 @@ var dateUtil = require('../util/dates')
 var _ = require('lodash')
 var signalHelper = require('../util/signal-helper')
 
+var NodeCache = require('node-cache')
+var cache = new NodeCache()
+
+
 const TelegramBot = require('node-telegram-bot-api')
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: false })
@@ -43,96 +47,107 @@ function notify(message_data) {
 
                         var filters = [buildHorizonFilter(horizon)]
 
-                        return api.getUsers({ filters: filters }).then(usersJson => {
-                            var users = JSON.parse(usersJson)
-
-                            users = users.filter(user => (user.is_ITT_team || user.eula))
-
-                            var signalForNonno = isForNonno(signal, message_data)
-                            var signalForFree = isForFree(signal, message_data)
-                            var signalForStarter = isForStarter(signal, message_data)
-                            var signalForPro = isForPro(signal, message_data)
-                            var signalForAdvanced = isForAdvanced(signal, message_data)
-
-                            var matchingStarterUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 || (user.settings.staking && user.settings.staking.diecimila)) &&
-                                user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
-                                !user.settings.is_muted
-                            )
-
-                            matchingStarterUsers = matchingStarterUsers.filter(user => {
-                                var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
-                                return matchingIndicator && matchingIndicator.enabled
+                        var users_cache = cache.get('users')
+                        if (!users_cache) {
+                            return api.getUsers({ filters: filters }).then(usersJson => {
+                                var users = JSON.parse(usersJson)
+                                cache.set('users', users, 3300)
+                                return notifyUsers(users)
                             })
-
-                            matchingStarterUsers = matchingStarterUsers.filter(user => {
-                                var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
-                                return matchingExchange && matchingExchange.enabled
-                            })
-
-                            var matchingBetaUsers = users.filter(user =>
-                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
-                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
-                                !user.settings.is_ITT_team &&
-                                user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
-                                user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
-                                !user.settings.is_muted
-                            )
-
-                            var freeOnlyUsers = users.filter(user => (
-                                !user.settings.is_ITT_team &&
-                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
-                                dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
-
-                            var subscribers = []
-
-                            if (signalForFree) {
-                                subscribers = freeOnlyUsers
-                                subscribers = subscribers.concat(matchingBetaUsers)
-                            }
-                            else if (signalForNonno) {
-                                subscribers = subscribers.concat(matchingBetaUsers)
-                            }
-
-                            if (signalForStarter)
-                                subscribers = _.unionBy(subscribers, matchingStarterUsers, 'telegram_chat_id')
-
-                            if (signalForPro)
-                                subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.diecimila), 'telegram_chat_id')
-
-                            if (signalForAdvanced)
-                                subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.centomila), 'telegram_chat_id')
-
-                            var rejections = []
-                            var reasons = []
-                            var notificationPromises = []
-                            var subscribersIds = []
-
-                            subscribers.map(subscriber => {
-                                var notificationPromise = bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
-                                    .then(() => {
-                                        subscribersIds.push(subscriber.telegram_chat_id)
-                                    })
-                                    .catch(err => {
-                                        rejections.push(subscriber.telegram_chat_id)
-                                        reasons.push(`${subscriber.telegram_chat_id} :: ${err.message.includes('400') ? 'Not Existing' : err.message.includes('403') ? 'Blocked' : err.message}`)
-                                        console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`)
-                                    })
-
-                                notificationPromises.push(notificationPromise)
-                            })
-
-                            return Promise.all(notificationPromises)
-                                .then(() => {
-                                    return api.lastDispatchedSignal(subscribersIds, message_data.id).then(() => {
-                                        return { signal_id: message_data.id, rejections: rejections, reasons: reasons, sent_at: new Date(message_data.sent_at * 1000) }
-                                    })
-                                })
-                        })
+                        }
+                        else {
+                            return notifyUsers(users_cache)
+                        }
                     }
                 })
             })
     }
+}
+
+function notifyUsers(users) {
+
+    users = users.filter(user => (user.is_ITT_team || user.eula))
+
+    var signalForNonno = isForNonno(signal, message_data)
+    var signalForFree = isForFree(signal, message_data)
+    var signalForStarter = isForStarter(signal, message_data)
+    var signalForPro = isForPro(signal, message_data)
+    var signalForAdvanced = isForAdvanced(signal, message_data)
+
+    var matchingStarterUsers = users.filter(user => (user.settings.is_ITT_team || dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) > 0 || (user.settings.staking && user.settings.staking.diecimila)) &&
+        user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
+        user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
+        !user.settings.is_muted
+    )
+
+    matchingStarterUsers = matchingStarterUsers.filter(user => {
+        var matchingIndicator = user.settings.indicators.find(ind => ind.name == signal.label)
+        return matchingIndicator && matchingIndicator.enabled
+    })
+
+    matchingStarterUsers = matchingStarterUsers.filter(user => {
+        var matchingExchange = user.settings.exchanges.find(exc => exc.label.toLowerCase() == signal.source.toLowerCase())
+        return matchingExchange && matchingExchange.enabled
+    })
+
+    var matchingBetaUsers = users.filter(user =>
+        dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) > 0 &&
+        dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
+        !user.settings.is_ITT_team &&
+        user.settings.transaction_currencies.indexOf(message_data.transaction_currency) >= 0 &&
+        user.settings.counter_currencies.indexOf(parseInt(message_data.counter_currency)) >= 0 &&
+        !user.settings.is_muted
+    )
+
+    var freeOnlyUsers = users.filter(user => (
+        !user.settings.is_ITT_team &&
+        dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
+        dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
+
+    var subscribers = []
+
+    if (signalForFree) {
+        subscribers = freeOnlyUsers
+        subscribers = subscribers.concat(matchingBetaUsers)
+    }
+    else if (signalForNonno) {
+        subscribers = subscribers.concat(matchingBetaUsers)
+    }
+
+    if (signalForStarter)
+        subscribers = _.unionBy(subscribers, matchingStarterUsers, 'telegram_chat_id')
+
+    if (signalForPro)
+        subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.diecimila), 'telegram_chat_id')
+
+    if (signalForAdvanced)
+        subscribers = _.unionBy(subscribers, matchingStarterUsers.filter(u => u.settings.staking && u.settings.staking.centomila), 'telegram_chat_id')
+
+    var rejections = []
+    var reasons = []
+    var notificationPromises = []
+    var subscribersIds = []
+
+    subscribers.map(subscriber => {
+        var notificationPromise = bot.sendMessage(subscriber.telegram_chat_id, telegram_signal_message, opts)
+            .then(() => {
+                subscribersIds.push(subscriber.telegram_chat_id)
+            })
+            .catch(err => {
+                rejections.push(subscriber.telegram_chat_id)
+                reasons.push(`${subscriber.telegram_chat_id} :: ${err.message.includes('400') ? 'Not Existing' : err.message.includes('403') ? 'Blocked' : err.message}`)
+                console.log(`${err.message} :: chat ${subscriber.telegram_chat_id}`)
+            })
+
+        notificationPromises.push(notificationPromise)
+    })
+
+    return Promise.all(notificationPromises)
+        .then(() => {
+            return api.lastDispatchedSignal(subscribersIds, message_data.id).then(() => {
+                return { signal_id: message_data.id, rejections: rejections, reasons: reasons, sent_at: new Date(message_data.sent_at * 1000) }
+            })
+        })
 }
 
 function isForFree(signal, message_data) {
