@@ -20,17 +20,16 @@ var horizons = ['long', 'medium', 'short']
 var subscriptionTemplates = {}
 initSubscriptionTemplates()
 
-function notify(message_data) {
+var opts =
+    {
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": "true"
+    };
 
-    var opts =
-        {
-            "parse_mode": "Markdown",
-            "disable_web_page_preview": "true"
-        };
+function notify(message_data) {
 
     if (message_data != undefined) {
         var risk = message_data.risk;
-        var horizon = message_data.horizon;
         var signal_counter_currency
 
         console.log(`${message_data.signal} signal`);
@@ -45,18 +44,16 @@ function notify(message_data) {
                         signal.trend = message_data.trend
                         signal.source = message_data.source
 
-                        var filters = [buildHorizonFilter(horizon)]
-
                         var users_cache = cache.get('users')
                         if (!users_cache) {
-                            return api.getUsers({ filters: filters }).then(usersJson => {
+                            return api.getUsers().then(usersJson => {
                                 var users = JSON.parse(usersJson)
+                                console.log('Reloading users cache for signal dispatching...')
                                 cache.set('users', users, 3300)
-                                return notifyUsers(users)
+                                return notifyUsers(users, signal, message_data, telegram_signal_message)
                             })
-                        }
-                        else {
-                            return notifyUsers(users_cache)
+                        } else {
+                            return notifyUsers(users_cache, signal, message_data, telegram_signal_message)
                         }
                     }
                 })
@@ -64,8 +61,11 @@ function notify(message_data) {
     }
 }
 
-function notifyUsers(users) {
+function notifyUsers(users, signal, message_data, telegram_signal_message) {
 
+    //var horizon = message_data.horizon;
+    var hrzns = horizons.slice(horizons.indexOf(message_data.horizon))
+    users = users.filter(usr => hrzns.indexOf(usr.settings.horizon) >= 0)
     users = users.filter(user => (user.is_ITT_team || user.eula))
 
     var signalForNonno = isForNonno(signal, message_data)
