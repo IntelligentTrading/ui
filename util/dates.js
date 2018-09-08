@@ -10,10 +10,12 @@ var dateUtil = {
         return ((utc2 - utc1) / _MS_PER_DAY).toFixed(2)
     },
     hasValidSubscription: (settings) => {
-        
+
+        var isStakeHolder = settings.staking && settings.staking.diecimila
+
         return dateUtil.getDaysLeftFrom(settings.subscriptions.paid) > 0 ||
-        dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
-            settings.is_ITT_team
+            dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
+            settings.is_ITT_team || isStakeHolder
     }
 }
 
