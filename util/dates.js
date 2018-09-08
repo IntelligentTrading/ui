@@ -15,7 +15,8 @@ var dateUtil = {
 
         return dateUtil.getDaysLeftFrom(settings.subscriptions.paid) > 0 ||
             dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
-            settings.is_ITT_team || isStakeHolder
+            settings.is_ITT_team ||
+            isStakeHolder
     }
 }
 

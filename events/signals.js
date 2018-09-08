@@ -100,9 +100,11 @@ function notifyUsers(users, signal, message_data, telegram_signal_message) {
     )
 
     var freeOnlyUsers = users.filter(user => (
-        !user.settings.is_ITT_team &&
-        dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
-        dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0))
+        !dateUtil.hasValidSubscription(user.settings)
+        //!user.settings.is_ITT_team &&
+        //dateUtil.getDaysLeftFrom(user.settings.subscriptions.paid) <= 0 &&
+        //dateUtil.getDaysLeftFrom(user.settings.subscriptions.beta) <= 0
+    ))
 
     var subscribers = []
 
