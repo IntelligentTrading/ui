@@ -1,247 +1,111 @@
-const request = require('request');
 const express = require('express');
 const app = express();
-const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
+const api = require('./core/api')
+require('./util/extensions')
+var telegram = require('./bot/telegramInstance')
+var bot = telegram.bot
+var ua = require('universal-analytics')
+var botVisitor = ua(process.env.UA_CODE)
 
-var startCmd = require('./commands/start').start;
-var helpCmd = require('./commands/help').help;
-var priceCmd = require('./commands/price').price;
-var volumeCmd = require('./commands/volume').volume;
-var feedbackCmd = require('./commands/feedback').feedback;
-var settingsCmd = require('./commands/settings').settings;
-const about = require('./commands/about').about;
+var commandsManager = {}
+const tickers = require('./data/tickers')
 
-var qrbuilder = require('./util/qr-builder').builder;
-
-var errorManager = require('./util/error').errorManager;
-
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
-const telegram_message_options = {
-  parse_mode: "Markdown"
-};
-
-console.log('Starting telegram bot service');
-
-const opts =
-  {
-    "parse_mode": "Markdown",
-    "disable_web_page_preview": "true"
-  };
-
-const MAX_TOKEN_LENGTH = 8;  
-
-bot.onText(/\/start/, (msg, match) => {
-  const chatId = msg.chat.id;
-
-  bot.sendMessage(chatId, startCmd.text, opts).catch(reason => console.log(reason));
-});
-
-bot.onText(/\/token(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const token = match[2];
-
-  if (token == undefined || token == "" || token.length > MAX_TOKEN_LENGTH) {
-    bot.sendMessage(chatId, settingsCmd.tokenError, opts).catch(reason => {
-      errorManager.handleException(reason, errorManager.communication_error_message + reason);
-    });
-  }
-  else {
-    settingsCmd.subscribe(chatId, token)
-      .then((userSettings) => {
-        console.log(userSettings);
-        if (userSettings.beta_token_valid == true) {
-          var subscriptionMessage = userSettings.is_ITT_team 
-          ? settingsCmd.teamMemberSubscription
-          : settingsCmd.subscribedMessage;
-
-          bot.sendMessage(chatId, subscriptionMessage, opts);
-        }
-        else{
-          bot.sendMessage(chatId, settingsCmd.tokenError, opts);
-        }
-      })
-      .catch((reason) => {
-        console.log(reason);
-        bot.sendMessage(chatId, settingsCmd.subscriptionError, opts);
-      })
-  }
-});
-
-bot.onText(/\/help/, (msg, match) => {
-  const chatId = msg.chat.id;
-
-  bot.sendMessage(chatId, helpCmd.text())
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
-});
-
-// match with /price, throw away all the blanks, match with any single char
-bot.onText(/\/price(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const coin = match[2]; // the captured "whatever"
-
-  priceCmd.getPrice(coin)
-    .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options)
-        .catch((reason) => {
-          console.log(reason);
-          bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
-        });
+console.log('Loading tickers...')
+try {
+  tickers.init().then(() => {
+    console.log('Tickers cache loaded.')
+    console.log('Loading command controllers...')
+    var commandFiles = fs.readdirSync('./commands/controllers')
+    commandFiles.forEach(cf => {
+      var commandClass = require(`./commands/controllers/${cf}`)
+      commandsManager[`${cf.replace('.js', '')}`] = new commandClass(bot)
     })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, errorManager.generic_error_message, telegram_message_options);
-    });
-});
+    console.log('Command controllers loaded.')
+  }).catch(err => console.log(err))
+} catch (err) {
+  console.log(err)
+}
 
-bot.onText(/\/volume(\s*)(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const coin = match[2]; // the captured "whatever"
+bot.onText(/\/(\w+)(.*)/, (msg, match) => {
+  const chat_id = msg.chat.id;
+  botVisitor.set('userId', chat_id)
 
-  volumeCmd.getVolume(coin)
-    .then((result) => {
-      bot.sendMessage(chatId, result.toString(), telegram_message_options);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
-});
+  var commandText = match[1].replace('/', '');
 
-bot.onText(/\/feedback(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const feedback = match[1];
-
-  feedbackCmd.storeFeedback(feedback)
-    .then((result) => {
-      bot.sendMessage(chatId, result);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
-});
-
-bot.onText(/\/about(.*)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  
-  about.get()
-    .then((result) => {
-      bot.sendMessage(chatId, result);
-    })
-    .catch((reason) => {
-      console.log(reason);
-      bot.sendMessage(chatId, reason);
-    });
-});
-
-bot.onText(/\/settings/, (msg, match) => {
-  const chatId = msg.chat.id;
-
-  settingsCmd.getCurrent(chatId)
-    .then(() => {
-
-      var keyboard = settingsCmd.getKeyboard().kb;
-
-      var settingsMessage = keyboard.message;
-      var options = {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: keyboard.buttons
-        }
-      };
-
-      bot.sendMessage(chatId, settingsMessage, options);
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
-});
+  var command = commandsManager[commandText]
+  if (command)
+    try {
+      botVisitor.event('Bot Command', commandText, 'Main', (err) => {
+        if (err) console.log(err)
+      }).send()
+      command.cmd(msg, match.map(m => m.trim()).splice(2))
+      api.updateUser(chat_id).catch(err => console.log(err))
+    }
+    catch (err) {
+      bot.sendMessage(chat_id, err)
+    }
+  else
+    bot.sendMessage(chat_id, `Sorry, I don't understand command /${commandText}, please check the list of available commands with /help.`)
+})
 
 bot.on('callback_query', (callback_message) => {
-  //console.log(callback_message);
+  botVisitor.set('userId', callback_message.from.id)
 
-  var message_id = callback_message.message.message_id;
-  var chat_id = callback_message.message.chat.id;
 
-  var data_array = callback_message.data.split('.'); // eg.: settings_RSK
-  var cmd = {
-    category: data_array[0],
-    operation: {
-      action: data_array[1].split(':')[0],
-      param: data_array[1].split(':')[1]
+  if (callback_message.data.isJSON()) {
+    var callback_data = JSON.parse(callback_message.data)
+
+    // so far settings is the only view with a callback
+    botVisitor.event('Bot Callback', 'settings', !callback_data.n || callback_data.n == 'Settings' ? 'Main' : callback_data.n, (err) => {
+      if (err) console.log(err)
+    }).send()
+
+    var commandController = commandsManager[callback_data.cmd]
+    if (commandController) {
+      commandController.callback(callback_message)
+      return
     }
-  };
+  }
+})
 
-  if (cmd.category == 'settings') {
+bot.onText(/ITF/, (msg, match) => {
+  if (!msg.text.startsWith('ITF')) return
 
-    if (cmd.operation.action == 'NAV') {
-      var cmd_kb = settingsCmd.getKeyboard(cmd.operation.param);
+  return api.referral(msg.chat.id, msg.text)
+    .then(result => bot.sendMessage(msg.chat.id, result))
+    .catch(error => {
+      bot.sendMessage(msg.chat.id, error.error)
+    })
+})
 
-      bot.editMessageText(cmd_kb.kb.message,
-        {
-          chat_id: chat_id,
-          message_id: message_id,
-          parse_mode: 'Markdown',
-          reply_markup: { inline_keyboard: cmd_kb.kb.buttons }
-        });
-    }
-    if (cmd.operation.action == 'DB') {
-      var cmd_kb = settingsCmd.store(chat_id, cmd.operation.param)
-        .then(() => {
-          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings saved' })
-            .then((any) => {
-
-              var main_kb = settingsCmd.getKeyboard('MAIN').kb;
-
-              bot.editMessageText(main_kb.message,
-                {
-                  chat_id: chat_id,
-                  message_id: message_id,
-                  parse_mode: 'Markdown',
-                  reply_markup: { parse_mode: 'Markdown', inline_keyboard: main_kb.buttons }
-                });
-            });
+bot.onText(/0x/, (msg, match) => {
+  // it's an address!
+  if (msg.text.length == 42) {
+    return api.addStakeHolderWalletAddress(msg.chat.id, msg.text).then(messageToSign => {
+      bot.sendMessage(msg.chat.id, `Your stakeholder wallet address has been added.\nIn order to verify the ownership, please [sign](https://mycrypto.com/sign-and-verify-message/sign) from the same address the message *${messageToSign}* and paste the signature hash below.`, telegram.nopreview_markdown_opts)
+    })
+  }
+  // it's a signature!
+  else if (msg.text.length == 132) {
+    return api.verifySignature(msg.chat.id, msg.text).then(verificationResult => {
+      if (verificationResult.verified) {
+        return bot.sendMessage(msg.chat.id, 'Yay! Your signature is verified! Give us a moment to verify your stake!').then(() => {
+          return api.checkStakeholdersStatus(msg.chat.id).then(stakeholder => {
+            var stakeMessage = 'Stake 10K or 100K ITT tokens in order to get the *Stake Holder* status!'
+            if (stakeholder.settings.staking.diecimila || stakeholder.settings.staking.diecimila) {
+              stakeMessage = 'You are a stake holder!\nPlease remember that reductions in the stake may result in the loss of the current status.'
+            }
+            bot.sendMessage(msg.chat.id, stakeMessage, telegram.nopreview_markdown_opts)
+          })
         })
-        .catch((reason) => {
-          console.log(reason);
-
-          bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: 'Settings not saved' })
-            .then(() => {
-              bot.sendMessage(chat_id, 'Something went wrong while saving your settings, please try again or contact us if the problem persists.');
-            });
-        });
-    }
+      }
+      else {
+        bot.sendMessage(msg.chat.id, `Your signature is invalid! Please check the spelling, copy paste the full hash or for contact us in case nothing works.`)
+      }
+    })
   }
   else {
-    bot.answerCallbackQuery({ callback_query_id: callback_message.id, text: '' });
+    bot.sendMessage(msg.chat.id, 'Are you trying to paste your address or verify a signature? Check the spelling and the text length.')
   }
-});
-
-bot.onText(/\/qr (.+)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const qr_input = match[1];
-
-  var code = qrbuilder.build(qr_input, function (image_name) {
-    bot.sendPhoto(chatId, image_name, { caption: qr_input }).then(function () {
-      fs.unlinkSync(image_name);
-    });
-  });
-});
-
-bot.onText(/\/getMe/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from.id;
-  const username = msg.from.username;
-
-  bot.sendMessage(chatId, `Your ChatId is ${chatId}, userId ${userId} and username ${username}`);
-});
-
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-});
-
+})
