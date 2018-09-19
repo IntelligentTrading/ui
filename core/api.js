@@ -19,15 +19,15 @@ var api = {
         request_opts.form = { telegram_chat_id: chat_id, eula: false }
         return rpromise(request_opts)
     },
-    getUsers: (options = {}) => {
-
-        var chat_id = options.telegram_chat_id == undefined ? '' : options.telegram_chat_id;
-        var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
-
-        var stringified_filters = filters ? filters.join('&') : '';
-
+    getUsers: () => {
         var request_opts = new Options()
-        request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`
+        request_opts.uri = `${node_svc_api}/users/`
+
+        return rpromise(request_opts);
+    },
+    getUser: (telegram_chat_id) => {
+        var request_opts = new Options()
+        request_opts.uri = `${node_svc_api}/users/${telegram_chat_id}`
 
         return rpromise(request_opts);
     },

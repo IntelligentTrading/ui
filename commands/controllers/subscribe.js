@@ -30,7 +30,7 @@ module.exports = function (bot) {
 
     this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
-        Promise.all([api.getUsers({ telegram_chat_id: chat_id }), getITTRate()]).then(fulfillments => {
+        Promise.all([api.getUser(chat_id), getITTRate()]).then(fulfillments => {
             var user = JSON.parse(fulfillments[0])
             var itt_usd_rate = fulfillments[1]
             var currentStatusMsg = getCurrentStatusMessage(user.settings, itt_usd_rate)
