@@ -19,15 +19,15 @@ var api = {
         request_opts.form = { telegram_chat_id: chat_id, eula: false }
         return rpromise(request_opts)
     },
-    getUsers: (options = {}) => {
-
-        var chat_id = options.telegram_chat_id == undefined ? '' : options.telegram_chat_id;
-        var filters = chat_id != '' ? [] : options.filters; //filters won't work for single user selection 
-
-        var stringified_filters = filters ? filters.join('&') : '';
-
+    getUsers: () => {
         var request_opts = new Options()
-        request_opts.uri = `${node_svc_api}/users/${chat_id}?${stringified_filters}`
+        request_opts.uri = `${node_svc_api}/users/`
+
+        return rpromise(request_opts);
+    },
+    getUser: (telegram_chat_id) => {
+        var request_opts = new Options()
+        request_opts.uri = `${node_svc_api}/users/${telegram_chat_id}`
 
         return rpromise(request_opts);
     },
@@ -96,16 +96,6 @@ var api = {
 
         return rpromise(request_opts);
     },
-    getSignals: (signal) => {
-        var request_opts = {};
-        request_opts.url = `${node_svc_api}/signals/${signal}`;
-        request_opts.method = 'GET';
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts);
-    },
     generateToken: (plan, admin_token) => {
         var request_opts = {};
         request_opts.url = `${node_svc_api}/license/generate/${plan}`;
@@ -142,52 +132,8 @@ var api = {
 
         return rpromise(request_opts);
     },
-    getSubscriptionTemplate: (plan) => {
-        var request_opts = {}
-        request_opts.url = `${node_svc_api}/users/template/${plan}`
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts)
-    },
     getITT: () => {
         return backend.get('/itt').catch(err => console.log(err))
-    },
-    lastDispatchedSignal: (subscribersIds, signalId) => {
-        var request_opts = {
-            method: 'POST',
-            body: {
-                signalId: signalId,
-                subscribersIds: subscribersIds
-            },
-            json: true
-        }
-        request_opts.url = `${node_svc_api}/users/notified`
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts)
-    },
-    saveTradingAlerts: (talert) => {
-        var request_opts = {
-            method: 'POST',
-            body: {
-                signalId: talert.signal_id,
-                awsSQSId: talert.SQSId,
-                rejections: talert.rejections,
-                reasons: talert.reasons,
-                sent_at: talert.sent_at
-            },
-            json: true
-        }
-        request_opts.url = `${node_svc_api}/alerts`
-        request_opts.headers = {
-            'NSVC-API-KEY': node_svc_api_key
-        }
-
-        return rpromise(request_opts)
     },
     referral: (telegram_chat_id, code) => {
         var request_opts = {

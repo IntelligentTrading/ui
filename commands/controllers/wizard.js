@@ -109,7 +109,7 @@ module.exports = function (bot) {
     moduleBot = bot
 
     this.cmd = (msg, params) => {
-        return api.getUsers({ telegram_chat_id: msg.chat.id }).then(user => {
+        return api.getUser(msg.chat.id).then(user => {
             user = JSON.parse(user)
             if (util.hasValidSubscription(user.settings)) {
                 setTraderProfile(msg.chat.id)

@@ -4,8 +4,6 @@ var keyboardUtils = require('./keyboardUtils')
 var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 var tickers = require('../../data/tickers')
-var api = require('../../core/api')
-var ext = require('../../util/extensions')
 var moment = require('moment')
 
 eventEmitter.on('ShowSettingsKeyboard', (user) => { showKeyboard(user.telegram_chat_id, user.settings) })
@@ -66,10 +64,9 @@ var getKeyboardButtons = (telegram_chat_id, settings) => {
 }
 
 var getKeyboardText = (settings) => {
-    var isMuted = settings.is_muted
     var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var subscriptionExpirationDate = settings.subscriptions.paid
-    var tradingPairs = settings.counter_currencies.map(scc => {
+    settings.counter_currencies.map(scc => {
         var matchingCC = _.find(counter_currencies, cc => cc.index == scc)
         return matchingCC ? matchingCC.symbol : ''
     }).filter(el => el != '').join(', ')
@@ -99,10 +96,3 @@ var createMagicLink = (telegram_chat_id) => {
 
     return magicLink
 }
-
-var horizonToValidity = (horizon) => {
-    var validityDuration = ['1hr', '4hr', '12hr']
-    var horizons = ['short', 'medium', 'long']
-    return validityDuration[horizons.indexOf(horizon)]
-}
-
