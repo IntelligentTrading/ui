@@ -40,7 +40,7 @@ bot.onText(/\/(\w+)(.*)/, (msg, match) => {
         if (err) console.log(err)
       }).send()
       command.cmd(msg, match.map(m => m.trim()).splice(2))
-      api.updateUser(chat_id).catch(err => console.log(err))
+      //api.updateUser(chat_id).catch(err => console.log(err))
     }
     catch (err) {
       bot.sendMessage(chat_id, err)
