@@ -32,16 +32,13 @@ var updateKeyboard = (telegram_chat_id, message_id, settings) => {
 
 var showKeyboard = (telegram_chat_id, settings) => {
     var keyboardObject = getKeyboardObject(telegram_chat_id, settings)
-
-    var hasValidSubscription = subscriptionUtils.hasValidSubscription(settings)
     var keyboardText = keyboardObject.text
 
     var options = { parse_mode: "Markdown", disable_web_page_preview: "true" }
-    if (hasValidSubscription || settings.is_ITT_team) {
 
-        options.reply_markup = {
-            inline_keyboard: keyboardObject.buttons
-        }
+
+    options.reply_markup = {
+        inline_keyboard: keyboardObject.buttons
     }
 
     keyboardBot.sendMessage(telegram_chat_id, keyboardText, options).catch(err => console.log(err))
@@ -56,11 +53,13 @@ var getKeyboardObject = (telegram_chat_id, settings) => {
 
 var getKeyboardButtons = (telegram_chat_id, settings) => {
 
-    return [
-        [{ text: "All Settings", url: createMagicLink(telegram_chat_id) }],
-        [{ text: "Basic Settings", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }],
-        [{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }]
-    ]
+    var hsl = subscriptionUtils.getHighestSubscriptionLevel(settings)
+    var settingsButtons = [[{ text: "All Settings", url: createMagicLink(telegram_chat_id) }]]
+    if (hsl != 'free')
+        settingsButtons.push([{ text: "Basic Settings", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }])
+
+    settingsButtons.push([{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }])
+    return settingsButtons
 }
 
 var getKeyboardText = (settings) => {

@@ -1,3 +1,5 @@
+var moment = require('moment')
+
 var dateUtil = {
     getDaysLeftFrom: (expirationDate) => {
         // Discard the time and time-zone information.
@@ -17,6 +19,23 @@ var dateUtil = {
             dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
             settings.is_ITT_team ||
             isStakeHolder
+    },
+    getHighestSubscriptionLevel: (settings) => {
+
+        var levels = {}
+        levels.is_ITT_team = settings.is_ITT_team
+        levels.isAdvanced = settings.staking && settings.staking.centomila
+        levels.isPro = settings.staking && settings.staking.diecimila
+        levels.isStarter = -1 * moment().diff(settings.subscriptions.paid, "days") > 0
+        levels.isFreePlus = -1 * moment().diff(settings.subscriptions.beta, "days") > 0
+
+        var highestLevel = 'free'
+        if (levels.is_ITT_team) highestLevel = 'ITT'
+        else if (levels.isAdvanced) highestLevel = 'centomila'
+        else if (levels.isPro) highestLevel = 'diecimila'
+        else if (levels.isStarter) highestLevel = 'paid'
+        else if (levels.isFreePlus) highestLevel = 'beta'
+        return highestLevel
     }
 }
 
