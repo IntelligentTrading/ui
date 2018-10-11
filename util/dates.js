@@ -26,8 +26,8 @@ var dateUtil = {
         levels.is_ITT_team = settings.is_ITT_team
         levels.isAdvanced = settings.staking && settings.staking.centomila
         levels.isPro = settings.staking && settings.staking.diecimila
-        levels.isStarter = -1 * moment().diff(settings.subscriptions.paid, "days") > 0
-        levels.isFreePlus = -1 * moment().diff(settings.subscriptions.beta, "days") > 0
+        levels.isStarter = -1 * moment().diff(settings.subscriptions.paid, "hours") > 0
+        levels.isFreePlus = -1 * moment().diff(settings.subscriptions.beta, "hours") > 0
 
         var highestLevel = 'free'
         if (levels.is_ITT_team) highestLevel = 'ITT'
