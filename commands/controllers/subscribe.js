@@ -26,6 +26,7 @@ ${paidDaysLeft <= 0 && !settings.is_ITT_team ? upgradeToPro : extendYourSubscrip
 module.exports = function (bot) {
     moduleBot = bot
     this.cmd = (msg, params) => {
+        const chat_id = msg.chat.id
         var currentStatusMsg = 'Tap or type /settings and follow the instructions to upgrade or extend your subscription.'
         moduleBot.sendMessage(chat_id, currentStatusMsg, nopreview_markdown_opts)
     }
