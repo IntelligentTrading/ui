@@ -25,8 +25,12 @@ ${paidDaysLeft <= 0 && !settings.is_ITT_team ? upgradeToPro : extendYourSubscrip
 
 module.exports = function (bot) {
     moduleBot = bot
-
     this.cmd = (msg, params) => {
+        var currentStatusMsg = 'Tap or type /settings and follow the instructions to upgrade or extend your subscription.'
+        moduleBot.sendMessage(chat_id, currentStatusMsg, nopreview_markdown_opts)
+    }
+
+    /*this.cmd = (msg, params) => {
         const chat_id = msg.chat.id
         Promise.all([api.getUser(chat_id), getITTRate()]).then(fulfillments => {
             var user = JSON.parse(fulfillments[0])
@@ -36,7 +40,7 @@ module.exports = function (bot) {
         }).then((msg) => {
             moduleBot.sendMessage(chat_id, msg, nopreview_markdown_opts)
         })
-    }
+    }*/
 }
 
 var getITTRate = () => {

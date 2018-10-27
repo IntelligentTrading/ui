@@ -53,7 +53,6 @@ var getKeyboardObject = (telegram_chat_id, settings) => {
 
 var getKeyboardButtons = (telegram_chat_id, settings) => {
 
-    var hsl = subscriptionUtils.getHighestSubscriptionLevel(settings)
     var settingsButtons = [[{ text: "All Settings", url: createMagicLink(telegram_chat_id) }]]
     settingsButtons.push([{ text: "Basic Settings", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, null, 'Basic') }])
     settingsButtons.push([{ text: "Close", callback_data: keyboardUtils.getButtonCallbackData('navigation', {}, 'close') }])
@@ -74,7 +73,7 @@ var getKeyboardText = (settings) => {
 
     return `Settings | *${currentPlan}* plan
 
-Tap or type /subscribe to ${hasValidSubscription ? 'extend' : 'upgrade'} your plan. ([View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'}))`
+Tap or click on 'All Settings' and visit the _Subscription_ page to upgrade or extend your plan. ([View Plans](http://intelligenttrading.org/pricing/?utm_source=${hasValidSubscription ? 'starter_bot_settings' : 'free_bot_settings'}))`
 }
 
 var createMagicLink = (telegram_chat_id) => {
