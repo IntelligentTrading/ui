@@ -16,7 +16,6 @@ var dateUtil = {
         var isStakeHolder = settings.staking && settings.staking.diecimila
 
         return dateUtil.getDaysLeftFrom(settings.subscriptions.paid) > 0 ||
-            dateUtil.getDaysLeftFrom(settings.subscriptions.beta) > 0 ||
             settings.is_ITT_team ||
             isStakeHolder
     },
@@ -24,17 +23,15 @@ var dateUtil = {
 
         var levels = {}
         levels.is_ITT_team = settings.is_ITT_team
-        levels.isAdvanced = settings.staking && settings.staking.centomila
         levels.isPro = settings.staking && settings.staking.diecimila
         levels.isStarter = -1 * moment().diff(settings.subscriptions.paid, "hours") > 0
         levels.isFreePlus = -1 * moment().diff(settings.subscriptions.beta, "hours") > 0
 
         var highestLevel = 'free'
         if (levels.is_ITT_team) highestLevel = 'ITT'
-        else if (levels.isAdvanced) highestLevel = 'centomila'
         else if (levels.isPro) highestLevel = 'diecimila'
         else if (levels.isStarter) highestLevel = 'paid'
-        else if (levels.isFreePlus) highestLevel = 'beta'
+        else if (levels.isFreePlus) highestLevel = 'free'
         return highestLevel
     }
 }
