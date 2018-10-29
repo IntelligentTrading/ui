@@ -12,11 +12,11 @@ function Options() {
 }
 
 var api = {
-    createUser: (chat_id) => {
+    createUser: (chat_id, username) => {
         var request_opts = new Options()
         request_opts.uri = `${node_svc_api}/users`
         request_opts.method = 'POST'
-        request_opts.form = { telegram_chat_id: chat_id, eula: false }
+        request_opts.form = { telegram_chat_id: chat_id, eula: false, settings: { username: username } }
         return rpromise(request_opts)
     },
     getUsers: () => {

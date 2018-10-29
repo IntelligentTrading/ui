@@ -7,10 +7,16 @@ module.exports = function (bot) {
 
     this.cmd = (msg, params) => {
 
-        api.getUser(msg.chat.id).then((userJSON) => {
+        return api.getUser(msg.chat.id).then((userJSON) => {
             var user = JSON.parse(userJSON)
             if (!user.eula) eventEmitter.emit('eula', msg)
             else eventEmitter.emit('ShowSettingsKeyboard', user)
+            return user
+        }).then(user => {
+            if (msg.chat.username) {
+                if (user.settings.username != msg.chat.username)
+                    return api.updateUser(msg.chat.id, { username: msg.chat.username })
+            }
         })
     }
 

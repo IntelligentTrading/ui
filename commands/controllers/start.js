@@ -10,7 +10,7 @@ module.exports = function (bot) {
     moduleBot = bot
 
     this.cmd = (msg, params) => {
-        api.createUser(msg.chat.id)
+        api.createUser(msg.chat.id, msg.chat.username)
             .catch(err => {
                 console.log(err)
             })

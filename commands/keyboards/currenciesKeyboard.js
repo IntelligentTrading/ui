@@ -13,7 +13,7 @@ var PAGE_COLS = 5
 var PAGE_ROWS = 4
 var PAGE_SIZE = PAGE_COLS * PAGE_ROWS;
 var current_page = 0
-var poloniex_only = true
+var no_binance = true
 
 module.exports = (bot) => {
     keyboardBot = bot
@@ -49,7 +49,7 @@ var getKeyboardText = () => {
 var getKeyboardButtons = (keyboard_rows) => {
 
     var buttons = []
-    var total_number_of_pages = Math.ceil(currencies.filter(ccs => poloniex_only ? ccs.sources.indexOf('poloniex') >= 0 : true).length / PAGE_SIZE)
+    var total_number_of_pages = Math.ceil(currencies.filter(ccs => no_binance ? _.difference(ccs.sources,['binance']).length > 0 : true).length / PAGE_SIZE)
 
     for (i = 0; i < keyboard_rows.length; i++) {
         var page_idx = Math.floor(i / PAGE_SIZE)
@@ -103,9 +103,9 @@ var loadKeyboardRows = (userSettings) => {
 
     var kb_rows = []
 
-    poloniex_only = dateHelper.getDaysLeftFrom(userSettings.subscriptions.paid) <= 0 && !(userSettings.is_ITT_team || userSettings.staking.diecimila)
+    no_binance = dateHelper.getDaysLeftFrom(userSettings.subscriptions.paid) <= 0 && !(userSettings.is_ITT_team || userSettings.staking.diecimila)
 
-    currencies.filter(ccs => poloniex_only ? ccs.sources.indexOf('poloniex') >= 0 : true).forEach(currency => {
+    currencies.filter(ccs => no_binance ? _.difference(ccs.sources,['binance']).length > 0 : true).forEach(currency => {
         currency.followed = userSettings.transaction_currencies.indexOf(currency.symbol) >= 0;
         kb_rows.push({ text: `${currency.followed ? '✓ ' : ''}${currency.symbol}`, currency_data: { sym: currency.symbol, in: !currency.followed } })
     })
