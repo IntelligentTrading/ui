@@ -9,24 +9,40 @@ eventEmitter.on('eula', (msg) => {
 module.exports = function (bot) {
     moduleBot = bot
 
-    this.cmd = (msg, params) => {
-        api.createUser(msg.chat.id, msg.chat.username)
-            .catch(err => {
-                console.log(err)
-            })
-            .finally(() => {
-                sendEula(msg)
+    this.cmd = async (msg, params) => {
 
-                var referral = params.filter(p => p.startsWith('refcode_'))
-                if (referral.length > 0) {
-                    referral = referral[0].split('_')[1]
-                    return api.referral(msg.chat.id, referral).then(result => {
-                        moduleBot.sendMessage(msg.chat.id, result)
-                    }).catch(err => {
-                        moduleBot.sendMessage(msg.chat.id, err.error)
-                    })
-                }
+        var existingUser = await api.getUser(msg.chat.id).catch((err) => {
+            console.log(err)
+            return null
+        })
+        if (!existingUser) {
+            existingUser = await api.createUser(msg.chat.id, msg.chat.username).catch(err => { console.log(err) })
+        }
+
+        existingUser = JSON.parse(existingUser)
+        if (!existingUser.eula)
+            sendEula(msg)
+
+        var referral = params.filter(p => p.startsWith('refcode_'))
+        if (referral.length > 0) {
+            referral = referral[0].split('_')[1]
+            return api.referral(msg.chat.id, referral).then(result => {
+                moduleBot.sendMessage(msg.chat.id, result)
+            }).catch(err => {
+                moduleBot.sendMessage(msg.chat.id, err.error)
             })
+        }
+
+        var promo = params.filter(p => p.startsWith('promo_'))
+        if (promo.length > 0) {
+            promo = promo[0].split('_')[1]
+            return api.promo(msg.chat.id, promo).then(result => {
+                var message = result.success ? result.message : result.reason
+                moduleBot.sendMessage(msg.chat.id, message)
+            }).catch(err => {
+                moduleBot.sendMessage(msg.chat.id, err.error)
+            })
+        }
     }
 }
 
