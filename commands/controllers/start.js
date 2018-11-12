@@ -23,9 +23,11 @@ module.exports = function (bot) {
         if (!existingUser.eula)
             sendEula(msg)
 
-        var referral = params.filter(p => p.startsWith('refcode_'))
-        if (referral.length > 0) {
-            referral = referral[0].split('_')[1]
+        //cHJvbW9fSVRGMTAmZW1haWxfdGVzdEB5YWhvby5pdA
+        var payload = Buffer.from(params[0], 'base64').toString()
+
+        if (payload.startsWith('refcode_')) {
+            var referral = payload.split('_')[1]
             return api.referral(msg.chat.id, referral).then(result => {
                 moduleBot.sendMessage(msg.chat.id, result)
             }).catch(err => {
@@ -33,12 +35,15 @@ module.exports = function (bot) {
             })
         }
 
-        var promo = params.filter(p => p.startsWith('promo_'))
-        if (promo.length > 0) {
-            promo = promo[0].split('_')[1]
+        if (payload.startsWith('promo_')) {
+            var promoParam = payload.split('&')[0]
+            var emailParam = payload.split('&')[1]
+            var promo = promoParam.split('_')[1]
+            var email = emailParam.split('_')[1]
             return api.promo(msg.chat.id, promo).then(result => {
                 var message = result.success ? result.message : result.reason
                 moduleBot.sendMessage(msg.chat.id, message)
+                return api.updateUser(msg.chat.id, { email: email })
             }).catch(err => {
                 moduleBot.sendMessage(msg.chat.id, err.error)
             })

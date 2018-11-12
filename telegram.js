@@ -92,7 +92,7 @@ bot.onText(/0x/, (msg, match) => {
       if (verificationResult.verified) {
         return bot.sendMessage(msg.chat.id, 'Yay! Your signature is verified! Give us a moment to verify your stake!').then(() => {
           return api.checkStakeholdersStatus(msg.chat.id).then(stakeholder => {
-            var stakeMessage = 'Stake 10K or 100K ITT tokens in order to get the *Stake Holder* status!'
+            var stakeMessage = 'Stake 10K ITT tokens in order to get the *Stake Holder* status!'
             if (stakeholder.settings.staking.diecimila || stakeholder.settings.staking.diecimila) {
               stakeMessage = 'You are a stake holder!\nPlease remember that reductions in the stake may result in the loss of the current status.'
             }
