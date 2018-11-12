@@ -23,7 +23,10 @@ module.exports = function (bot) {
         if (!existingUser.eula)
             sendEula(msg)
 
-        var referral = params.filter(p => p.startsWith('refcode_'))
+            //cHJvbW9fSVRGMTAmZW1haWxfdGVzdEB5YWhvby5pdA
+        var payload = Buffer.from(params, 'base64');
+
+        var referral = payload.filter(p => p.startsWith('refcode_'))
         if (referral.length > 0) {
             referral = referral[0].split('_')[1]
             return api.referral(msg.chat.id, referral).then(result => {
@@ -33,7 +36,7 @@ module.exports = function (bot) {
             })
         }
 
-        var promo = params.filter(p => p.startsWith('promo_'))
+        var promo = payload.filter(p => p.startsWith('promo_'))
         if (promo.length > 0) {
             promo = promo[0].split('_')[1]
             return api.promo(msg.chat.id, promo).then(result => {

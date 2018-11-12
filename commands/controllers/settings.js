@@ -56,7 +56,15 @@ module.exports = function (bot) {
                 var navigateToPage = destination_page.split('(')[1]
                 if (navigateToPage) navigateToPage = navigateToPage.replace(')', '')
                 eventEmitter.emit(`${navigateToKeyboard}KeyboardChanged`, chat_id, message_id, JSON.parse(updatedUser).settings, navigateToPage)
-            }).catch(reason => {
+
+
+
+                if (callback_message.from.username) {
+                    if (updatedUser.settings.username != callback_message.from.username)
+                        return api.updateUser(callback_message.from.id, { username: callback_message.from.username })
+                }
+            })
+            .catch(reason => {
                 var message = reason.error ? reason.error : reason
                 moduleBot.sendMessage(chat_id, message)
             })
