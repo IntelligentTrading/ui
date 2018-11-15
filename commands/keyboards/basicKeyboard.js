@@ -1,7 +1,6 @@
 var _ = require('lodash')
 var eventEmitter = require('../../events/botEmitter')
 var keyboardUtils = require('./keyboardUtils')
-var subscriptionUtils = require('../../util/dates')
 var keyboardBot = null
 
 eventEmitter.on('ShowBasicKeyboard', async (chat_id, message_id, settings) => {
