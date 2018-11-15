@@ -38,7 +38,7 @@ var getKeyboardText = () => {
 var getKeyboardButtons = () => {
 
     var btns = [
-        [{ text: `Get Free Trial`, url: 'https://intelligenttrading.org' }]
+        [{ text: `Get Free Trial`, url: 'https://intelligenttrading.org/free' }]
     ]
 
     return btns
