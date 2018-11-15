@@ -32,13 +32,13 @@ var getKeyboardObject = (horizon) => {
 }
 
 var getKeyboardText = () => {
-    return `*Alerts Reactivated*\nThanks for your interest in our trading alerts. Here’s a 10-day free trial of the Pro plan.`
+    return `*Alerts Reactivated*\nThanks for your interest in our trading alerts. Here’s a free trial of the Pro plan.`
 }
 
 var getKeyboardButtons = () => {
 
     var btns = [
-        [{ text: `Get Free Trial`, url: 'https://intelligenttrading.org' }]
+        [{ text: `Get Free Trial`, url: 'https://intelligenttrading.org/free' }]
     ]
 
     return btns
